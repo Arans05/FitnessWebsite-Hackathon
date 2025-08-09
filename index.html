@@ -200,7 +200,7 @@
           </button>
         </div>
         <div class="flex gap-2">
-          <button id="add-mood-btn" disabled
+          <button id="add-mood-btn"
             class="flex-1 bg-yellow-600 text-white font-semibold py-2 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors">
             Add Mood
           </button>
@@ -260,474 +260,480 @@
   </div>
 
   <script>
-    // Initialize Lucide icons
-    lucide.createIcons();
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Lucide icons
+      lucide.createIcons();
 
-    // Custom Modal implementation to replace alert() and confirm()
-    const customModal = document.getElementById('custom-modal');
-    const modalMessage = document.getElementById('modal-message');
-    const modalOkBtn = document.getElementById('modal-ok-btn');
-    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+      // Custom Modal implementation to replace alert() and confirm()
+      const customModal = document.getElementById('custom-modal');
+      const modalMessage = document.getElementById('modal-message');
+      const modalOkBtn = document.getElementById('modal-ok-btn');
+      const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
-    /**
-     * Shows a custom alert modal.
-     * @param {string} message The message to display.
-     */
-    function showAlert(message) {
-      modalMessage.textContent = message;
-      modalCancelBtn.classList.add('hidden');
-      customModal.classList.remove('hidden');
-      modalOkBtn.onclick = () => {
-        customModal.classList.add('hidden');
-      };
-    }
-
-    /**
-     * Shows a custom confirmation modal.
-     * @param {string} message The message to display.
-     * @returns {Promise<boolean>} A promise that resolves to true if 'OK' is clicked, false otherwise.
-     */
-    function showConfirm(message) {
-      return new Promise(resolve => {
+      /**
+       * Shows a custom alert modal.
+       * @param {string} message The message to display.
+       */
+      function showAlert(message) {
         modalMessage.textContent = message;
-        modalCancelBtn.classList.remove('hidden');
+        modalCancelBtn.classList.add('hidden');
         customModal.classList.remove('hidden');
-
         modalOkBtn.onclick = () => {
           customModal.classList.add('hidden');
-          resolve(true);
         };
-        modalCancelBtn.onclick = () => {
-          customModal.classList.add('hidden');
-          resolve(false);
-        };
-      });
-    }
-
-    // Helper to check if it's a new day since last stored date
-    function isNewDay(lastDateStr) {
-      if (!lastDateStr) return true;
-      const lastDate = new Date(lastDateStr);
-      const today = new Date();
-      return lastDate.toDateString() !== today.toDateString();
-    }
-
-    // --- Hydration Tracker ---
-    const waterInput = document.getElementById('water-input');
-    const addWaterBtn = document.getElementById('add-water-btn');
-    const resetWaterBtn = document.getElementById('reset-water-btn');
-    const waterTotalEl = document.getElementById('water-total');
-    const waterProgress = document.getElementById('water-progress');
-    const DAILY_WATER_GOAL = 2000; // 2000 ml daily goal
-
-    // Load hydration from localStorage or reset if new day
-    const lastWaterDate = localStorage.getItem('waterDate');
-    let waterTotal = 0;
-    if (isNewDay(lastWaterDate)) {
-      waterTotal = 0;
-      localStorage.setItem('waterTotal', waterTotal);
-      localStorage.setItem('waterDate', new Date().toISOString());
-    } else {
-      waterTotal = parseInt(localStorage.getItem('waterTotal')) || 0;
-    }
-
-    function updateWaterUI() {
-      waterTotalEl.textContent = waterTotal;
-      let progressPercent = Math.min((waterTotal / DAILY_WATER_GOAL) * 100, 100);
-      waterProgress.style.width = progressPercent + '%';
-    }
-
-    addWaterBtn.addEventListener('click', () => {
-      let intake = parseInt(waterInput.value);
-      if (!intake || intake <= 0) {
-        showAlert('Please enter a positive number for water intake.');
-        return;
       }
-      waterTotal += intake;
-      localStorage.setItem('waterTotal', waterTotal);
-      localStorage.setItem('waterDate', new Date().toISOString());
-      updateWaterUI();
-      waterInput.value = '';
-    });
 
-    resetWaterBtn.addEventListener('click', async () => {
-      const confirmed = await showConfirm('Are you sure you want to reset your hydration data?');
-      if (confirmed) {
+      /**
+       * Shows a custom confirmation modal.
+       * @param {string} message The message to display.
+       * @returns {Promise<boolean>} A promise that resolves to true if 'OK' is clicked, false otherwise.
+       */
+      function showConfirm(message) {
+        return new Promise(resolve => {
+          modalMessage.textContent = message;
+          modalCancelBtn.classList.remove('hidden');
+          customModal.classList.remove('hidden');
+
+          modalOkBtn.onclick = () => {
+            customModal.classList.add('hidden');
+            resolve(true);
+          };
+          modalCancelBtn.onclick = () => {
+            customModal.classList.add('hidden');
+            resolve(false);
+          };
+        });
+      }
+
+      // Helper to check if it's a new day since last stored date
+      function isNewDay(lastDateStr) {
+        if (!lastDateStr) return true;
+        const lastDate = new Date(lastDateStr);
+        const today = new Date();
+        return lastDate.toDateString() !== today.toDateString();
+      }
+
+      // --- Hydration Tracker ---
+      const waterInput = document.getElementById('water-input');
+      const addWaterBtn = document.getElementById('add-water-btn');
+      const resetWaterBtn = document.getElementById('reset-water-btn');
+      const waterTotalEl = document.getElementById('water-total');
+      const waterProgress = document.getElementById('water-progress');
+      const DAILY_WATER_GOAL = 2000; // 2000 ml daily goal
+
+      // Load hydration from localStorage or reset if new day
+      const lastWaterDate = localStorage.getItem('waterDate');
+      let waterTotal = 0;
+      if (isNewDay(lastWaterDate)) {
         waterTotal = 0;
-        localStorage.removeItem('waterTotal');
-        localStorage.removeItem('waterDate');
+        localStorage.setItem('waterTotal', waterTotal);
+        localStorage.setItem('waterDate', new Date().toISOString());
+      } else {
+        waterTotal = parseInt(localStorage.getItem('waterTotal')) || 0;
+      }
+
+      function updateWaterUI() {
+        waterTotalEl.textContent = waterTotal;
+        let progressPercent = Math.min((waterTotal / DAILY_WATER_GOAL) * 100, 100);
+        waterProgress.style.width = progressPercent + '%';
+      }
+
+      addWaterBtn.addEventListener('click', () => {
+        let intake = parseInt(waterInput.value);
+        if (isNaN(intake) || intake <= 0) {
+          showAlert('Please enter a positive number for water intake.');
+          return;
+        }
+        waterTotal += intake;
+        localStorage.setItem('waterTotal', waterTotal);
+        localStorage.setItem('waterDate', new Date().toISOString());
         updateWaterUI();
-      }
-    });
-
-    updateWaterUI();
-
-    // --- Workout Log ---
-    const workoutTypeInput = document.getElementById('workout-type');
-    const workoutDurationInput = document.getElementById('workout-duration');
-    const addWorkoutBtn = document.getElementById('add-workout-btn');
-    const resetWorkoutBtn = document.getElementById('reset-workout-btn');
-    const workoutList = document.getElementById('workout-list');
-
-    let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-
-    function renderWorkouts() {
-      workoutList.innerHTML = '';
-      if (workouts.length === 0) {
-        workoutList.innerHTML = '<li class="p-3 text-sm text-slate-500">No workouts logged yet.</li>';
-        return;
-      }
-      workouts.forEach((w, i) => {
-        const li = document.createElement('li');
-        li.className = 'p-3 text-sm flex items-center justify-between group';
-        li.innerHTML = `
-          <span>${w.type} &mdash; ${w.duration} min</span>
-          <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete workout" data-index="${i}">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        `;
-        workoutList.appendChild(li);
+        waterInput.value = '';
       });
-      lucide.createIcons(); // Call once after rendering the list
-    }
 
-    // Use event delegation to handle clicks on the workout list
-    workoutList.addEventListener('click', async (e) => {
-      const deleteButton = e.target.closest('button');
-      if (deleteButton) {
-        const confirmed = await showConfirm('Are you sure you want to delete this workout entry?');
+      resetWaterBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to reset your hydration data?');
         if (confirmed) {
-          const index = deleteButton.dataset.index;
-          workouts.splice(index, 1);
-          localStorage.setItem('workouts', JSON.stringify(workouts));
+          waterTotal = 0;
+          localStorage.removeItem('waterTotal');
+          localStorage.removeItem('waterDate');
+          updateWaterUI();
+        }
+      });
+
+      updateWaterUI();
+
+      // --- Workout Log ---
+      const workoutTypeInput = document.getElementById('workout-type');
+      const workoutDurationInput = document.getElementById('workout-duration');
+      const addWorkoutBtn = document.getElementById('add-workout-btn');
+      const resetWorkoutBtn = document.getElementById('reset-workout-btn');
+      const workoutList = document.getElementById('workout-list');
+
+      let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+
+      function renderWorkouts() {
+        workoutList.innerHTML = '';
+        if (workouts.length === 0) {
+          workoutList.innerHTML = '<li class="p-3 text-sm text-slate-500">No workouts logged yet.</li>';
+          return;
+        }
+        workouts.forEach((w, i) => {
+          const li = document.createElement('li');
+          li.className = 'p-3 text-sm flex items-center justify-between group';
+          li.innerHTML = `
+            <span>${w.type} &mdash; ${w.duration} min</span>
+            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete workout" data-index="${i}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          workoutList.appendChild(li);
+        });
+        lucide.createIcons(); // Call once after rendering the list
+      }
+
+      // Use event delegation to handle clicks on the workout list
+      workoutList.addEventListener('click', async (e) => {
+        const deleteButton = e.target.closest('button');
+        if (deleteButton) {
+          const confirmed = await showConfirm('Are you sure you want to delete this workout entry?');
+          if (confirmed) {
+            const index = deleteButton.dataset.index;
+            workouts.splice(index, 1);
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+            renderWorkouts();
+          }
+        }
+      });
+
+      addWorkoutBtn.addEventListener('click', () => {
+        const type = workoutTypeInput.value.trim();
+        const duration = parseInt(workoutDurationInput.value);
+        if (!type) {
+          showAlert('Please enter a workout type.');
+          return;
+        }
+        if (isNaN(duration) || duration <= 0) {
+          showAlert('Please enter a positive workout duration.');
+          return;
+        }
+        workouts.push({
+          type,
+          duration,
+          date: new Date().toLocaleString()
+        });
+        localStorage.setItem('workouts', JSON.stringify(workouts));
+        renderWorkouts();
+        workoutTypeInput.value = '';
+        workoutDurationInput.value = '';
+      });
+
+      resetWorkoutBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to reset all workout logs?');
+        if (confirmed) {
+          workouts = [];
+          localStorage.removeItem('workouts');
           renderWorkouts();
         }
-      }
-    });
-
-    addWorkoutBtn.addEventListener('click', () => {
-      const type = workoutTypeInput.value.trim();
-      const duration = parseInt(workoutDurationInput.value);
-      if (!type) {
-        showAlert('Please enter a workout type.');
-        return;
-      }
-      if (!duration || duration <= 0) {
-        showAlert('Please enter a positive workout duration.');
-        return;
-      }
-      workouts.push({
-        type,
-        duration,
-        date: new Date().toLocaleString()
       });
-      localStorage.setItem('workouts', JSON.stringify(workouts));
+
       renderWorkouts();
-      workoutTypeInput.value = '';
-      workoutDurationInput.value = '';
-    });
 
-    resetWorkoutBtn.addEventListener('click', async () => {
-      const confirmed = await showConfirm('Are you sure you want to reset all workout logs?');
-      if (confirmed) {
-        workouts = [];
-        localStorage.removeItem('workouts');
-        renderWorkouts();
+      // --- Meal Log ---
+      const mealNameInput = document.getElementById('meal-name');
+      const mealCaloriesInput = document.getElementById('meal-calories');
+      const addMealBtn = document.getElementById('add-meal-btn');
+      const resetMealBtn = document.getElementById('reset-meal-btn');
+      const mealList = document.getElementById('meal-list');
+
+      let meals = JSON.parse(localStorage.getItem('meals')) || [];
+
+      function renderMeals() {
+        mealList.innerHTML = '';
+        if (meals.length === 0) {
+          mealList.innerHTML = '<li class="p-3 text-sm text-slate-500">No meals logged yet.</li>';
+          return;
+        }
+        meals.forEach((m, i) => {
+          const li = document.createElement('li');
+          li.className = 'p-3 text-sm flex items-center justify-between group';
+          li.innerHTML = `
+            <span>${m.name} &mdash; ${m.calories} calories</span>
+            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete meal" data-index="${i}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          mealList.appendChild(li);
+        });
+        lucide.createIcons();
       }
-    });
 
-    renderWorkouts();
-
-    // --- Meal Log ---
-    const mealNameInput = document.getElementById('meal-name');
-    const mealCaloriesInput = document.getElementById('meal-calories');
-    const addMealBtn = document.getElementById('add-meal-btn');
-    const resetMealBtn = document.getElementById('reset-meal-btn');
-    const mealList = document.getElementById('meal-list');
-
-    let meals = JSON.parse(localStorage.getItem('meals')) || [];
-
-    function renderMeals() {
-      mealList.innerHTML = '';
-      if (meals.length === 0) {
-        mealList.innerHTML = '<li class="p-3 text-sm text-slate-500">No meals logged yet.</li>';
-        return;
-      }
-      meals.forEach((m, i) => {
-        const li = document.createElement('li');
-        li.className = 'p-3 text-sm flex items-center justify-between group';
-        li.innerHTML = `
-          <span>${m.name} &mdash; ${m.calories} calories</span>
-          <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete meal" data-index="${i}">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        `;
-        mealList.appendChild(li);
+      mealList.addEventListener('click', async (e) => {
+        const deleteButton = e.target.closest('button');
+        if (deleteButton) {
+          const confirmed = await showConfirm('Are you sure you want to delete this meal entry?');
+          if (confirmed) {
+            const index = deleteButton.dataset.index;
+            meals.splice(index, 1);
+            localStorage.setItem('meals', JSON.stringify(meals));
+            renderMeals();
+          }
+        }
       });
-      lucide.createIcons();
-    }
 
-    mealList.addEventListener('click', async (e) => {
-      const deleteButton = e.target.closest('button');
-      if (deleteButton) {
-        const confirmed = await showConfirm('Are you sure you want to delete this meal entry?');
+      addMealBtn.addEventListener('click', () => {
+        const name = mealNameInput.value.trim();
+        const calories = parseInt(mealCaloriesInput.value);
+        if (!name) {
+          showAlert('Please enter a meal name.');
+          return;
+        }
+        if (isNaN(calories) || calories <= 0) {
+          showAlert('Please enter a positive number for calories.');
+          return;
+        }
+        meals.push({ name, calories, date: new Date().toLocaleString() });
+        localStorage.setItem('meals', JSON.stringify(meals));
+        renderMeals();
+        mealNameInput.value = '';
+        mealCaloriesInput.value = '';
+      });
+
+      resetMealBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to reset all meal logs?');
         if (confirmed) {
-          const index = deleteButton.dataset.index;
-          meals.splice(index, 1);
-          localStorage.setItem('meals', JSON.stringify(meals));
+          meals = [];
+          localStorage.removeItem('meals');
           renderMeals();
         }
-      }
-    });
-
-    addMealBtn.addEventListener('click', () => {
-      const name = mealNameInput.value.trim();
-      const calories = parseInt(mealCaloriesInput.value);
-      if (!name) {
-        showAlert('Please enter a meal name.');
-        return;
-      }
-      if (!calories || calories <= 0) {
-        showAlert('Please enter a positive number for calories.');
-        return;
-      }
-      meals.push({ name, calories, date: new Date().toLocaleString() });
-      localStorage.setItem('meals', JSON.stringify(meals));
-      renderMeals();
-      mealNameInput.value = '';
-      mealCaloriesInput.value = '';
-    });
-
-    resetMealBtn.addEventListener('click', async () => {
-      const confirmed = await showConfirm('Are you sure you want to reset all meal logs?');
-      if (confirmed) {
-        meals = [];
-        localStorage.removeItem('meals');
-        renderMeals();
-      }
-    });
-    
-    renderMeals();
-
-    // --- Sleep Tracker ---
-    const sleepHoursInput = document.getElementById('sleep-hours');
-    const addSleepBtn = document.getElementById('add-sleep-btn');
-    const resetSleepBtn = document.getElementById('reset-sleep-btn');
-    const sleepList = document.getElementById('sleep-list');
-
-    let sleepEntries = JSON.parse(localStorage.getItem('sleepEntries')) || [];
-    
-    function renderSleepEntries() {
-      sleepList.innerHTML = '';
-      if (sleepEntries.length === 0) {
-        sleepList.innerHTML = '<li class="p-3 text-sm text-slate-500">No sleep logged yet.</li>';
-        return;
-      }
-      sleepEntries.forEach((s, i) => {
-        const li = document.createElement('li');
-        li.className = 'p-3 text-sm flex items-center justify-between group';
-        li.innerHTML = `
-          <span>${s.hours} hours &mdash; ${s.date}</span>
-          <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete sleep entry" data-index="${i}">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        `;
-        sleepList.appendChild(li);
       });
-      lucide.createIcons();
-    }
-    
-    sleepList.addEventListener('click', async (e) => {
-      const deleteButton = e.target.closest('button');
-      if (deleteButton) {
-        const confirmed = await showConfirm('Are you sure you want to delete this sleep entry?');
+      
+      renderMeals();
+
+      // --- Sleep Tracker ---
+      const sleepHoursInput = document.getElementById('sleep-hours');
+      const addSleepBtn = document.getElementById('add-sleep-btn');
+      const resetSleepBtn = document.getElementById('reset-sleep-btn');
+      const sleepList = document.getElementById('sleep-list');
+
+      let sleepEntries = JSON.parse(localStorage.getItem('sleepEntries')) || [];
+      
+      function renderSleepEntries() {
+        sleepList.innerHTML = '';
+        if (sleepEntries.length === 0) {
+          sleepList.innerHTML = '<li class="p-3 text-sm text-slate-500">No sleep logged yet.</li>';
+          return;
+        }
+        sleepEntries.forEach((s, i) => {
+          const li = document.createElement('li');
+          li.className = 'p-3 text-sm flex items-center justify-between group';
+          li.innerHTML = `
+            <span>${s.hours} hours &mdash; ${s.date}</span>
+            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete sleep entry" data-index="${i}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          sleepList.appendChild(li);
+        });
+        lucide.createIcons();
+      }
+      
+      sleepList.addEventListener('click', async (e) => {
+        const deleteButton = e.target.closest('button');
+        if (deleteButton) {
+          const confirmed = await showConfirm('Are you sure you want to delete this sleep entry?');
+          if (confirmed) {
+            const index = deleteButton.dataset.index;
+            sleepEntries.splice(index, 1);
+            localStorage.setItem('sleepEntries', JSON.stringify(sleepEntries));
+            renderSleepEntries();
+          }
+        }
+      });
+      
+      addSleepBtn.addEventListener('click', () => {
+        const hours = parseFloat(sleepHoursInput.value);
+        if (isNaN(hours) || hours <= 0) {
+          showAlert('Please enter a positive number for hours slept.');
+          return;
+        }
+        sleepEntries.push({ hours, date: new Date().toLocaleString() });
+        localStorage.setItem('sleepEntries', JSON.stringify(sleepEntries));
+        renderSleepEntries();
+        sleepHoursInput.value = '';
+      });
+      
+      resetSleepBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to reset all sleep logs?');
         if (confirmed) {
-          const index = deleteButton.dataset.index;
-          sleepEntries.splice(index, 1);
-          localStorage.setItem('sleepEntries', JSON.stringify(sleepEntries));
+          sleepEntries = [];
+          localStorage.removeItem('sleepEntries');
           renderSleepEntries();
         }
-      }
-    });
-    
-    addSleepBtn.addEventListener('click', () => {
-      const hours = parseFloat(sleepHoursInput.value);
-      if (!hours || hours <= 0) {
-        showAlert('Please enter a positive number for hours slept.');
-        return;
-      }
-      sleepEntries.push({ hours, date: new Date().toLocaleString() });
-      localStorage.setItem('sleepEntries', JSON.stringify(sleepEntries));
+      });
+
       renderSleepEntries();
-      sleepHoursInput.value = '';
-    });
-    
-    resetSleepBtn.addEventListener('click', async () => {
-      const confirmed = await showConfirm('Are you sure you want to reset all sleep logs?');
-      if (confirmed) {
-        sleepEntries = [];
-        localStorage.removeItem('sleepEntries');
-        renderSleepEntries();
+
+      // --- Mood Journal ---
+      const moodButtons = document.querySelectorAll('.mood-btn');
+      const addMoodBtn = document.getElementById('add-mood-btn');
+      const resetMoodBtn = document.getElementById('reset-mood-btn');
+      const moodList = document.getElementById('mood-list');
+
+      let selectedMood = null;
+      // Load moods from localStorage or reset if new day
+      const lastMoodDate = localStorage.getItem('moodDate');
+      let moods = [];
+      if (isNewDay(lastMoodDate)) {
+        moods = [];
+        localStorage.setItem('moods', JSON.stringify(moods));
+        localStorage.setItem('moodDate', new Date().toISOString());
+      } else {
+        moods = JSON.parse(localStorage.getItem('moods')) || [];
       }
-    });
 
-    renderSleepEntries();
+      moodButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          moodButtons.forEach(b => {
+            b.classList.remove('bg-yellow-500', 'text-white');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          btn.classList.add('bg-yellow-500', 'text-white');
+          btn.setAttribute('aria-pressed', 'true');
+          selectedMood = btn.dataset.mood;
+          // The button should be enabled once a mood is selected
+          addMoodBtn.disabled = false;
+        });
+      });
 
-    // --- Mood Journal ---
-    const moodButtons = document.querySelectorAll('.mood-btn');
-    const addMoodBtn = document.getElementById('add-mood-btn');
-    const resetMoodBtn = document.getElementById('reset-mood-btn');
-    const moodList = document.getElementById('mood-list');
-
-    let selectedMood = null;
-    // Load moods from localStorage or reset if new day
-    const lastMoodDate = localStorage.getItem('moodDate');
-    let moods = [];
-    if (isNewDay(lastMoodDate)) {
-      moods = [];
-      localStorage.setItem('moods', JSON.stringify(moods));
-      localStorage.setItem('moodDate', new Date().toISOString());
-    } else {
-      moods = JSON.parse(localStorage.getItem('moods')) || [];
-    }
-
-    moodButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
+      addMoodBtn.addEventListener('click', () => {
+        if (!selectedMood) {
+          showAlert('Please select a mood before adding.');
+          return;
+        }
+        const now = new Date().toLocaleString();
+        moods.push({ mood: selectedMood, date: now });
+        localStorage.setItem('moods', JSON.stringify(moods));
+        localStorage.setItem('moodDate', new Date().toISOString());
+        renderMoods();
+        selectedMood = null;
+        addMoodBtn.disabled = true; // Disable the button after adding
         moodButtons.forEach(b => {
           b.classList.remove('bg-yellow-500', 'text-white');
           b.setAttribute('aria-pressed', 'false');
         });
-        btn.classList.add('bg-yellow-500', 'text-white');
-        btn.setAttribute('aria-pressed', 'true');
-        selectedMood = btn.dataset.mood;
-        addMoodBtn.disabled = false;
       });
-    });
 
-    addMoodBtn.addEventListener('click', () => {
-      if (!selectedMood) return;
-      const now = new Date().toLocaleString();
-      moods.push({ mood: selectedMood, date: now });
-      localStorage.setItem('moods', JSON.stringify(moods));
-      localStorage.setItem('moodDate', new Date().toISOString());
-      renderMoods();
-      selectedMood = null;
-      addMoodBtn.disabled = true;
-      moodButtons.forEach(b => {
-        b.classList.remove('bg-yellow-500', 'text-white');
-        b.setAttribute('aria-pressed', 'false');
-      });
-    });
-
-    resetMoodBtn.addEventListener('click', async () => {
-      const confirmed = await showConfirm('Are you sure you want to reset your mood journal?');
-      if (confirmed) {
-        moods = [];
-        localStorage.removeItem('moods');
-        localStorage.removeItem('moodDate');
-        renderMoods();
-      }
-    });
-
-    function renderMoods() {
-      moodList.innerHTML = '';
-      if (moods.length === 0) {
-        moodList.innerHTML = '<li class="p-3 text-sm text-slate-500">No moods logged yet.</li>';
-        return;
-      }
-      moods.forEach((entry, i) => {
-        const li = document.createElement('li');
-        li.className = 'p-3 text-sm flex items-center justify-between group';
-        li.innerHTML = `
-          <span>${entry.date} &mdash; ${getMoodEmoji(entry.mood)}</span>
-          <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete mood entry" data-index="${i}">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        `;
-        moodList.appendChild(li);
-      });
-      lucide.createIcons(); // Call once after rendering the list
-    }
-
-    // Use event delegation to handle clicks on the mood list
-    moodList.addEventListener('click', async (e) => {
-      const deleteButton = e.target.closest('button');
-      if (deleteButton) {
-        const confirmed = await showConfirm('Are you sure you want to delete this mood entry?');
+      resetMoodBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to reset your mood journal?');
         if (confirmed) {
-          const index = deleteButton.dataset.index;
-          moods.splice(index, 1);
-          localStorage.setItem('moods', JSON.stringify(moods));
+          moods = [];
+          localStorage.removeItem('moods');
+          localStorage.removeItem('moodDate');
           renderMoods();
         }
+      });
+
+      function renderMoods() {
+        moodList.innerHTML = '';
+        if (moods.length === 0) {
+          moodList.innerHTML = '<li class="p-3 text-sm text-slate-500">No moods logged yet.</li>';
+          return;
+        }
+        moods.forEach((entry, i) => {
+          const li = document.createElement('li');
+          li.className = 'p-3 text-sm flex items-center justify-between group';
+          li.innerHTML = `
+            <span>${entry.date} &mdash; ${getMoodEmoji(entry.mood)}</span>
+            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete mood entry" data-index="${i}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          moodList.appendChild(li);
+        });
+        lucide.createIcons(); // Call once after rendering the list
       }
-    });
 
-    function getMoodEmoji(mood) {
-      switch (mood) {
-        case 'Happy': return '😊';
-        case 'Neutral': return '�';
-        case 'Sad': return '😔';
-        case 'Angry': return '😡';
-        case 'Tired': return '😴';
-        default: return '';
+      // Use event delegation to handle clicks on the mood list
+      moodList.addEventListener('click', async (e) => {
+        const deleteButton = e.target.closest('button');
+        if (deleteButton) {
+          const confirmed = await showConfirm('Are you sure you want to delete this mood entry?');
+          if (confirmed) {
+            const index = deleteButton.dataset.index;
+            moods.splice(index, 1);
+            localStorage.setItem('moods', JSON.stringify(moods));
+            renderMoods();
+          }
+        }
+      });
+
+      function getMoodEmoji(mood) {
+        switch (mood) {
+          case 'Happy': return '😊';
+          case 'Neutral': return '😐';
+          case 'Sad': return '😔';
+          case 'Angry': return '😡';
+          case 'Tired': return '😴';
+          default: return '';
+        }
       }
-    }
 
-    renderMoods();
+      renderMoods();
 
-    // --- Goals & Motivational Quotes ---
-    const goalInput = document.getElementById('goal-input');
-    const setGoalBtn = document.getElementById('set-goal-btn');
-    const resetGoalBtn = document.getElementById('reset-goal-btn');
-    const currentGoalEl = document.getElementById('current-goal');
-    const quoteEl = document.getElementById('motivational-quote');
+      // --- Goals & Motivational Quotes ---
+      const goalInput = document.getElementById('goal-input');
+      const setGoalBtn = document.getElementById('set-goal-btn');
+      const resetGoalBtn = document.getElementById('reset-goal-btn');
+      const currentGoalEl = document.getElementById('current-goal');
+      const quoteEl = document.getElementById('motivational-quote');
 
-    let currentGoal = localStorage.getItem('fitnessGoal') || null;
+      let currentGoal = localStorage.getItem('fitnessGoal') || null;
 
-    const quotes = [
-      "The only bad workout is the one that didn't happen.",
-      "Push yourself because no one else is going to do it for you.",
-      "Don’t limit your challenges. Challenge your limits.",
-      "Sweat is fat crying.",
-      "Strive for progress, not perfection.",
-      "You don’t have to be great to start, but you have to start to be great.",
-      "Your body can stand almost anything. It’s your mind that you have to convince.",
-      "Fitness is not about being better than someone else. It’s about being better than you used to be."
-    ];
+      const quotes = [
+        "The only bad workout is the one that didn't happen.",
+        "Push yourself because no one else is going to do it for you.",
+        "Don’t limit your challenges. Challenge your limits.",
+        "Sweat is fat crying.",
+        "Strive for progress, not perfection.",
+        "You don’t have to be great to start, but you have to start to be great.",
+        "Your body can stand almost anything. It’s your mind that you have to convince.",
+        "Fitness is not about being better than someone else. It’s about being better than you used to be."
+      ];
 
-    function updateGoalUI() {
-      currentGoalEl.textContent = currentGoal || 'No goal set';
-    }
-
-    function showRandomQuote() {
-      const idx = Math.floor(Math.random() * quotes.length);
-      quoteEl.textContent = `"${quotes[idx]}"`;
-    }
-
-    setGoalBtn.addEventListener('click', () => {
-      const goalText = goalInput.value.trim();
-      if (!goalText) {
-        showAlert('Please enter a goal.');
-        return;
+      function updateGoalUI() {
+        currentGoalEl.textContent = currentGoal || 'No goal set';
       }
-      currentGoal = goalText;
-      localStorage.setItem('fitnessGoal', currentGoal);
-      updateGoalUI();
-      goalInput.value = '';
-    });
 
-    resetGoalBtn.addEventListener('click', async () => {
-      const confirmed = await showConfirm('Are you sure you want to clear your current goal?');
-      if (confirmed) {
-        currentGoal = null;
-        localStorage.removeItem('fitnessGoal');
+      function showRandomQuote() {
+        const idx = Math.floor(Math.random() * quotes.length);
+        quoteEl.textContent = `"${quotes[idx]}"`;
+      }
+
+      setGoalBtn.addEventListener('click', () => {
+        const goalText = goalInput.value.trim();
+        if (!goalText) {
+          showAlert('Please enter a goal.');
+          return;
+        }
+        currentGoal = goalText;
+        localStorage.setItem('fitnessGoal', currentGoal);
         updateGoalUI();
-      }
-    });
+        goalInput.value = '';
+      });
 
-    updateGoalUI();
-    showRandomQuote();
+      resetGoalBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to clear your current goal?');
+        if (confirmed) {
+          currentGoal = null;
+          localStorage.removeItem('fitnessGoal');
+          updateGoalUI();
+        }
+      });
+
+      updateGoalUI();
+      showRandomQuote();
+    });
   </script>
 </body>
 </html>
