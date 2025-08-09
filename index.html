@@ -13,17 +13,14 @@
             font-family: 'Inter', sans-serif;
             @apply bg-[#0f172a] text-white;
         }
-        .container-view, .page-content, #app-container, #loading-overlay {
+        .container-view, #app-container, #loading-overlay {
             display: none;
         }
-        .container-view.active, .page-content.active, #app-container.active, #loading-overlay.active {
+        .container-view.active, #app-container.active, #loading-overlay.active {
             display: flex;
         }
         #app-container.active {
             display: flex;
-        }
-        .nav-link.active {
-            @apply bg-gray-700 text-white;
         }
         .progress-bar-container {
             @apply relative w-full h-2 rounded-full bg-gray-700;
@@ -86,27 +83,9 @@
             <nav class="flex-grow">
                 <ul class="space-y-2">
                     <li>
-                        <a href="#" id="nav-dashboard" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
+                        <a href="#" id="nav-dashboard" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                             Dashboard
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" id="nav-workouts" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="M5.5 22H3.6c-.9 0-1.6-.7-1.6-1.6v-1.6c0-.9.7-1.6 1.6-1.6h1.8c.9 0 1.6.7 1.6 1.6v1.8c0 .9-.7 1.6-1.6 1.6zM15.9 2.1c-.9 0-1.6.7-1.6 1.6v1.8c0 .9.7 1.6 1.6 1.6h1.8c.9 0 1.6-.7 1.6-1.6V3.6c0-.9-.7-1.6-1.6-1.6zM11.6 12.5c0 .9-.7 1.6-1.6 1.6H8.2c-.9 0-1.6-.7-1.6-1.6v-1.8c0-.9.7-1.6 1.6-1.6h1.8c.9 0 1.6.7 1.6 1.6v1.8z"/><path d="m20.4 17.2-1.3-1.3c-.3-.3-.7-.3-1 0l-1.6 1.6c-.3.3-.3.7 0 1l1.3 1.3c.3.3.7.3 1 0l1.6-1.6c.3-.3.3-.7 0-1zM3.6 3.6 5 5m14 14 1.4 1.4M12 8V2m0 20v-6m-8-6H2m20 0h-6"/></svg>
-                            Workouts
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" id="nav-progress" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20V16"/></svg>
-                            Progress
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" id="nav-nutrition" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="M17 14v-4h-2v4h2Z"/><path d="M22 14v-4h-2v4h2Z"/><path d="M12 14V4H2v10a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4Z"/><path d="M4 14V8h6v6H4Z"/><path d="M12 14h8v2a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4v-2h4Z"/></svg>
-                            Nutrition
                         </a>
                     </li>
                 </ul>
@@ -119,7 +98,7 @@
 
         <!-- Main Content Area -->
         <main class="flex-grow p-8 overflow-y-auto">
-            <div id="dashboard-content" class="page-content">
+            <div id="dashboard-content">
                 <h2 class="text-3xl font-bold mb-6" id="welcome-message">Welcome Back!</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
@@ -151,155 +130,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold mb-2">Last Logged Workout</h3>
-                        <div id="next-workout-info" class="text-gray-400">
-                            <p>No workouts logged yet.</p>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold mb-2">Tip of the Day</h3>
-                        <p class="italic text-gray-300" id="motivational-quote"></p>
-                    </div>
-                </div>
-                <div class="mb-8">
-                    <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
-                    <div class="flex flex-wrap gap-4">
-                        <button id="log-workout-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
-                            Log Workout
-                        </button>
-                        <button id="add-meal-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
-                            Add Meal
-                        </button>
-                        <button id="add-water-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
-                            Add Water
-                        </button>
-                    </div>
-                </div>
-                <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                    <h3 class="text-xl font-bold mb-4">Weekly Workout Frequency</h3>
-                    <canvas id="weekly-workout-chart" class="w-full h-64"></canvas>
-                </div>
-            </div>
-            <div id="workouts-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Workout Tracker</h2>
-                <div class="mb-6">
-                    <button id="add-workout-page-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
-                        Log New Workout
-                    </button>
-                </div>
-                <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                    <div class="relative w-full overflow-auto">
-                        <table class="w-full caption-bottom text-sm">
-                            <thead class="[&_tr]:border-b">
-                                <tr class="border-b transition-colors hover:bg-muted/50">
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Workout</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Duration</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="workout-list"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div id="progress-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Progress Tracker</h2>
-                <div class="grid gap-6 md:grid-cols-2">
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <div class="flex flex-col space-y-1.5 p-6">
-                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Weight Progress</h3>
-                            <p class="text-sm text-muted-foreground">Track your weight over time.</p>
-                        </div>
-                        <div class="p-6 pt-0">
-                            <canvas id="weight-chart" class="w-full h-80"></canvas>
-                        </div>
-                        <div class="flex items-center p-6 pt-0 space-x-2">
-                            <input type="number" id="weight-input" placeholder="Enter weight (lbs)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <button id="log-weight-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Weight</button>
-                        </div>
-                    </div>
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <div class="flex flex-col space-y-1.5 p-6">
-                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Body Fat % Progress</h3>
-                            <p class="text-sm text-muted-foreground">Monitor your body fat percentage.</p>
-                        </div>
-                        <div class="p-6 pt-0">
-                            <canvas id="bodyfat-chart" class="w-full h-80"></canvas>
-                        </div>
-                        <div class="flex items-center p-6 pt-0 space-x-2">
-                            <input type="number" id="bodyfat-input" placeholder="Enter body fat %" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <button id="log-bodyfat-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Body Fat</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="nutrition-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Nutrition Tracker</h2>
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6 col-span-1 lg:col-span-3">
-                        <h3 class="text-xl font-semibold mb-4">Recent Meals</h3>
-                        <ul id="meal-list" class="space-y-2"></ul>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
-
-    <!-- Modals -->
-    <div id="workout-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
-        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-semibold">Log New Workout</h3>
-                <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="flex flex-col space-y-4">
-                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"></textarea>
-                <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Save Workout</button>
-            </div>
-        </div>
-    </div>
-    <div id="meal-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
-        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-semibold">Log New Meal</h3>
-                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="flex flex-col space-y-4">
-                <input type="text" id="meal-name-modal-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                <textarea id="meal-description-modal-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"></textarea>
-                <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Meal</button>
-            </div>
-        </div>
-    </div>
-    <div id="water-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
-        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-semibold">Log Water Intake</h3>
-                <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-            </div>
-            <div class="flex flex-col space-y-4">
-                <input type="number" id="water-intake-modal-input" placeholder="Water intake (oz)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Water</button>
-            </div>
-        </div>
-    </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
           authDomain: "fitnessapp-721d9.firebaseapp.com",
@@ -310,18 +149,12 @@
           measurementId: "G-XFQYPFN6GR"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        setLogLevel('debug');
 
         let userId = null;
-        let unsubscribeWorkout, unsubscribeProgress, unsubscribeNutrition, unsubscribeWater;
-        
-        const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
-        const pageContentElements = pages.reduce((acc, page) => ({ ...acc, [page]: document.getElementById(`${page}-content`) }), {});
-        const navLinks = pages.reduce((acc, page) => ({ ...acc, [page]: document.getElementById(`nav-${page}`) }), {});
+        let unsubscribeWorkout, unsubscribeWater;
         
         const loginContainer = document.getElementById('login-container');
         const appContainer = document.getElementById('app-container');
@@ -330,185 +163,88 @@
         const signupForm = document.getElementById('signup-form');
         const userEmailDisplay = document.getElementById('user-email-display');
 
-        function showPage(pageId) {
-            pages.forEach(page => {
-                const content = pageContentElements[page];
-                const link = navLinks[page];
-                if (content) content.style.display = 'none';
-                if (link) link.classList.remove('active');
-            });
-            if (pageContentElements[pageId]) pageContentElements[pageId].style.display = 'block';
-            if (navLinks[pageId]) navLinks[pageId].classList.add('active');
-        }
-        
-        Object.keys(navLinks).forEach(pageId => navLinks[pageId]?.addEventListener('click', e => {
-            e.preventDefault();
-            showPage(pageId);
-        }));
-
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log("Auth state changed: User is logged in. UID:", user.uid);
                 userId = user.uid;
                 loadingOverlay.classList.add('active');
                 userEmailDisplay.textContent = user.email;
                 
-                const success = await loadAndRenderInitialData();
+                const success = await loadDashboardData();
                 if (success) {
-                    setupRealtimeListeners();
+                    setupDashboardListeners();
                     loginContainer.classList.remove('active');
                     appContainer.classList.add('active');
                     loadingOverlay.classList.remove('active');
-                    showPage('dashboard');
                 } else {
                     loadingOverlay.classList.remove('active');
-                    alert("Failed to load your data. Please check your Firestore rules and ensure you are connected to the internet.");
+                    alert("Failed to load dashboard data. Please check your Firestore rules.");
                     signOut(auth);
                 }
-
             } else {
-                console.log("Auth state changed: User is logged out.");
                 userId = null;
                 appContainer.classList.remove('active');
                 loginContainer.classList.add('active');
                 loadingOverlay.classList.remove('active');
-
                 if (unsubscribeWorkout) unsubscribeWorkout();
-                if (unsubscribeProgress) unsubscribeProgress();
-                if (unsubscribeNutrition) unsubscribeNutrition();
                 if (unsubscribeWater) unsubscribeWater();
             }
         });
 
-        async function loadAndRenderInitialData() {
+        async function loadDashboardData() {
             if (!userId) return false;
-            console.log("Performing initial data load and render...");
             try {
                 const workoutsQuery = query(collection(db, "users", userId, "workouts"));
-                const progressQuery = query(collection(db, "users", userId, "progress"));
-                const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
                 const waterQuery = query(collection(db, "users", userId, "water"));
-
-                const [workoutsSnapshot, progressSnapshot, nutritionSnapshot, waterSnapshot] = await Promise.all([
+                const [workoutsSnapshot, waterSnapshot] = await Promise.all([
                     getDocs(workoutsQuery),
-                    getDocs(progressQuery),
-                    getDocs(nutritionQuery),
                     getDocs(waterQuery)
                 ]);
-
-                console.log("All initial data fetched. Now rendering...");
-
-                const workouts = workoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                renderWorkouts(workouts);
-                updateDashboardWorkouts(workouts);
-                renderWeeklyWorkoutChart(workouts);
-
-                const progressData = progressSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
-                renderProgressCharts(progressData);
-
-                const meals = nutritionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                renderMeals(meals);
-
-                const waterLogs = waterSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                updateWaterIntake(waterLogs);
-
-                console.log("Initial data rendered successfully.");
+                
+                updateDashboardWorkouts(workoutsSnapshot.docs.map(doc => doc.data()));
+                updateWaterIntake(waterSnapshot.docs.map(doc => doc.data()));
                 return true;
-
             } catch (error) {
-                console.error("Error during initial data load:", error);
+                console.error("Error loading initial dashboard data:", error);
                 return false;
             }
         }
 
-        function setupRealtimeListeners() {
+        function setupDashboardListeners() {
             if (!userId) return;
-            console.log("Setting up Firestore real-time listeners for updates...");
-
-            const commonErrorHandler = (error) => console.error("Firestore listener error:", error);
+            const errorHandler = (error) => console.error("Listener error:", error);
 
             unsubscribeWorkout = onSnapshot(query(collection(db, "users", userId, "workouts")), (snapshot) => {
-                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                renderWorkouts(workouts);
-                updateDashboardWorkouts(workouts);
-                renderWeeklyWorkoutChart(workouts);
-            }, commonErrorHandler);
+                updateDashboardWorkouts(snapshot.docs.map(doc => doc.data()));
+            }, errorHandler);
 
-            unsubscribeProgress = onSnapshot(query(collection(db, "users", userId, "progress")), (snapshot) => {
-                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
-                renderProgressCharts(progressData);
-            }, commonErrorHandler);
-
-            unsubscribeNutrition = onSnapshot(query(collection(db, "users", userId, "nutrition")), (snapshot) => {
-                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                renderMeals(meals);
-            }, commonErrorHandler);
-            
             unsubscribeWater = onSnapshot(query(collection(db, "users", userId, "water")), (snapshot) => {
-                const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                updateWaterIntake(waterLogs);
-            }, commonErrorHandler);
-        }
-        
-        function renderWorkouts(workouts) {
-            const el = document.getElementById('workout-list');
-            if (!el) return;
-            el.innerHTML = workouts.length === 0 ? `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` : workouts.map(w => `
-                <tr class="border-b transition-colors hover:bg-muted/50">
-                    <td class="p-4">${new Date(w.timestamp?.seconds * 1000).toLocaleDateString()}</td>
-                    <td class="p-4">${w.type || 'N/A'}</td>
-                    <td class="p-4">${w.duration || 'N/A'} min</td>
-                    <td class="p-4">${w.notes || ''}</td>
-                </tr>`).join('');
-        }
-
-        function renderProgressCharts(progressData) {
-            const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(156, 163, 175, 0.2)' }, ticks: { color: 'rgb(203, 213, 225)' } }, x: { grid: { display: false }, ticks: { color: 'rgb(203, 213, 225)' } } }, plugins: { legend: { display: false } } };
-            const createChart = (id, label, data, color) => {
-                const ctx = document.getElementById(id);
-                if (!ctx) return null;
-                if(window[id]) window[id].destroy();
-                window[id] = new Chart(ctx, { type: 'line', data: { labels: data.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString()), datasets: [{ label, data: data.map(d => d.value), borderColor: color, tension: 0.1 }] }, options: chartOptions });
-            };
-            createChart('weight-chart', 'Weight (lbs)', progressData.filter(d => d.weight).map(d => ({...d, value: d.weight})), 'rgb(59, 130, 246)');
-            createChart('bodyfat-chart', 'Body Fat %', progressData.filter(d => d.bodyfat).map(d => ({...d, value: d.bodyfat})), 'rgb(239, 68, 68)');
-        }
-
-        function renderMeals(meals) {
-            const el = document.getElementById('meal-list');
-            if (!el) return;
-            el.innerHTML = meals.length === 0 ? `<li class="text-gray-500">No meals logged yet.</li>` : meals.map(m => `
-                <li class="p-4 rounded-md bg-gray-800">
-                    <p class="font-semibold text-white">${m.name} - ${new Date(m.timestamp?.seconds * 1000).toLocaleDateString()}</p>
-                    <p class="text-sm text-gray-400">${m.description}</p>
-                </li>`).join('');
+                updateWaterIntake(snapshot.docs.map(doc => doc.data()));
+            }, errorHandler);
         }
         
         function updateDashboardWorkouts(workouts) {
-            const infoEl = document.getElementById('next-workout-info');
+            const sortedWorkouts = workouts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             const statusEl = document.getElementById('workout-status');
-            if (!infoEl || !statusEl) return;
-            if (workouts.length > 0) {
-                const last = workouts[0];
+            if (!statusEl) return;
+
+            if (sortedWorkouts.length > 0) {
+                const last = sortedWorkouts[0];
                 const date = new Date(last.timestamp?.seconds * 1000).toLocaleDateString();
-                infoEl.innerHTML = `<p class="font-semibold">${last.type}</p><p>Date: ${date}</p><p>Duration: ${last.duration} min</p>`;
-                statusEl.textContent = date === new Date().toLocaleDateString() ? `Yes (${last.duration} min)` : 'No';
+                if (date === new Date().toLocaleDateString()) {
+                    statusEl.textContent = `Yes (${last.duration} min)`;
+                } else {
+                    statusEl.textContent = 'No';
+                }
             } else {
-                infoEl.innerHTML = `<p class="text-gray-500">No workouts logged yet.</p>`;
                 statusEl.textContent = 'No';
             }
         }
 
         function updateWaterIntake(logs) {
-            const total = logs.filter(l => new Date(l.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString()).reduce((sum, l) => sum + (l.amount || 0), 0);
+            const total = logs
+                .filter(l => new Date(l.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+                .reduce((sum, l) => sum + (l.amount || 0), 0);
+            
             const goal = parseFloat(document.getElementById('water-goal').textContent);
             document.getElementById('water-intake').textContent = total;
             const progress = (total / goal) * 100;
@@ -518,85 +254,13 @@
             bar.classList.toggle('bg-blue-500', progress < 100);
         }
 
-        function renderWeeklyWorkoutChart(workouts) {
-            if (window.weeklyWorkoutChart) window.weeklyWorkoutChart.destroy();
-            const ctx = document.getElementById('weekly-workout-chart');
-            if (!ctx) return;
-            const today = new Date();
-            const labels = Array.from({length: 7}).map((_, i) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - i).toLocaleDateString()).reverse();
-            const data = labels.map(day => workouts.filter(w => new Date(w.timestamp?.seconds * 1000).toLocaleDateString() === day).length);
-            window.weeklyWorkoutChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Workouts', data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1, barPercentage: 0.6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 }, grid: { color: 'rgba(156, 163, 175, 0.2)' } }, x: { ticks: { color: 'rgb(156, 163, 175)' }, grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } } } });
-        }
-
-        function setMotivationalQuote() {
-            const quotes = ["The only bad workout is the one that didn't happen.", "Success isn't always about greatness. It's about consistency.", "Your body can stand almost anything. It’s your mind that you have to convince.", "Strive for progress, not perfection.", "Don't limit your challenges. Challenge your limits."];
-            document.getElementById('motivational-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
-        }
-        
-        const setupModal = (btnId, modalId, closeBtnId, saveBtnId, action) => {
-            document.getElementById(btnId)?.addEventListener('click', () => document.getElementById(modalId).style.display = 'flex');
-            document.getElementById(closeBtnId)?.addEventListener('click', () => document.getElementById(modalId).style.display = 'none');
-            document.getElementById(saveBtnId)?.addEventListener('click', action);
-        };
-
-        const addData = async (collectionName, data) => {
-            if (!userId) { console.error("User not authenticated."); return; }
-            try {
-                await addDoc(collection(db, "users", userId, collectionName), { ...data, timestamp: serverTimestamp() });
-            } catch (e) { console.error(`Error adding ${collectionName}:`, e); }
-        };
-
-        setupModal('log-workout-btn', 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
-            const type = document.getElementById('workout-type-input').value, duration = document.getElementById('workout-duration-input').value, notes = document.getElementById('workout-notes-input').value;
-            if (type && duration) {
-                await addData('workouts', { type, duration: parseInt(duration), notes });
-                document.getElementById('workout-modal').style.display = 'none';
-                document.getElementById('workout-type-input').value = '';
-                document.getElementById('workout-duration-input').value = '';
-                document.getElementById('workout-notes-input').value = '';
-            }
-        });
-        document.getElementById('add-workout-page-btn')?.addEventListener('click', () => document.getElementById('workout-modal').style.display = 'flex');
-
-        setupModal('add-meal-btn', 'meal-modal', 'close-meal-modal-btn', 'save-meal-btn', async () => {
-            const name = document.getElementById('meal-name-modal-input').value, description = document.getElementById('meal-description-modal-input').value;
-            if (name && description) {
-                await addData('nutrition', { name, description });
-                document.getElementById('meal-modal').style.display = 'none';
-                document.getElementById('meal-name-modal-input').value = '';
-                document.getElementById('meal-description-modal-input').value = '';
-            }
-        });
-
-        setupModal('add-water-btn', 'water-modal', 'close-water-modal-btn', 'save-water-btn', async () => {
-            const amount = document.getElementById('water-intake-modal-input').value;
-            if (amount) {
-                await addData('water', { amount: parseInt(amount) });
-                document.getElementById('water-modal').style.display = 'none';
-                document.getElementById('water-intake-modal-input').value = '';
-            }
-        });
-
-        document.getElementById('log-weight-btn')?.addEventListener('click', async () => {
-            const weight = document.getElementById('weight-input').value;
-            if (weight) {
-                await addData('progress', { weight: parseFloat(weight) });
-                document.getElementById('weight-input').value = '';
-            }
-        });
-        document.getElementById('log-bodyfat-btn')?.addEventListener('click', async () => {
-            const bodyfat = document.getElementById('bodyfat-input').value;
-            if (bodyfat) {
-                await addData('progress', { bodyfat: parseFloat(bodyfat) });
-                document.getElementById('bodyfat-input').value = '';
-            }
-        });
-
         document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); loginForm.style.display = 'none'; signupForm.style.display = 'block'; });
         document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); signupForm.style.display = 'none'; loginForm.style.display = 'block'; });
 
         document.getElementById('login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('login-email').value, password = document.getElementById('login-password').value, errorEl = document.getElementById('login-error');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
             errorEl.textContent = '';
             loadingOverlay.classList.add('active');
             try {
@@ -608,7 +272,9 @@
         });
 
         document.getElementById('signup-btn').addEventListener('click', async () => {
-            const email = document.getElementById('signup-email').value, password = document.getElementById('signup-password').value, errorEl = document.getElementById('signup-error');
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const errorEl = document.getElementById('signup-error');
             errorEl.textContent = '';
             loadingOverlay.classList.add('active');
             try {
@@ -622,11 +288,7 @@
         document.getElementById('sign-out-btn').addEventListener('click', () => {
             signOut(auth);
         });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            setMotivationalQuote();
-        });
-
     </script>
 </body>
 </html>
+
