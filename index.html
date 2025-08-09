@@ -54,6 +54,8 @@
                                 <a href="#" id="nav-workouts" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Workouts</a>
                                 <a href="#" id="nav-progress" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Progress</a>
                                 <a href="#" id="nav-nutrition" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Nutrition</a>
+                                <a href="#" id="nav-community" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Community</a>
+                                <a href="#" id="nav-profile" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Profile</a>
                             </div>
                         </div>
                     </div>
@@ -74,7 +76,7 @@
                                     </button>
                                 </div>
                                 <div id="profile-dropdown" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Your Profile</a>
+                                    <a href="#" id="nav-profile-dropdown" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">Your Profile</a>
                                     <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-1">Settings</a>
                                     <a href="#" id="sign-out-btn" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">Sign out</a>
                                 </div>
@@ -102,6 +104,8 @@
                     <a href="#" id="mobile-nav-workouts" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Workouts</a>
                     <a href="#" id="mobile-nav-progress" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Progress</a>
                     <a href="#" id="mobile-nav-nutrition" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Nutrition</a>
+                    <a href="#" id="mobile-nav-community" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Community</a>
+                    <a href="#" id="mobile-nav-profile" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
                 </div>
                 <div class="border-t border-gray-700 pt-4 pb-3">
                     <div class="flex items-center px-5">
@@ -119,7 +123,7 @@
                         </button>
                     </div>
                     <div class="mt-3 space-y-1 px-2">
-                        <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">Your Profile</a>
+                        <a href="#" id="mobile-nav-profile-dropdown" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">Your Profile</a>
                         <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">Settings</a>
                         <a href="#" id="sign-out-btn-mobile" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">Sign out</a>
                     </div>
@@ -137,8 +141,8 @@
                         <p class="text-2xl font-bold"><span id="calories-burned">0</span></p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Steps Today</p>
-                        <p class="text-2xl font-bold"><span id="steps-taken">0</span></p>
+                        <p class="text-sm text-gray-400">Current Streak</p>
+                        <p class="text-2xl font-bold"><span id="streak-display">0</span> Days</p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Workout Today</p>
@@ -231,6 +235,49 @@
                     <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
                         <h3 class="text-2xl font-semibold mb-4">Today's Summary</h3>
                         <canvas id="macro-chart" class="w-full h-80"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div id="profile-content" class="page-content">
+                <h2 class="text-3xl font-bold mb-6">Your Profile</h2>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Workout Streak</h3>
+                        <p class="text-6xl font-bold text-center text-yellow-400"><span id="profile-streak-display">0</span></p>
+                        <p class="text-center text-gray-400">Days</p>
+                    </div>
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Achievements</h3>
+                        <div id="badges-display" class="grid grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="community-content" class="page-content">
+                <h2 class="text-3xl font-bold mb-6">Community</h2>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Workout Leaderboard</h3>
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Rank</th>
+                                    <th scope="col" class="px-6 py-3">User</th>
+                                    <th scope="col" class="px-6 py-3">Workouts</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Weekly Challenge</h3>
+                        <div id="challenge-display" class="text-center">
+                            <h4 class="text-xl font-bold text-yellow-400">Cardio King</h4>
+                            <p class="text-gray-400 mb-4">Log 120 minutes of cardio this week.</p>
+                            <div class="w-full bg-gray-700 rounded-full h-4 mb-2">
+                                <div id="challenge-progress-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p id="challenge-progress-text" class="text-sm">0 / 120 minutes</p>
+                        </div>
                     </div>
                 </div>
             </div>
