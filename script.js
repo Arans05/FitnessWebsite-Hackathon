@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const mealModal = document.getElementById('meal-modal');
     const waterModal = document.getElementById('water-modal');
 
-    const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
+    const pages = ['dashboard', 'workouts', 'progress', 'nutrition', 'profile', 'community'];
     let userId = null;
-    let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress;
+    let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard;
     let weightChart, bodyfatChart, macroChart;
 
     // --- Page Navigation ---
@@ -68,6 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         showPage('dashboard');
     });
+    document.getElementById('nav-profile-dropdown').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('profile');
+        profileDropdown.classList.add('hidden');
+    });
 
     // --- Authentication ---
     onAuthStateChanged(auth, (user) => {
@@ -90,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (unsubscribeNutrition) unsubscribeNutrition();
             if (unsubscribeWater) unsubscribeWater();
             if (unsubscribeProgress) unsubscribeProgress();
+            if (unsubscribeProfile) unsubscribeProfile();
+            if (unsubscribeLeaderboard) unsubscribeLeaderboard();
         }
     });
 
@@ -103,6 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             renderWorkouts(workouts);
             updateDashboardWorkouts(workouts);
+            checkAchievements({ workouts });
+            updateLeaderboard(workouts.length);
+            updateChallengeProgress(workouts);
         });
 
         const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
@@ -124,6 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                 .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
             renderProgressCharts(progressData);
+        });
+
+        const profileDoc = doc(db, "users", userId, "profile", "data");
+        unsubscribeProfile = onSnapshot(profileDoc, (snapshot) => {
+            const profileData = snapshot.data() || {};
+            renderAchievements(profileData.achievements || []);
+        });
+
+        const leaderboardQuery = query(collection(db, "profiles"));
+        unsubscribeLeaderboard = onSnapshot(leaderboardQuery, (snapshot) => {
+            const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderLeaderboard(profiles);
         });
     }
 
@@ -202,6 +224,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderLeaderboard(profiles) {
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        if (!leaderboardBody) return;
+        const sortedProfiles = profiles.sort((a, b) => (b.workoutCount || 0) - (a.workoutCount || 0));
+        leaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
+            <tr class="bg-gray-800 border-b border-gray-700">
+                <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
+                <td class="px-6 py-4">${p.email}</td>
+                <td class="px-6 py-4">${p.workoutCount || 0}</td>
+            </tr>
+        `).join('');
+    }
+
     function updateDashboardWorkouts(workouts) {
         const statusEl = document.getElementById('workout-status');
         if (!statusEl) return;
@@ -212,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             statusEl.textContent = 'No';
         }
+        calculateStreak(workouts);
     }
 
     function updateDashboardCalories(meals) {
@@ -234,6 +270,115 @@ document.addEventListener('DOMContentLoaded', () => {
             motivationalQuoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
         }
     }
+
+    // --- Gamification ---
+    function calculateStreak(workouts) {
+        if (workouts.length === 0) {
+            updateStreakDisplay(0);
+            return;
+        }
+
+        const workoutDates = [...new Set(workouts.map(w => new Date(w.timestamp.seconds * 1000).toLocaleDateString()))]
+            .map(dateStr => new Date(dateStr))
+            .sort((a, b) => b - a);
+
+        let streak = 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const lastWorkoutDay = new Date(workoutDates[0]);
+        lastWorkoutDay.setHours(0, 0, 0, 0);
+
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+        if (lastWorkoutDay.getTime() === today.getTime() || lastWorkoutDay.getTime() === yesterday.getTime()) {
+            streak = 1;
+            for (let i = 1; i < workoutDates.length; i++) {
+                const currentDay = new Date(workoutDates[i-1]);
+                const prevDay = new Date(workoutDates[i]);
+                const expectedPrevDay = new Date(currentDay);
+                expectedPrevDay.setDate(currentDay.getDate() - 1);
+
+                if (prevDay.toLocaleDateString() === expectedPrevDay.toLocaleDateString()) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+        }
+        updateStreakDisplay(streak);
+    }
+
+    function updateStreakDisplay(streak) {
+        document.getElementById('streak-display').textContent = streak;
+        document.getElementById('profile-streak-display').textContent = streak;
+    }
+
+    const achievements = {
+        FIRST_WORKOUT: { name: 'First Step', description: 'Log your first workout' },
+        FIVE_WORKOUTS: { name: 'Getting Started', description: 'Log 5 workouts' },
+    };
+
+    async function checkAchievements(data) {
+        if (!userId) return;
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        const profileSnap = await getDoc(profileRef);
+        const earnedAchievements = profileSnap.data()?.achievements || [];
+
+        const newAchievements = [];
+
+        // First Workout
+        if (data.workouts.length >= 1 && !earnedAchievements.includes('FIRST_WORKOUT')) {
+            newAchievements.push('FIRST_WORKOUT');
+        }
+        // Five Workouts
+        if (data.workouts.length >= 5 && !earnedAchievements.includes('FIVE_WORKOUTS')) {
+            newAchievements.push('FIVE_WORKOUTS');
+        }
+
+        if (newAchievements.length > 0) {
+            await setDoc(profileRef, { achievements: [...earnedAchievements, ...newAchievements] }, { merge: true });
+        }
+    }
+
+    function renderAchievements(earnedIds) {
+        const container = document.getElementById('badges-display');
+        if (!container) return;
+        container.innerHTML = earnedIds.length === 0
+            ? `<p class="text-gray-500 col-span-3">No achievements yet. Keep going!</p>`
+            : earnedIds.map(id => {
+                const achievement = achievements[id];
+                return `
+                    <div class="text-center" title="${achievement.description}">
+                        <div class="text-4xl">🏆</div>
+                        <p class="text-sm font-semibold">${achievement.name}</p>
+                    </div>
+                `;
+            }).join('');
+    }
+
+    async function updateLeaderboard(workoutCount) {
+        if (!userId) return;
+        const profileRef = doc(db, "profiles", userId);
+        await setDoc(profileRef, { email: auth.currentUser.email, workoutCount }, { merge: true });
+    }
+    
+    function updateChallengeProgress(workouts) {
+        const challengeGoal = 120; // 120 minutes of cardio
+        const today = new Date();
+        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        startOfWeek.setHours(0,0,0,0);
+
+        const thisWeekCardio = workouts
+            .filter(w => w.timestamp.toDate() >= startOfWeek && w.type?.toLowerCase() === 'cardio')
+            .reduce((sum, w) => sum + w.duration, 0);
+        
+        const progress = Math.min((thisWeekCardio / challengeGoal) * 100, 100);
+        document.getElementById('challenge-progress-bar').style.width = `${progress}%`;
+        document.getElementById('challenge-progress-text').textContent = `${thisWeekCardio} / ${challengeGoal} minutes`;
+    }
+
 
     // --- UI Event Listeners ---
     document.getElementById('user-menu-button').addEventListener('click', () => {
