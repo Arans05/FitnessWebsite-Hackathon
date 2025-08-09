@@ -36,11 +36,14 @@
         .dark {
             color-scheme: dark;
         }
-        .page-content {
+        .page-content, #app-container {
             display: none;
         }
-        .page-content.active {
+        .page-content.active, #app-container.active {
             display: block;
+        }
+        #login-container.active {
+            display: flex;
         }
         .nav-link.active {
             @apply bg-gray-700 text-white;
@@ -54,7 +57,34 @@
     </style>
 </head>
 <body class="bg-[#0f172a] text-white">
-    <div class="flex min-h-screen">
+
+    <!-- Login/Signup Container -->
+    <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4">
+        <div class="w-full max-w-md">
+            <h1 class="text-4xl font-bold text-center mb-8 text-white">Fitness Tracker</h1>
+            <!-- Login Form -->
+            <div id="login-form" class="bg-gray-900 p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+                <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 mb-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 mb-6 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="login-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Login</button>
+                <p class="text-center text-gray-400 mt-4">Don't have an account? <a href="#" id="show-signup" class="text-blue-400 hover:underline">Sign Up</a></p>
+                <p id="login-error" class="text-red-500 text-center mt-2"></p>
+            </div>
+            <!-- Signup Form -->
+            <div id="signup-form" class="bg-gray-900 p-8 rounded-lg shadow-lg" style="display: none;">
+                <h2 class="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+                <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 mb-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 mb-6 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="signup-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Sign Up</button>
+                <p class="text-center text-gray-400 mt-4">Already have an account? <a href="#" id="show-login" class="text-blue-400 hover:underline">Login</a></p>
+                <p id="signup-error" class="text-red-500 text-center mt-2"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="flex min-h-screen">
         <!-- Sidebar Navigation -->
         <aside class="flex flex-col w-64 bg-gray-900 border-r border-gray-800 p-4">
             <h1 class="text-2xl font-bold mb-8 text-white">Fitness Tracker</h1>
@@ -86,8 +116,9 @@
                     </li>
                 </ul>
             </nav>
-            <div id="user-id-display" class="mt-auto text-xs text-gray-500 break-words">
-                <!-- User ID will be displayed here -->
+            <div id="user-info" class="mt-auto text-xs text-gray-500 break-words">
+                <p id="user-email-display"></p>
+                <button id="sign-out-btn" class="w-full mt-2 text-left text-red-400 hover:text-red-300">Sign Out</button>
             </div>
         </aside>
 
@@ -95,10 +126,7 @@
         <main class="flex-grow p-8 overflow-y-auto">
             <div id="dashboard-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6" id="welcome-message">Welcome Back!</h2>
-
-                <!-- Quick Stats Section -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <!-- Calories Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Calories</p>
@@ -106,7 +134,6 @@
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-red-400"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </div>
-                    <!-- Steps Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Steps</p>
@@ -114,7 +141,6 @@
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-yellow-400"><path d="M5 22s1.5-2 4-2 4 2 4 2 1.5-2 4-2-4-2-4-2-1.5 2-4 2-4-2-4-2-1.5 2-4 2z"/><path d="M12 14v8"/></svg>
                     </div>
-                    <!-- Workout Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Workout Today</p>
@@ -122,7 +148,6 @@
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-green-400"><path d="M5.5 22H3.6c-.9 0-1.6-.7-1.6-1.6v-1.6c0-.9.7-1.6 1.6-1.6h1.8c.9 0 1.6.7 1.6 1.6v1.8c0 .9-.7 1.6-1.6 1.6zM15.9 2.1c-.9 0-1.6.7-1.6 1.6v1.8c0 .9.7 1.6 1.6 1.6h1.8c.9 0 1.6-.7 1.6-1.6V3.6c0-.9-.7-1.6-1.6-1.6zM11.6 12.5c0 .9-.7 1.6-1.6 1.6H8.2c-.9 0-1.6-.7-1.6-1.6v-1.8c0-.9.7-1.6 1.6-1.6h1.8c.9 0 1.6.7 1.6 1.6v1.8z"/><path d="m20.4 17.2-1.3-1.3c-.3-.3-.7-.3-1 0l-1.6 1.6c-.3.3-.3.7 0 1l1.3 1.3c.3.3.7.3 1 0l1.6-1.6c.3-.3.3-.7 0-1zM3.6 3.6 5 5m14 14 1.4 1.4M12 8V2m0 20v-6m-8-6H2m20 0h-6"/></svg>
                     </div>
-                    <!-- Water Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Water Intake</p>
                         <p class="text-2xl font-bold"><span id="water-intake">0</span> / <span id="water-goal">64</span> oz</p>
@@ -131,24 +156,18 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Next Workout & Quote Section -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                    <!-- Next Workout Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <h3 class="text-xl font-semibold mb-2">Last Logged Workout</h3>
                         <div id="next-workout-info" class="text-gray-400">
                             <p>No workouts logged yet.</p>
                         </div>
                     </div>
-                    <!-- Quote of the Day Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <h3 class="text-xl font-semibold mb-2">Tip of the Day</h3>
                         <p class="italic text-gray-300" id="motivational-quote"></p>
                     </div>
                 </div>
-
-                <!-- Quick Log Buttons -->
                 <div class="mb-8">
                     <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
                     <div class="flex flex-wrap gap-4">
@@ -166,14 +185,11 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Weekly Stats Graph -->
                 <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                     <h3 class="text-xl font-bold mb-4">Weekly Workout Frequency</h3>
                     <canvas id="weekly-workout-chart" class="w-full h-64"></canvas>
                 </div>
             </div>
-
             <div id="workouts-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Workout Tracker</h2>
                 <div class="mb-6">
@@ -193,18 +209,14 @@
                                     <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Notes</th>
                                 </tr>
                             </thead>
-                            <tbody id="workout-list">
-                                <!-- Workout rows will be populated by JavaScript -->
-                            </tbody>
+                            <tbody id="workout-list"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
             <div id="progress-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Progress Tracker</h2>
                 <div class="grid gap-6 md:grid-cols-2">
-                    <!-- Weight Progress Card -->
                     <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
                         <div class="flex flex-col space-y-1.5 p-6">
                             <h3 class="text-2xl font-semibold leading-none tracking-tight">Weight Progress</h3>
@@ -215,12 +227,9 @@
                         </div>
                         <div class="flex items-center p-6 pt-0 space-x-2">
                             <input type="number" id="weight-input" placeholder="Enter weight (lbs)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <button id="log-weight-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                                Log Weight
-                            </button>
+                            <button id="log-weight-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Weight</button>
                         </div>
                     </div>
-                    <!-- Body Fat Progress Card -->
                     <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
                         <div class="flex flex-col space-y-1.5 p-6">
                             <h3 class="text-2xl font-semibold leading-none tracking-tight">Body Fat % Progress</h3>
@@ -231,22 +240,17 @@
                         </div>
                         <div class="flex items-center p-6 pt-0 space-x-2">
                             <input type="number" id="bodyfat-input" placeholder="Enter body fat %" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <button id="log-bodyfat-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                                Log Body Fat
-                            </button>
+                            <button id="log-bodyfat-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Body Fat</button>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div id="nutrition-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Nutrition Tracker</h2>
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <div class="rounded-xl border bg-card text-card-foreground shadow p-6 col-span-1 lg:col-span-3">
                         <h3 class="text-xl font-semibold mb-4">Recent Meals</h3>
-                        <ul id="meal-list" class="space-y-2">
-                            <!-- Meal list items will be appended here -->
-                        </ul>
+                        <ul id="meal-list" class="space-y-2"></ul>
                     </div>
                 </div>
             </div>
@@ -254,505 +258,294 @@
     </div>
 
     <!-- Modals -->
-    <!-- Workout Modal -->
     <div id="workout-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
         <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log New Workout</h3>
-                <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
+                <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
-                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
-                <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                    Save Workout
-                </button>
+                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"></textarea>
+                <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Save Workout</button>
             </div>
         </div>
     </div>
-    
-    <!-- Modal for Meal Logging -->
     <div id="meal-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
         <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log New Meal</h3>
-                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
+                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
-                <input type="text" id="meal-name-modal-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <textarea id="meal-description-modal-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
-                <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                    Log Meal
-                </button>
+                <input type="text" id="meal-name-modal-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                <textarea id="meal-description-modal-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"></textarea>
+                <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Meal</button>
             </div>
         </div>
     </div>
-
-    <!-- Modal for Water Intake -->
     <div id="water-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
         <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log Water Intake</h3>
-                <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
+                <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
-                <input type="number" id="water-intake-modal-input" placeholder="Water intake (oz)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                    Log Water
-                </button>
+                <input type="number" id="water-intake-modal-input" placeholder="Water intake (oz)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Log Water</button>
             </div>
         </div>
     </div>
     
-    <!-- Firebase and Chart.js Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script type="module">
-        // Import Firebase libraries from CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // --- GLOBAL VARIABLES & FIREBASE SETUP ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
+        
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         setLogLevel('debug');
 
         let userId = null;
-        let unsubscribeWorkout = null;
-        let unsubscribeProgress = null;
-        let unsubscribeNutrition = null;
-        let unsubscribeWater = null;
-        let weightChart = null;
-        let bodyfatChart = null;
-        let weeklyWorkoutChart = null;
+        let unsubscribeWorkout, unsubscribeProgress, unsubscribeNutrition, unsubscribeWater;
+        let weightChart, bodyfatChart, weeklyWorkoutChart;
 
-        // An array to store all page names
         const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
-
-        // --- DOM ELEMENTS ---
-        const pageContentElements = pages.reduce((acc, page) => {
-            acc[page] = document.getElementById(`${page}-content`);
-            return acc;
-        }, {});
-        const navLinks = pages.reduce((acc, page) => {
-            acc[page] = document.getElementById(`nav-${page}`);
-            return acc;
-        }, {});
+        const pageContentElements = pages.reduce((acc, page) => ({ ...acc, [page]: document.getElementById(`${page}-content`) }), {});
+        const navLinks = pages.reduce((acc, page) => ({ ...acc, [page]: document.getElementById(`nav-${page}`) }), {});
         
-        const workoutModal = document.getElementById('workout-modal');
-        const mealModal = document.getElementById('meal-modal');
-        const waterModal = document.getElementById('water-modal');
-        const userIdDisplay = document.getElementById('user-id-display');
-        const motivationalQuoteEl = document.getElementById('motivational-quote');
+        const loginContainer = document.getElementById('login-container');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
 
-        // --- UI & PAGE NAVIGATION ---
         function showPage(pageId) {
-            // Hide all pages and deactivate all navigation links
             pages.forEach(page => {
-                if (pageContentElements[page]) {
-                    pageContentElements[page].classList.remove('active');
-                }
-                if (navLinks[page]) {
-                    navLinks[page].classList.remove('active');
-                }
+                pageContentElements[page]?.classList.remove('active');
+                navLinks[page]?.classList.remove('active');
             });
-
-            // Show the selected page and activate its link
-            const activePage = pageContentElements[pageId];
-            const activeLink = navLinks[pageId];
-            
-            if (activePage) activePage.classList.add('active');
-            if (activeLink) activeLink.classList.add('active');
+            pageContentElements[pageId]?.classList.add('active');
+            navLinks[pageId]?.classList.add('active');
         }
         
-        // Add event listeners for navigation links
-        Object.keys(navLinks).forEach(pageId => {
-            if (navLinks[pageId]) {
-                navLinks[pageId].addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showPage(pageId);
-                });
-            }
-        });
+        Object.keys(navLinks).forEach(pageId => navLinks[pageId]?.addEventListener('click', e => {
+            e.preventDefault();
+            showPage(pageId);
+        }));
 
-        // --- FIREBASE AUTHENTICATION ---
-        async function authenticate() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Error signing in: ", error);
-            }
-        }
-        
-        // Listen for authentication state changes
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 userId = user.uid;
-                console.log("User authenticated with UID:", userId);
-                userIdDisplay.textContent = `User ID: ${userId}`;
-                
-                // Start listening to Firestore data once authenticated
+                loginContainer.classList.remove('active');
+                appContainer.classList.add('active');
+                document.getElementById('user-email-display').textContent = user.email;
+                showPage('dashboard');
                 setupFirestoreListeners();
             } else {
-                console.log("User is signed out.");
                 userId = null;
-                userIdDisplay.textContent = 'User ID: N/A';
+                appContainer.classList.remove('active');
+                loginContainer.classList.add('active');
+                if (unsubscribeWorkout) unsubscribeWorkout();
+                if (unsubscribeProgress) unsubscribeProgress();
+                if (unsubscribeNutrition) unsubscribeNutrition();
+                if (unsubscribeWater) unsubscribeWater();
             }
         });
 
-        // --- FIREBASE LISTENERS ---
         function setupFirestoreListeners() {
             if (!userId) return;
+            const commonErrorHandler = (error) => console.error("Firestore error:", error);
 
-            // Unsubscribe existing listeners to avoid duplicates
-            if (unsubscribeWorkout) unsubscribeWorkout();
-            if (unsubscribeProgress) unsubscribeProgress();
-            if (unsubscribeNutrition) unsubscribeNutrition();
-            if (unsubscribeWater) unsubscribeWater();
-
-            // Setup Workouts listener
             const workoutQuery = query(collection(db, `artifacts/${appId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
             unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
                 const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderWorkouts(workouts);
                 updateDashboardWorkouts(workouts);
                 renderWeeklyWorkoutChart(workouts);
-            }, (error) => console.error("Error fetching workouts:", error));
+            }, commonErrorHandler);
 
-            // Setup Progress listener
             const progressQuery = query(collection(db, `artifacts/${appId}/users/${userId}/progress`), orderBy("timestamp"));
             unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
-                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderProgressCharts(progressData);
-            }, (error) => console.error("Error fetching progress:", error));
+                renderProgressCharts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            }, commonErrorHandler);
 
-            // Setup Nutrition listener
             const nutritionQuery = query(collection(db, `artifacts/${appId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
             unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
-                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderMeals(meals);
-            }, (error) => console.error("Error fetching nutrition:", error));
+                renderMeals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            }, commonErrorHandler);
             
-            // Setup Water listener
             const waterQuery = query(collection(db, `artifacts/${appId}/users/${userId}/water`), orderBy("timestamp", "desc"));
             unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
-                const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                updateWaterIntake(waterLogs);
-            }, (error) => console.error("Error fetching water logs:", error));
+                updateWaterIntake(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            }, commonErrorHandler);
         }
         
-        // --- RENDERING FUNCTIONS ---
         function renderWorkouts(workouts) {
-            const workoutListEl = document.getElementById('workout-list');
-            if (!workoutListEl) return;
-            workoutListEl.innerHTML = '';
-            if (workouts.length === 0) {
-                workoutListEl.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>`;
-                return;
-            }
-            workouts.forEach(workout => {
-                const date = workout.timestamp ? new Date(workout.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
-                const row = `
-                    <tr class="border-b transition-colors hover:bg-muted/50">
-                        <td class="p-4 align-middle">${date}</td>
-                        <td class="p-4 align-middle">${workout.type || 'N/A'}</td>
-                        <td class="p-4 align-middle">${workout.duration || 'N/A'} min</td>
-                        <td class="p-4 align-middle">${workout.notes || ''}</td>
-                    </tr>
-                `;
-                workoutListEl.innerHTML += row;
-            });
+            const el = document.getElementById('workout-list');
+            if (!el) return;
+            el.innerHTML = workouts.length === 0 ? `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` : workouts.map(w => `
+                <tr class="border-b transition-colors hover:bg-muted/50">
+                    <td class="p-4">${new Date(w.timestamp?.seconds * 1000).toLocaleDateString()}</td>
+                    <td class="p-4">${w.type || 'N/A'}</td>
+                    <td class="p-4">${w.duration || 'N/A'} min</td>
+                    <td class="p-4">${w.notes || ''}</td>
+                </tr>`).join('');
         }
 
         function renderProgressCharts(progressData) {
-            const weights = progressData.filter(item => item.weight);
-            const bodyfats = progressData.filter(item => item.bodyfat);
-            
-            const weightLabels = weights.map(item => item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : 'N/A');
-            const weightValues = weights.map(item => item.weight);
-
-            const bodyfatLabels = bodyfats.map(item => item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : 'N/A');
-            const bodyfatValues = bodyfats.map(item => item.bodyfat);
-            
-            const chartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: false, grid: { color: 'rgba(156, 163, 175, 0.2)' }, ticks: { color: 'rgb(203, 213, 225)' } },
-                    x: { grid: { display: false }, ticks: { color: 'rgb(203, 213, 225)' } }
-                },
-                plugins: { legend: { display: false } }
+            const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(156, 163, 175, 0.2)' }, ticks: { color: 'rgb(203, 213, 225)' } }, x: { grid: { display: false }, ticks: { color: 'rgb(203, 213, 225)' } } }, plugins: { legend: { display: false } } };
+            const createChart = (id, label, data, color) => {
+                const ctx = document.getElementById(id);
+                if (!ctx) return null;
+                return new Chart(ctx, { type: 'line', data: { labels: data.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString()), datasets: [{ label, data: data.map(d => d.value), borderColor: color, tension: 0.1 }] }, options: chartOptions });
             };
-
             if (weightChart) weightChart.destroy();
-            const weightCtx = document.getElementById('weight-chart');
-            if (weightCtx) {
-                weightChart = new Chart(weightCtx, {
-                    type: 'line',
-                    data: {
-                        labels: weightLabels,
-                        datasets: [{ label: 'Weight (lbs)', data: weightValues, borderColor: 'rgb(59, 130, 246)', tension: 0.1 }]
-                    },
-                    options: chartOptions
-                });
-            }
-
+            weightChart = createChart('weight-chart', 'Weight (lbs)', progressData.filter(d => d.weight).map(d => ({...d, value: d.weight})), 'rgb(59, 130, 246)');
             if (bodyfatChart) bodyfatChart.destroy();
-            const bodyfatCtx = document.getElementById('bodyfat-chart');
-            if (bodyfatCtx) {
-                bodyfatChart = new Chart(bodyfatCtx, {
-                    type: 'line',
-                    data: {
-                        labels: bodyfatLabels,
-                        datasets: [{ label: 'Body Fat %', data: bodyfatValues, borderColor: 'rgb(239, 68, 68)', tension: 0.1 }]
-                    },
-                    options: chartOptions
-                });
-            }
+            bodyfatChart = createChart('bodyfat-chart', 'Body Fat %', progressData.filter(d => d.bodyfat).map(d => ({...d, value: d.bodyfat})), 'rgb(239, 68, 68)');
         }
 
         function renderMeals(meals) {
-            const mealListEl = document.getElementById('meal-list');
-            if (!mealListEl) return;
-            mealListEl.innerHTML = '';
-            if (meals.length === 0) {
-                mealListEl.innerHTML = `<li class="text-gray-500">No meals logged yet.</li>`;
-                return;
-            }
-            meals.forEach(meal => {
-                const date = meal.timestamp ? new Date(meal.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
-                const listItem = `
-                    <li class="p-4 rounded-md bg-gray-800">
-                        <p class="font-semibold text-white">${meal.name} - ${date}</p>
-                        <p class="text-sm text-gray-400">${meal.description}</p>
-                    </li>
-                `;
-                mealListEl.innerHTML += listItem;
-            });
+            const el = document.getElementById('meal-list');
+            if (!el) return;
+            el.innerHTML = meals.length === 0 ? `<li class="text-gray-500">No meals logged yet.</li>` : meals.map(m => `
+                <li class="p-4 rounded-md bg-gray-800">
+                    <p class="font-semibold text-white">${m.name} - ${new Date(m.timestamp?.seconds * 1000).toLocaleDateString()}</p>
+                    <p class="text-sm text-gray-400">${m.description}</p>
+                </li>`).join('');
         }
         
         function updateDashboardWorkouts(workouts) {
-            const nextWorkoutInfoEl = document.getElementById('next-workout-info');
-            const workoutStatusEl = document.getElementById('workout-status');
-            if (!nextWorkoutInfoEl || !workoutStatusEl) return;
-            
-            const today = new Date().toLocaleDateString();
-            
+            const infoEl = document.getElementById('next-workout-info');
+            const statusEl = document.getElementById('workout-status');
+            if (!infoEl || !statusEl) return;
             if (workouts.length > 0) {
-                const lastWorkout = workouts[0];
-                const date = lastWorkout.timestamp ? new Date(lastWorkout.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
-                
-                nextWorkoutInfoEl.innerHTML = `
-                    <p class="text-white font-semibold">${lastWorkout.type}</p>
-                    <p>Date: ${date}</p>
-                    <p>Duration: ${lastWorkout.duration} min</p>
-                `;
-                if (date === today) {
-                    workoutStatusEl.textContent = `Yes (${lastWorkout.duration} min)`;
-                } else {
-                    workoutStatusEl.textContent = `No`;
-                }
+                const last = workouts[0];
+                const date = new Date(last.timestamp?.seconds * 1000).toLocaleDateString();
+                infoEl.innerHTML = `<p class="font-semibold">${last.type}</p><p>Date: ${date}</p><p>Duration: ${last.duration} min</p>`;
+                statusEl.textContent = date === new Date().toLocaleDateString() ? `Yes (${last.duration} min)` : 'No';
             } else {
-                nextWorkoutInfoEl.innerHTML = `<p class="text-gray-500">No workouts logged yet.</p>`;
-                workoutStatusEl.textContent = `No`;
+                infoEl.innerHTML = `<p class="text-gray-500">No workouts logged yet.</p>`;
+                statusEl.textContent = 'No';
             }
         }
 
-        function updateWaterIntake(waterLogs) {
-            const today = new Date().toLocaleDateString();
-            const todayWater = waterLogs.filter(log => log.timestamp && new Date(log.timestamp.seconds * 1000).toLocaleDateString() === today);
-            const totalWater = todayWater.reduce((sum, log) => sum + (log.amount || 0), 0);
-            
-            const waterIntakeEl = document.getElementById('water-intake');
-            const waterGoalEl = document.getElementById('water-goal');
-            const waterProgressBarEl = document.getElementById('water-progress-bar');
-            if (!waterIntakeEl || !waterGoalEl || !waterProgressBarEl) return;
-            
-            const waterGoal = parseFloat(waterGoalEl.textContent);
-            waterIntakeEl.textContent = totalWater;
-
-            const waterProgress = (totalWater / waterGoal) * 100;
-            waterProgressBarEl.style.width = `${Math.min(waterProgress, 100)}%`;
-            waterProgressBarEl.classList.toggle('bg-green-500', waterProgress >= 100);
-            waterProgressBarEl.classList.toggle('bg-blue-500', waterProgress < 100);
+        function updateWaterIntake(logs) {
+            const total = logs.filter(l => new Date(l.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString()).reduce((sum, l) => sum + (l.amount || 0), 0);
+            const goal = parseFloat(document.getElementById('water-goal').textContent);
+            document.getElementById('water-intake').textContent = total;
+            const progress = (total / goal) * 100;
+            const bar = document.getElementById('water-progress-bar');
+            bar.style.width = `${Math.min(progress, 100)}%`;
+            bar.classList.toggle('bg-green-500', progress >= 100);
+            bar.classList.toggle('bg-blue-500', progress < 100);
         }
 
         function renderWeeklyWorkoutChart(workouts) {
             if (weeklyWorkoutChart) weeklyWorkoutChart.destroy();
             const ctx = document.getElementById('weekly-workout-chart');
             if (!ctx) return;
-            
             const today = new Date();
-            const last7Days = Array.from({length: 7}).map((_, i) => {
-                const d = new Date();
-                d.setDate(today.getDate() - i);
-                return d.toLocaleDateString();
-            }).reverse();
-
-            const workoutCounts = last7Days.map(day => {
-                return workouts.filter(w => w.timestamp && new Date(w.timestamp.seconds * 1000).toLocaleDateString() === day).length;
-            });
-            
-            weeklyWorkoutChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: last7Days,
-                    datasets: [{
-                        label: 'Workouts',
-                        data: workoutCounts,
-                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 1,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 }, grid: { color: 'rgba(156, 163, 175, 0.2)' } },
-                        x: { ticks: { color: 'rgb(156, 163, 175)' }, grid: { display: false } }
-                    },
-                    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } }
-                }
-            });
+            const labels = Array.from({length: 7}).map((_, i) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - i).toLocaleDateString()).reverse();
+            const data = labels.map(day => workouts.filter(w => new Date(w.timestamp?.seconds * 1000).toLocaleDateString() === day).length);
+            weeklyWorkoutChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Workouts', data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1, barPercentage: 0.6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 }, grid: { color: 'rgba(156, 163, 175, 0.2)' } }, x: { ticks: { color: 'rgb(156, 163, 175)' }, grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } } } });
         }
 
         function setMotivationalQuote() {
-            const quotes = [
-                "The only bad workout is the one that didn't happen.",
-                "Success isn't always about greatness. It's about consistency.",
-                "Your body can stand almost anything. It’s your mind that you have to convince.",
-                "Strive for progress, not perfection.",
-                "Don't limit your challenges. Challenge your limits."
-            ];
-            if (motivationalQuoteEl) {
-                motivationalQuoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
-            }
+            const quotes = ["The only bad workout is the one that didn't happen.", "Success isn't always about greatness. It's about consistency.", "Your body can stand almost anything. It’s your mind that you have to convince.", "Strive for progress, not perfection.", "Don't limit your challenges. Challenge your limits."];
+            document.getElementById('motivational-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
         }
         
-        // --- FORM & MODAL HANDLERS ---
-        // Open modals
-        document.getElementById('log-workout-btn')?.addEventListener('click', () => { workoutModal.style.display = 'flex'; });
-        document.getElementById('add-workout-page-btn')?.addEventListener('click', () => { workoutModal.style.display = 'flex'; });
-        document.getElementById('add-meal-btn')?.addEventListener('click', () => { mealModal.style.display = 'flex'; });
-        document.getElementById('add-water-btn')?.addEventListener('click', () => { waterModal.style.display = 'flex'; });
+        const setupModal = (btnId, modalId, closeBtnId, saveBtnId, action) => {
+            document.getElementById(btnId)?.addEventListener('click', () => document.getElementById(modalId).style.display = 'flex');
+            document.getElementById(closeBtnId)?.addEventListener('click', () => document.getElementById(modalId).style.display = 'none');
+            document.getElementById(saveBtnId)?.addEventListener('click', action);
+        };
 
-        // Close modals
-        document.getElementById('close-workout-modal-btn')?.addEventListener('click', () => { workoutModal.style.display = 'none'; });
-        document.getElementById('close-meal-modal-btn')?.addEventListener('click', () => { mealModal.style.display = 'none'; });
-        document.getElementById('close-water-modal-btn')?.addEventListener('click', () => { waterModal.style.display = 'none'; });
-        
-        // Log Workout Handler
-        document.getElementById('save-workout-btn')?.addEventListener('click', async () => {
+        const addData = async (collectionName, data) => {
             if (!userId) { console.error("User not authenticated."); return; }
-            const type = document.getElementById('workout-type-input').value;
-            const duration = document.getElementById('workout-duration-input').value;
-            const notes = document.getElementById('workout-notes-input').value;
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/${collectionName}`), { ...data, timestamp: serverTimestamp() });
+            } catch (e) { console.error(`Error adding ${collectionName}:`, e); }
+        };
 
+        setupModal('log-workout-btn', 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
+            const type = document.getElementById('workout-type-input').value, duration = document.getElementById('workout-duration-input').value, notes = document.getElementById('workout-notes-input').value;
             if (type && duration) {
-                try {
-                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/workouts`), {
-                        type,
-                        duration: parseInt(duration, 10),
-                        notes,
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('workout-type-input').value = '';
-                    document.getElementById('workout-duration-input').value = '';
-                    document.getElementById('workout-notes-input').value = '';
-                    workoutModal.style.display = 'none';
-                } catch (e) { console.error("Error adding workout: ", e); }
-            } else { console.error("Workout type and duration are required."); }
+                await addData('workouts', { type, duration: parseInt(duration), notes });
+                document.getElementById('workout-modal').style.display = 'none';
+                document.getElementById('workout-type-input').value = '';
+                document.getElementById('workout-duration-input').value = '';
+                document.getElementById('workout-notes-input').value = '';
+            }
         });
+        document.getElementById('add-workout-page-btn')?.addEventListener('click', () => document.getElementById('workout-modal').style.display = 'flex');
 
-        // Log Weight Handler
-        document.getElementById('log-weight-btn')?.addEventListener('click', async () => {
-            if (!userId) { console.error("User not authenticated."); return; }
-            const weight = document.getElementById('weight-input').value;
-            if (weight) {
-                try {
-                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/progress`), {
-                        weight: parseFloat(weight),
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('weight-input').value = '';
-                } catch (e) { console.error("Error logging weight: ", e); }
-            } else { console.error("Weight is required."); }
-        });
-        
-        // Log Body Fat Handler
-        document.getElementById('log-bodyfat-btn')?.addEventListener('click', async () => {
-            if (!userId) { console.error("User not authenticated."); return; }
-            const bodyfat = document.getElementById('bodyfat-input').value;
-            if (bodyfat) {
-                try {
-                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/progress`), {
-                        bodyfat: parseFloat(bodyfat),
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('bodyfat-input').value = '';
-                } catch (e) { console.error("Error logging body fat: ", e); }
-            } else { console.error("Body fat is required."); }
-        });
-        
-        // Log Meal Handler
-        document.getElementById('save-meal-btn')?.addEventListener('click', async () => {
-            if (!userId) { console.error("User not authenticated."); return; }
-            const name = document.getElementById('meal-name-modal-input').value;
-            const description = document.getElementById('meal-description-modal-input').value;
+        setupModal('add-meal-btn', 'meal-modal', 'close-meal-modal-btn', 'save-meal-btn', async () => {
+            const name = document.getElementById('meal-name-modal-input').value, description = document.getElementById('meal-description-modal-input').value;
             if (name && description) {
-                try {
-                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/nutrition`), {
-                        name,
-                        description,
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('meal-name-modal-input').value = '';
-                    document.getElementById('meal-description-modal-input').value = '';
-                    mealModal.style.display = 'none';
-                } catch (e) { console.error("Error logging meal: ", e); }
-            } else { console.error("Meal name and description are required."); }
+                await addData('nutrition', { name, description });
+                document.getElementById('meal-modal').style.display = 'none';
+                document.getElementById('meal-name-modal-input').value = '';
+                document.getElementById('meal-description-modal-input').value = '';
+            }
         });
 
-        // Log Water Handler
-        document.getElementById('save-water-btn')?.addEventListener('click', async () => {
-            if (!userId) { console.error("User not authenticated."); return; }
+        setupModal('add-water-btn', 'water-modal', 'close-water-modal-btn', 'save-water-btn', async () => {
             const amount = document.getElementById('water-intake-modal-input').value;
             if (amount) {
-                try {
-                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/water`), {
-                        amount: parseInt(amount, 10),
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('water-intake-modal-input').value = '';
-                    waterModal.style.display = 'none';
-                } catch (e) { console.error("Error logging water: ", e); }
-            } else { console.error("Water amount is required."); }
+                await addData('water', { amount: parseInt(amount) });
+                document.getElementById('water-modal').style.display = 'none';
+                document.getElementById('water-intake-modal-input').value = '';
+            }
         });
 
-        // --- INITIALIZATION ---
+        document.getElementById('log-weight-btn')?.addEventListener('click', async () => {
+            const weight = document.getElementById('weight-input').value;
+            if (weight) {
+                await addData('progress', { weight: parseFloat(weight) });
+                document.getElementById('weight-input').value = '';
+            }
+        });
+        document.getElementById('log-bodyfat-btn')?.addEventListener('click', async () => {
+            const bodyfat = document.getElementById('bodyfat-input').value;
+            if (bodyfat) {
+                await addData('progress', { bodyfat: parseFloat(bodyfat) });
+                document.getElementById('bodyfat-input').value = '';
+            }
+        });
+
+        document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); loginForm.style.display = 'none'; signupForm.style.display = 'block'; });
+        document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); signupForm.style.display = 'none'; loginForm.style.display = 'block'; });
+
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value, password = document.getElementById('login-password').value, errorEl = document.getElementById('login-error');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                errorEl.textContent = '';
+            } catch (error) { errorEl.textContent = error.message; }
+        });
+
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const email = document.getElementById('signup-email').value, password = document.getElementById('signup-password').value, errorEl = document.getElementById('signup-error');
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                errorEl.textContent = '';
+            } catch (error) { errorEl.textContent = error.message; }
+        });
+
+        document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
+
         document.addEventListener('DOMContentLoaded', () => {
-            showPage('dashboard');
             setMotivationalQuote();
-            authenticate();
         });
     </script>
 </body>
 </html>
+
