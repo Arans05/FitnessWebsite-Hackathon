@@ -93,9 +93,17 @@
       font-size: 1rem;
       font-weight: 600;
       transition: background-color 0.3s ease;
+      user-select: none;
     }
     button:hover {
       background-color: var(--secondary-color);
+    }
+    button.reset-btn {
+      background-color: #e74c3c;
+      margin-left: 10px;
+    }
+    button.reset-btn:hover {
+      background-color: #c0392b;
     }
     .progress-bar {
       width: 100%;
@@ -125,9 +133,26 @@
       padding: 0.4rem 0.7rem;
       border-bottom: 1px solid #eee;
       font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     li:last-child {
       border-bottom: none;
+    }
+    li button.delete-btn {
+      background: transparent;
+      border: none;
+      color: #e74c3c;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    li button.delete-btn:hover {
+      color: #c0392b;
     }
     .mood-options button {
       background: #eee;
@@ -138,6 +163,7 @@
       cursor: pointer;
       font-size: 1.3rem;
       transition: background-color 0.3s ease;
+      user-select: none;
     }
     .mood-options button.selected,
     .mood-options button:hover {
@@ -169,6 +195,7 @@
       <label for="water-input">Enter water intake (ml):</label>
       <input type="number" id="water-input" min="0" step="50" placeholder="e.g. 250" />
       <button id="add-water-btn">Add</button>
+      <button id="reset-water-btn" class="reset-btn">Reset</button>
       <div class="progress-bar" aria-label="Water intake progress">
         <div class="progress-fill" id="water-progress"></div>
       </div>
@@ -183,6 +210,7 @@
       <label for="workout-duration">Duration (minutes):</label>
       <input type="number" id="workout-duration" min="1" max="600" placeholder="e.g. 30" />
       <button id="add-workout-btn">Add Workout</button>
+      <button id="reset-workout-btn" class="reset-btn">Reset</button>
       <ul id="workout-list" aria-live="polite" aria-label="List of logged workouts"></ul>
     </section>
 
@@ -198,6 +226,7 @@
         <button type="button" aria-pressed="false" data-mood="😴" title="Tired">😴</button>
       </div>
       <button id="add-mood-btn" disabled>Add Mood</button>
+      <button id="reset-mood-btn" class="reset-btn">Reset</button>
       <ul id="mood-list" aria-live="polite" aria-label="Mood history"></ul>
     </section>
 
@@ -207,21 +236,39 @@
       <label for="goal-input">Set a fitness goal:</label>
       <input type="text" id="goal-input" placeholder="e.g. Run 5km, Drink 2L water daily" />
       <button id="set-goal-btn">Set Goal</button>
+      <button id="reset-goal-btn" class="reset-btn">Reset</button>
       <p><strong>Current Goal:</strong> <span id="current-goal">No goal set</span></p>
       <div class="quote" id="motivational-quote"></div>
     </section>
   </main>
 
   <script>
-    // Hydration Tracker
+    // Helper to check if it's a new day since last stored date
+    function isNewDay(lastDateStr) {
+      if (!lastDateStr) return true;
+      const lastDate = new Date(lastDateStr);
+      const today = new Date();
+      return lastDate.toDateString() !== today.toDateString();
+    }
+
+    // --- Hydration Tracker ---
     const waterInput = document.getElementById('water-input');
     const addWaterBtn = document.getElementById('add-water-btn');
+    const resetWaterBtn = document.getElementById('reset-water-btn');
     const waterTotalEl = document.getElementById('water-total');
     const waterProgress = document.getElementById('water-progress');
     const DAILY_WATER_GOAL = 2000; // 2000 ml daily goal
 
-    // Load hydration from localStorage or start at 0
-    let waterTotal = parseInt(localStorage.getItem('waterTotal')) || 0;
+    // Load hydration from localStorage or reset if new day
+    const lastWaterDate = localStorage.getItem('waterDate');
+    let waterTotal = 0;
+    if (isNewDay(lastWaterDate)) {
+      waterTotal = 0;
+      localStorage.setItem('waterTotal', waterTotal);
+      localStorage.setItem('waterDate', new Date().toISOString());
+    } else {
+      waterTotal = parseInt(localStorage.getItem('waterTotal')) || 0;
+    }
 
     function updateWaterUI() {
       waterTotalEl.textContent = waterTotal;
@@ -237,16 +284,27 @@
       }
       waterTotal += intake;
       localStorage.setItem('waterTotal', waterTotal);
+      localStorage.setItem('waterDate', new Date().toISOString());
       updateWaterUI();
       waterInput.value = '';
     });
 
+    resetWaterBtn.addEventListener('click', () => {
+      if (confirm('Reset hydration data?')) {
+        waterTotal = 0;
+        localStorage.removeItem('waterTotal');
+        localStorage.removeItem('waterDate');
+        updateWaterUI();
+      }
+    });
+
     updateWaterUI();
 
-    // Workout Log
+    // --- Workout Log ---
     const workoutTypeInput = document.getElementById('workout-type');
     const workoutDurationInput = document.getElementById('workout-duration');
     const addWorkoutBtn = document.getElementById('add-workout-btn');
+    const resetWorkoutBtn = document.getElementById('reset-workout-btn');
     const workoutList = document.getElementById('workout-list');
 
     let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
@@ -259,7 +317,19 @@
       }
       workouts.forEach((w, i) => {
         const li = document.createElement('li');
-        li.textContent = `${w.type} — ${w.duration} min`;
+        li.textContent = `${w.type} — ${w.duration} min — ${w.date}`;
+        
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
+        delBtn.className = 'delete-btn';
+        delBtn.title = 'Delete workout';
+        delBtn.addEventListener('click', () => {
+          workouts.splice(i, 1);
+          localStorage.setItem('workouts', JSON.stringify(workouts));
+          renderWorkouts();
+        });
+        li.appendChild(delBtn);
+        
         workoutList.appendChild(li);
       });
     }
@@ -275,22 +345,44 @@
         alert('Please enter a positive workout duration.');
         return;
       }
-      workouts.push({ type, duration });
+      workouts.push({ 
+        type, 
+        duration, 
+        date: new Date().toLocaleString()
+      });
       localStorage.setItem('workouts', JSON.stringify(workouts));
       renderWorkouts();
       workoutTypeInput.value = '';
       workoutDurationInput.value = '';
     });
 
+    resetWorkoutBtn.addEventListener('click', () => {
+      if (confirm('Reset workout logs?')) {
+        workouts = [];
+        localStorage.removeItem('workouts');
+        renderWorkouts();
+      }
+    });
+
     renderWorkouts();
 
-    // Mood Journal
+    // --- Mood Journal ---
     const moodButtons = document.querySelectorAll('.mood-options button');
     const addMoodBtn = document.getElementById('add-mood-btn');
+    const resetMoodBtn = document.getElementById('reset-mood-btn');
     const moodList = document.getElementById('mood-list');
 
     let selectedMood = null;
-    let moods = JSON.parse(localStorage.getItem('moods')) || [];
+    // Load moods from localStorage or reset if new day
+    const lastMoodDate = localStorage.getItem('moodDate');
+    let moods = [];
+    if (isNewDay(lastMoodDate)) {
+      moods = [];
+      localStorage.setItem('moods', JSON.stringify(moods));
+      localStorage.setItem('moodDate', new Date().toISOString());
+    } else {
+      moods = JSON.parse(localStorage.getItem('moods')) || [];
+    }
 
     moodButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -307,9 +399,10 @@
 
     addMoodBtn.addEventListener('click', () => {
       if (!selectedMood) return;
-      const now = new Date().toLocaleDateString();
+      const now = new Date().toLocaleString();
       moods.push({ mood: selectedMood, date: now });
       localStorage.setItem('moods', JSON.stringify(moods));
+      localStorage.setItem('moodDate', new Date().toISOString());
       renderMoods();
       selectedMood = null;
       addMoodBtn.disabled = true;
@@ -319,24 +412,46 @@
       });
     });
 
+    resetMoodBtn.addEventListener('click', () => {
+      if (confirm('Reset mood journal?')) {
+        moods = [];
+        localStorage.removeItem('moods');
+        localStorage.removeItem('moodDate');
+        renderMoods();
+      }
+    });
+
     function renderMoods() {
       moodList.innerHTML = '';
       if (moods.length === 0) {
         moodList.innerHTML = '<li>No moods logged yet.</li>';
         return;
       }
-      moods.forEach(entry => {
+      moods.forEach((entry, i) => {
         const li = document.createElement('li');
         li.textContent = `${entry.date} — ${entry.mood}`;
+        
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
+        delBtn.className = 'delete-btn';
+        delBtn.title = 'Delete mood entry';
+        delBtn.addEventListener('click', () => {
+          moods.splice(i, 1);
+          localStorage.setItem('moods', JSON.stringify(moods));
+          renderMoods();
+        });
+        li.appendChild(delBtn);
+        
         moodList.appendChild(li);
       });
     }
 
     renderMoods();
 
-    // Goals & Motivational Quotes
+    // --- Goals & Motivational Quotes ---
     const goalInput = document.getElementById('goal-input');
     const setGoalBtn = document.getElementById('set-goal-btn');
+    const resetGoalBtn = document.getElementById('reset-goal-btn');
     const currentGoalEl = document.getElementById('current-goal');
     const quoteEl = document.getElementById('motivational-quote');
 
@@ -372,6 +487,14 @@
       localStorage.setItem('fitnessGoal', currentGoal);
       updateGoalUI();
       goalInput.value = '';
+    });
+
+    resetGoalBtn.addEventListener('click', () => {
+      if (confirm('Clear current goal?')) {
+        currentGoal = null;
+        localStorage.removeItem('fitnessGoal');
+        updateGoalUI();
+      }
     });
 
     updateGoalUI();
