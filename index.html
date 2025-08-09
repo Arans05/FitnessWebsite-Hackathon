@@ -36,10 +36,10 @@
         .dark {
             color-scheme: dark;
         }
-        .page-content, #app-container {
+        .page-content, #app-container, #loading-overlay {
             display: none;
         }
-        .page-content.active, #app-container.active {
+        .page-content.active, #app-container.active, #loading-overlay.active {
             display: block;
         }
         #login-container.active {
@@ -54,9 +54,27 @@
         .progress-bar {
             @apply h-full rounded-full transition-all duration-500 ease-out;
         }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-[#0f172a] text-white">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 z-50 bg-black/80 flex flex-col justify-center items-center">
+        <div class="spinner"></div>
+        <p class="text-white mt-4">Loading your data...</p>
+    </div>
 
     <!-- Login/Signup Container -->
     <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 active">
@@ -333,6 +351,7 @@
         
         const loginContainer = document.getElementById('login-container');
         const appContainer = document.getElementById('app-container');
+        const loadingOverlay = document.getElementById('loading-overlay');
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
 
@@ -352,16 +371,19 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                console.log("Auth state changed: User is logged in. UID:", user.uid);
                 userId = user.uid;
-                loginContainer.classList.remove('active');
-                appContainer.classList.add('active');
+                loadingOverlay.classList.add('active');
+                
                 document.getElementById('user-email-display').textContent = user.email;
-                showPage('dashboard');
                 setupFirestoreListeners();
             } else {
+                console.log("Auth state changed: User is logged out.");
                 userId = null;
                 appContainer.classList.remove('active');
                 loginContainer.classList.add('active');
+                loadingOverlay.classList.remove('active');
+
                 if (unsubscribeWorkout) unsubscribeWorkout();
                 if (unsubscribeProgress) unsubscribeProgress();
                 if (unsubscribeNutrition) unsubscribeNutrition();
@@ -371,29 +393,56 @@
 
         function setupFirestoreListeners() {
             if (!userId) return;
-            const commonErrorHandler = (error) => console.error("Firestore error:", error);
+            console.log("Setting up Firestore listeners...");
+
+            const commonErrorHandler = (error) => {
+                console.error("Firestore permission error:", error);
+                loadingOverlay.classList.remove('active');
+                alert("Error: Could not load data. Please check your Firestore rules and database setup.");
+            };
+
+            let listenersAttached = 0;
+            const totalListeners = 4;
+            const onListenerAttached = () => {
+                listenersAttached++;
+                if (listenersAttached === totalListeners) {
+                    console.log("All Firestore listeners attached successfully. Showing app.");
+                    loginContainer.classList.remove('active');
+                    appContainer.classList.add('active');
+                    loadingOverlay.classList.remove('active');
+                    showPage('dashboard');
+                }
+            };
 
             const workoutQuery = query(collection(db, "users", userId, "workouts"), orderBy("timestamp", "desc"));
             unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
+                console.log("Received workout data.");
                 const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderWorkouts(workouts);
                 updateDashboardWorkouts(workouts);
                 renderWeeklyWorkoutChart(workouts);
+                onListenerAttached();
             }, commonErrorHandler);
 
             const progressQuery = query(collection(db, "users", userId, "progress"), orderBy("timestamp"));
             unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
+                console.log("Received progress data.");
                 renderProgressCharts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                onListenerAttached();
             }, commonErrorHandler);
 
             const nutritionQuery = query(collection(db, "users", userId, "nutrition"), orderBy("timestamp", "desc"));
             unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
+                console.log("Received nutrition data.");
                 renderMeals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                onListenerAttached();
             }, commonErrorHandler);
             
             const waterQuery = query(collection(db, "users", userId, "water"), orderBy("timestamp", "desc"));
             unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
+                console.log("Received water data.");
                 updateWaterIntake(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                onListenerAttached();
             }, commonErrorHandler);
         }
         
@@ -536,18 +585,26 @@
 
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value, password = document.getElementById('login-password').value, errorEl = document.getElementById('login-error');
+            errorEl.textContent = '';
+            loadingOverlay.classList.add('active');
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                errorEl.textContent = '';
-            } catch (error) { errorEl.textContent = error.message; }
+            } catch (error) { 
+                errorEl.textContent = error.message; 
+                loadingOverlay.classList.remove('active');
+            }
         });
 
         document.getElementById('signup-btn').addEventListener('click', async () => {
             const email = document.getElementById('signup-email').value, password = document.getElementById('signup-password').value, errorEl = document.getElementById('signup-error');
+            errorEl.textContent = '';
+            loadingOverlay.classList.add('active');
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
-                errorEl.textContent = '';
-            } catch (error) { errorEl.textContent = error.message; }
+            } catch (error) { 
+                errorEl.textContent = error.message; 
+                loadingOverlay.classList.remove('active');
+            }
         });
 
         document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
@@ -557,3 +614,4 @@
         });
     </script>
 </body>
+</html>
