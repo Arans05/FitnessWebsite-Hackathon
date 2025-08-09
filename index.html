@@ -59,7 +59,7 @@
 <body class="bg-[#0f172a] text-white">
 
     <!-- Login/Signup Container -->
-    <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4">
+    <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 active">
         <div class="w-full max-w-md">
             <h1 class="text-4xl font-bold text-center mb-8 text-white">Fitness Tracker</h1>
             <!-- Login Form -->
@@ -372,9 +372,8 @@
         function setupFirestoreListeners() {
             if (!userId) return;
             const commonErrorHandler = (error) => console.error("Firestore error:", error);
-            const firestoreAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-            const workoutQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
+            const workoutQuery = query(collection(db, "users", userId, "workouts"), orderBy("timestamp", "desc"));
             unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
                 const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderWorkouts(workouts);
@@ -382,17 +381,17 @@
                 renderWeeklyWorkoutChart(workouts);
             }, commonErrorHandler);
 
-            const progressQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/progress`), orderBy("timestamp"));
+            const progressQuery = query(collection(db, "users", userId, "progress"), orderBy("timestamp"));
             unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
                 renderProgressCharts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, commonErrorHandler);
 
-            const nutritionQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
+            const nutritionQuery = query(collection(db, "users", userId, "nutrition"), orderBy("timestamp", "desc"));
             unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
                 renderMeals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, commonErrorHandler);
             
-            const waterQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/water`), orderBy("timestamp", "desc"));
+            const waterQuery = query(collection(db, "users", userId, "water"), orderBy("timestamp", "desc"));
             unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
                 updateWaterIntake(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, commonErrorHandler);
@@ -481,9 +480,8 @@
 
         const addData = async (collectionName, data) => {
             if (!userId) { console.error("User not authenticated."); return; }
-            const firestoreAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             try {
-                await addDoc(collection(db, `artifacts/${firestoreAppId}/users/${userId}/${collectionName}`), { ...data, timestamp: serverTimestamp() });
+                await addDoc(collection(db, "users", userId, collectionName), { ...data, timestamp: serverTimestamp() });
             } catch (e) { console.error(`Error adding ${collectionName}:`, e); }
         };
 
@@ -559,5 +557,5 @@
         });
     </script>
 </body>
-</html>
+</ht
 
