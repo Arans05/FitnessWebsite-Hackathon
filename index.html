@@ -294,7 +294,15 @@
                 <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
-                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <select id="workout-type-select" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                    <option>Cardio</option>
+                    <option>Strength</option>
+                    <option>Yoga</option>
+                    <option>Running</option>
+                    <option>Walking</option>
+                    <option>Jogging</option>
+                    <option>Swimming</option>
+                </select>
                 <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
                 <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"></textarea>
                 <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Workout</button>
