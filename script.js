@@ -29,11 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuCloseIcon = document.getElementById('mobile-menu-close-icon');
     const welcomeMessage = document.getElementById('welcome-message');
     const motivationalQuoteEl = document.getElementById('motivational-quote');
+    const workoutModal = document.getElementById('workout-modal');
+    const mealModal = document.getElementById('meal-modal');
+    const waterModal = document.getElementById('water-modal');
 
     const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
     let userId = null;
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress;
-    let weightChart, bodyfatChart;
+    let weightChart, bodyfatChart, macroChart;
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -104,8 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
         unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
-            const meals = snapshot.docs.map(doc => doc.data());
+            const meals = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            renderMeals(meals);
             updateDashboardCalories(meals);
+            renderMacroChart(meals);
         });
 
         const waterQuery = query(collection(db, "users", userId, "water"));
@@ -137,6 +142,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tr>`).join('');
     }
 
+    function renderMeals(meals) {
+        const mealListEl = document.getElementById('meal-list');
+        if (!mealListEl) return;
+        const todayMeals = meals.filter(m => new Date(m.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+            .sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+
+        mealListEl.innerHTML = todayMeals.length === 0
+            ? `<li class="text-gray-500">No meals logged today.</li>`
+            : todayMeals.map(m => `
+                <li class="p-4 rounded-md bg-gray-700">
+                    <p class="font-semibold text-white">${m.name}</p>
+                    <p class="text-sm text-gray-400">${m.calories} kcal - P:${m.protein}g, C:${m.carbs}g, F:${m.fat}g</p>
+                </li>`).join('');
+    }
+
     function renderProgressCharts(progressData) {
         const weightData = progressData.filter(d => d.weight).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
         const bodyfatData = progressData.filter(d => d.bodyfat).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
@@ -159,6 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
         bodyfatChart = new Chart(bodyfatCtx, {
             type: 'line',
             data: { labels: bodyfatLabels, datasets: [{ label: 'Body Fat %', data: bodyfatValues, borderColor: 'rgb(239, 68, 68)', tension: 0.1 }] }
+        });
+    }
+    
+    function renderMacroChart(meals) {
+        const todayMeals = meals.filter(m => new Date(m.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
+        const totalProtein = todayMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
+        const totalCarbs = todayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+        const totalFat = todayMeals.reduce((sum, m) => sum + (m.fat || 0), 0);
+
+        if (macroChart) macroChart.destroy();
+        const macroCtx = document.getElementById('macro-chart').getContext('2d');
+        macroChart = new Chart(macroCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Protein (g)', 'Carbs (g)', 'Fat (g)'],
+                datasets: [{
+                    data: [totalProtein, totalCarbs, totalFat],
+                    backgroundColor: ['rgb(59, 130, 246)', 'rgb(239, 68, 68)', 'rgb(251, 191, 36)'],
+                }]
+            }
         });
     }
 
@@ -265,16 +305,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    setupModal(['add-meal-btn'], 'meal-modal', 'close-meal-modal-btn', 'save-meal-btn', async () => {
+    setupModal(['add-meal-btn', 'add-meal-page-btn'], 'meal-modal', 'close-meal-modal-btn', 'save-meal-btn', async () => {
         if (!userId) return;
         const name = document.getElementById('meal-name-input').value;
         const calories = document.getElementById('meal-calories-input').value;
+        const protein = document.getElementById('meal-protein-input').value;
+        const carbs = document.getElementById('meal-carbs-input').value;
+        const fat = document.getElementById('meal-fat-input').value;
 
-        if (name && calories) {
+        if (name && calories && protein && carbs && fat) {
             try {
-                await addDoc(collection(db, "users", userId, "nutrition"), { name, calories: parseInt(calories), timestamp: serverTimestamp() });
+                await addDoc(collection(db, "users", userId, "nutrition"), { 
+                    name, 
+                    calories: parseInt(calories), 
+                    protein: parseInt(protein),
+                    carbs: parseInt(carbs),
+                    fat: parseInt(fat),
+                    timestamp: serverTimestamp() 
+                });
                 document.getElementById('meal-name-input').value = '';
                 document.getElementById('meal-calories-input').value = '';
+                document.getElementById('meal-protein-input').value = '';
+                document.getElementById('meal-carbs-input').value = '';
+                document.getElementById('meal-fat-input').value = '';
                 document.getElementById('meal-modal').style.display = 'none';
             } catch (error) { console.error("Error adding meal:", error); }
         }
