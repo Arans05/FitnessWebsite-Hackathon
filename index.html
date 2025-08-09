@@ -215,6 +215,31 @@
             </div>
         </div>
     </div>
+    <div id="meal-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log New Meal</h3>
+                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <input type="number" id="meal-calories-input" placeholder="Calories" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Meal</button>
+            </div>
+        </div>
+    </div>
+    <div id="water-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log Water Intake</h3>
+                <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="number" id="water-amount-input" placeholder="Amount (oz)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Water</button>
+            </div>
+        </div>
+    </div>
     
     <!-- JavaScript -->
     <script src="script.js" type="module"></script>
