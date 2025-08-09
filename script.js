@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, query, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
@@ -17,6 +17,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
     const userEmailDisplay = document.getElementById('user-email-display');
@@ -28,15 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuCloseIcon = document.getElementById('mobile-menu-close-icon');
     const welcomeMessage = document.getElementById('welcome-message');
     const motivationalQuoteEl = document.getElementById('motivational-quote');
-    const workoutModal = document.getElementById('workout-modal');
-    const mealModal = document.getElementById('meal-modal');
-    const waterModal = document.getElementById('water-modal');
 
     const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
     let userId = null;
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress;
     let weightChart, bodyfatChart;
 
+    // --- Page Navigation ---
     function showPage(pageId) {
         pages.forEach(page => {
             document.getElementById(`${page}-content`).classList.remove('active');
@@ -67,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showPage('dashboard');
     });
 
+    // --- Authentication ---
     onAuthStateChanged(auth, (user) => {
         if (user) {
             userId = user.uid;
@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Firestore Listeners ---
     function setupListeners() {
         if (!userId) return;
         
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Rendering Functions ---
     function renderWorkouts(workouts) {
         const workoutListEl = document.getElementById('workout-list');
         if (!workoutListEl) return;
@@ -136,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderProgressCharts(progressData) {
-        const weightData = progressData.filter(d => d.weight);
-        const bodyfatData = progressData.filter(d => d.bodyfat);
+        const weightData = progressData.filter(d => d.weight).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+        const bodyfatData = progressData.filter(d => d.bodyfat).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
         const weightLabels = weightData.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString());
         const weightValues = weightData.map(d => d.weight);
@@ -149,39 +151,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const weightCtx = document.getElementById('weight-chart').getContext('2d');
         weightChart = new Chart(weightCtx, {
             type: 'line',
-            data: {
-                labels: weightLabels,
-                datasets: [{
-                    label: 'Weight (lbs)',
-                    data: weightValues,
-                    borderColor: 'rgb(59, 130, 246)',
-                    tension: 0.1
-                }]
-            }
+            data: { labels: weightLabels, datasets: [{ label: 'Weight (lbs)', data: weightValues, borderColor: 'rgb(59, 130, 246)', tension: 0.1 }] }
         });
 
         if (bodyfatChart) bodyfatChart.destroy();
         const bodyfatCtx = document.getElementById('bodyfat-chart').getContext('2d');
         bodyfatChart = new Chart(bodyfatCtx, {
             type: 'line',
-            data: {
-                labels: bodyfatLabels,
-                datasets: [{
-                    label: 'Body Fat %',
-                    data: bodyfatValues,
-                    borderColor: 'rgb(239, 68, 68)',
-                    tension: 0.1
-                }]
-            }
+            data: { labels: bodyfatLabels, datasets: [{ label: 'Body Fat %', data: bodyfatValues, borderColor: 'rgb(239, 68, 68)', tension: 0.1 }] }
         });
     }
 
     function updateDashboardWorkouts(workouts) {
         const statusEl = document.getElementById('workout-status');
         if (!statusEl) return;
-
         const todayWorkouts = workouts.filter(w => new Date(w.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
-
         if (todayWorkouts.length > 0) {
             const totalDuration = todayWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
             statusEl.textContent = `Yes (${totalDuration} min)`;
@@ -201,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = logs
             .filter(l => new Date(l.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
             .reduce((sum, l) => sum + (l.amount || 0), 0);
-        
         document.getElementById('water-intake').textContent = `${total} / 64 oz`;
     }
 
@@ -212,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- UI Event Listeners ---
     document.getElementById('user-menu-button').addEventListener('click', () => {
         profileDropdown.classList.toggle('hidden');
     });
@@ -251,18 +235,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
     document.getElementById('sign-out-btn-mobile').addEventListener('click', () => signOut(auth));
 
-    // Modal Handling
-    document.getElementById('log-workout-btn').addEventListener('click', () => workoutModal.style.display = 'flex');
-    document.getElementById('add-workout-page-btn').addEventListener('click', () => workoutModal.style.display = 'flex');
-    document.getElementById('close-workout-modal-btn').addEventListener('click', () => workoutModal.style.display = 'none');
-    
-    document.getElementById('add-meal-btn').addEventListener('click', () => mealModal.style.display = 'flex');
-    document.getElementById('close-meal-modal-btn').addEventListener('click', () => mealModal.style.display = 'none');
+    // --- Modal Handling ---
+    function setupModal(openBtnIds, modalId, closeBtnId, saveBtnId, saveAction) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
 
-    document.getElementById('add-water-btn').addEventListener('click', () => waterModal.style.display = 'flex');
-    document.getElementById('close-water-modal-btn').addEventListener('click', () => waterModal.style.display = 'none');
+        openBtnIds.forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => modal.style.display = 'flex');
+        });
 
-    document.getElementById('save-workout-btn').addEventListener('click', async () => {
+        document.getElementById(closeBtnId)?.addEventListener('click', () => modal.style.display = 'none');
+        document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
+    }
+
+    setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
         if (!userId) return;
         const type = document.getElementById('workout-type-input').value;
         const duration = document.getElementById('workout-duration-input').value;
@@ -270,90 +256,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (type && duration) {
             try {
-                await addDoc(collection(db, "users", userId, "workouts"), {
-                    type,
-                    duration: parseInt(duration),
-                    notes,
-                    timestamp: serverTimestamp()
-                });
+                await addDoc(collection(db, "users", userId, "workouts"), { type, duration: parseInt(duration), notes, timestamp: serverTimestamp() });
                 document.getElementById('workout-type-input').value = '';
                 document.getElementById('workout-duration-input').value = '';
                 document.getElementById('workout-notes-input').value = '';
-                workoutModal.style.display = 'none';
-            } catch (error) {
-                console.error("Error adding workout:", error);
-            }
+                document.getElementById('workout-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding workout:", error); }
         }
     });
 
-    document.getElementById('save-meal-btn').addEventListener('click', async () => {
+    setupModal(['add-meal-btn'], 'meal-modal', 'close-meal-modal-btn', 'save-meal-btn', async () => {
         if (!userId) return;
         const name = document.getElementById('meal-name-input').value;
         const calories = document.getElementById('meal-calories-input').value;
 
         if (name && calories) {
             try {
-                await addDoc(collection(db, "users", userId, "nutrition"), {
-                    name,
-                    calories: parseInt(calories),
-                    timestamp: serverTimestamp()
-                });
+                await addDoc(collection(db, "users", userId, "nutrition"), { name, calories: parseInt(calories), timestamp: serverTimestamp() });
                 document.getElementById('meal-name-input').value = '';
                 document.getElementById('meal-calories-input').value = '';
-                mealModal.style.display = 'none';
-            } catch (error) {
-                console.error("Error adding meal:", error);
-            }
+                document.getElementById('meal-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding meal:", error); }
         }
     });
 
-    document.getElementById('save-water-btn').addEventListener('click', async () => {
+    setupModal(['add-water-btn'], 'water-modal', 'close-water-modal-btn', 'save-water-btn', async () => {
         if (!userId) return;
         const amount = document.getElementById('water-amount-input').value;
 
         if (amount) {
             try {
-                await addDoc(collection(db, "users", userId, "water"), {
-                    amount: parseInt(amount),
-                    timestamp: serverTimestamp()
-                });
+                await addDoc(collection(db, "users", userId, "water"), { amount: parseInt(amount), timestamp: serverTimestamp() });
                 document.getElementById('water-amount-input').value = '';
-                waterModal.style.display = 'none';
-            } catch (error) {
-                console.error("Error adding water:", error);
-            }
+                document.getElementById('water-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding water:", error); }
         }
     });
 
-    document.getElementById('log-weight-btn').addEventListener('click', async () => {
+    document.getElementById('log-weight-btn')?.addEventListener('click', async () => {
         if (!userId) return;
         const weight = document.getElementById('weight-input').value;
         if (weight) {
             try {
-                await addDoc(collection(db, "users", userId, "progress"), {
-                    weight: parseFloat(weight),
-                    timestamp: serverTimestamp()
-                });
+                await addDoc(collection(db, "users", userId, "progress"), { weight: parseFloat(weight), timestamp: serverTimestamp() });
                 document.getElementById('weight-input').value = '';
-            } catch (error) {
-                console.error("Error logging weight:", error);
-            }
+            } catch (error) { console.error("Error logging weight:", error); }
         }
     });
 
-    document.getElementById('log-bodyfat-btn').addEventListener('click', async () => {
+    document.getElementById('log-bodyfat-btn')?.addEventListener('click', async () => {
         if (!userId) return;
         const bodyfat = document.getElementById('bodyfat-input').value;
         if (bodyfat) {
             try {
-                await addDoc(collection(db, "users", userId, "progress"), {
-                    bodyfat: parseFloat(bodyfat),
-                    timestamp: serverTimestamp()
-                });
+                await addDoc(collection(db, "users", userId, "progress"), { bodyfat: parseFloat(bodyfat), timestamp: serverTimestamp() });
                 document.getElementById('bodyfat-input').value = '';
-            } catch (error) {
-                console.error("Error logging body fat:", error);
-            }
+            } catch (error) { console.error("Error logging body fat:", error); }
         }
     });
 });
