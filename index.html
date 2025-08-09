@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fitness & Wellness Tracker</title>
+  <style>
+    :root {
+      --primary-color: #2e8b57;
+      --secondary-color: #4caf50;
+      --background-color: #f9f9f9;
+      --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --text-color: #333;
+      --accent-color: #82c91e;
+      --border-radius: 8px;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: var(--font-family);
+      background: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0 1rem 3rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    header {
+      text-align: center;
+      margin: 2rem 0 1rem;
+    }
+    header h1 {
+      margin-bottom: 0.3rem;
+      color: var(--primary-color);
+    }
+    header p {
+      font-size: 1.1rem;
+      color: #666;
+    }
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    section {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
+    }
+    h2 {
+      color: var(--secondary-color);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+    input[type="number"],
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-family: var(--font-family);
+      transition: border-color 0.3s ease;
+    }
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: var(--secondary-color);
+    }
+    .progress-bar {
+      width: 100%;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 20px;
+      margin-bottom: 1rem;
+    }
+    .progress-fill {
+      background: var(--accent-color);
+      height: 100%;
+      width: 0;
+      transition: width 0.5s ease;
+      border-radius: 10px 0 0 10px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    li {
+      padding: 0.4rem 0.7rem;
+      border-bottom: 1px solid #eee;
+      font-size: 0.95rem;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    .mood-options button {
+      background: #eee;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      margin: 0 0.3rem 0.5rem 0;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: background-color 0.3s ease;
+    }
+    .mood-options button.selected,
+    .mood-options button:hover {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+    .quote {
+      font-style: italic;
+      margin-top: 1rem;
+      text-align: center;
+      color: #555;
+    }
+    @media (max-width: 600px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fitness & Wellness Tracker</h1>
+    <p>Track your hydration, workouts, moods, and goals all in one place.</p>
+  </header>
+  <main>
+    <!-- Hydration Tracker -->
+    <section id="hydration-section">
+      <h2>Hydration Tracker</h2>
+      <label for="water-input">Enter water intake (ml):</label>
+      <input type="number" id="water-input" min="0" step="50" placeholder="e.g. 250" />
+      <button id="add-water-btn">Add</button>
+      <div class="progress-bar" aria-label="Water intake progress">
+        <div class="progress-fill" id="water-progress"></div>
+      </div>
+      <p><strong>Total today:</strong> <span id="water-total">0</span> ml</p>
+    </section>
+
+    <!-- Workout Log -->
+    <section id="workout-section">
+      <h2>Workout Log</h2>
+      <label for="workout-type">Workout type:</label>
+      <input type="text" id="workout-type" placeholder="e.g. Running, Yoga" />
+      <label for="workout-duration">Duration (minutes):</label>
+      <input type="number" id="workout-duration" min="1" max="600" placeholder="e.g. 30" />
+      <button id="add-workout-btn">Add Workout</button>
+      <ul id="workout-list" aria-live="polite" aria-label="List of logged workouts"></ul>
+    </section>
+
+    <!-- Mood Journal -->
+    <section id="mood-section">
+      <h2>Mood Journal</h2>
+      <p>Select your current mood:</p>
+      <div class="mood-options" role="radiogroup" aria-label="Mood selection">
+        <button type="button" aria-pressed="false" data-mood="😊" title="Happy">😊</button>
+        <button type="button" aria-pressed="false" data-mood="😐" title="Neutral">😐</button>
+        <button type="button" aria-pressed="false" data-mood="😔" title="Sad">😔</button>
+        <button type="button" aria-pressed="false" data-mood="😡" title="Angry">😡</button>
+        <button type="button" aria-pressed="false" data-mood="😴" title="Tired">😴</button>
+      </div>
+      <button id="add-mood-btn" disabled>Add Mood</button>
+      <ul id="mood-list" aria-live="polite" aria-label="Mood history"></ul>
+    </section>
+
+    <!-- Goals & Quotes -->
+    <section id="goals-section">
+      <h2>Goals & Motivational Quotes</h2>
+      <label for="goal-input">Set a fitness goal:</label>
+      <input type="text" id="goal-input" placeholder="e.g. Run 5km, Drink 2L water daily" />
+      <button id="set-goal-btn">Set Goal</button>
+      <p><strong>Current Goal:</strong> <span id="current-goal">No goal set</span></p>
+      <div class="quote" id="motivational-quote"></div>
+    </section>
+  </main>
+
+  <script>
+    // Hydration Tracker
+    const waterInput = document.getElementById('water-input');
+    const addWaterBtn = document.getElementById('add-water-btn');
+    const waterTotalEl = document.getElementById('water-total');
+    const waterProgress = document.getElementById('water-progress');
+    const DAILY_WATER_GOAL = 2000; // 2000 ml daily goal
+
+    // Load hydration from localStorage or start at 0
+    let waterTotal = parseInt(localStorage.getItem('waterTotal')) || 0;
+
+    function updateWaterUI() {
+      waterTotalEl.textContent = waterTotal;
+      let progressPercent = Math.min((waterTotal / DAILY_WATER_GOAL) * 100, 100);
+      waterProgress.style.width = progressPercent + '%';
+    }
+
+    addWaterBtn.addEventListener('click', () => {
+      let intake = parseInt(waterInput.value);
+      if (!intake || intake <= 0) {
+        alert('Please enter a positive number for water intake.');
+        return;
+      }
+      waterTotal += intake;
+      localStorage.setItem('waterTotal', waterTotal);
+      updateWaterUI();
+      waterInput.value = '';
+    });
+
+    updateWaterUI();
+
+    // Workout Log
+    const workoutTypeInput = document.getElementById('workout-type');
+    const workoutDurationInput = document.getElementById('workout-duration');
+    const addWorkoutBtn = document.getElementById('add-workout-btn');
+    const workoutList = document.getElementById('workout-list');
+
+    let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+
+    function renderWorkouts() {
+      workoutList.innerHTML = '';
+      if (workouts.length === 0) {
+        workoutList.innerHTML = '<li>No workouts logged yet.</li>';
+        return;
+      }
+      workouts.forEach((w, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${w.type} — ${w.duration} min`;
+        workoutList.appendChild(li);
+      });
+    }
+
+    addWorkoutBtn.addEventListener('click', () => {
+      const type = workoutTypeInput.value.trim();
+      const duration = parseInt(workoutDurationInput.value);
+      if (!type) {
+        alert('Please enter a workout type.');
+        return;
+      }
+      if (!duration || duration <= 0) {
+        alert('Please enter a positive workout duration.');
+        return;
+      }
+      workouts.push({ type, duration });
+      localStorage.setItem('workouts', JSON.stringify(workouts));
+      renderWorkouts();
+      workoutTypeInput.value = '';
+      workoutDurationInput.value = '';
+    });
+
+    renderWorkouts();
+
+    // Mood Journal
+    const moodButtons = document.querySelectorAll('.mood-options button');
+    const addMoodBtn = document.getElementById('add-mood-btn');
+    const moodList = document.getElementById('mood-list');
+
+    let selectedMood = null;
+    let moods = JSON.parse(localStorage.getItem('moods')) || [];
+
+    moodButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        moodButtons.forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('selected');
+        btn.setAttribute('aria-pressed', 'true');
+        selectedMood = btn.dataset.mood;
+        addMoodBtn.disabled = false;
+      });
+    });
+
+    addMoodBtn.addEventListener('click', () => {
+      if (!selectedMood) return;
+      const now = new Date().toLocaleDateString();
+      moods.push({ mood: selectedMood, date: now });
+      localStorage.setItem('moods', JSON.stringify(moods));
+      renderMoods();
+      selectedMood = null;
+      addMoodBtn.disabled = true;
+      moodButtons.forEach(b => {
+        b.classList.remove('selected');
+        b.setAttribute('aria-pressed', 'false');
+      });
+    });
+
+    function renderMoods() {
+      moodList.innerHTML = '';
+      if (moods.length === 0) {
+        moodList.innerHTML = '<li>No moods logged yet.</li>';
+        return;
+      }
+      moods.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.date} — ${entry.mood}`;
+        moodList.appendChild(li);
+      });
+    }
+
+    renderMoods();
+
+    // Goals & Motivational Quotes
+    const goalInput = document.getElementById('goal-input');
+    const setGoalBtn = document.getElementById('set-goal-btn');
+    const currentGoalEl = document.getElementById('current-goal');
+    const quoteEl = document.getElementById('motivational-quote');
+
+    let currentGoal = localStorage.getItem('fitnessGoal') || null;
+
+    const quotes = [
+      "The only bad workout is the one that didn't happen.",
+      "Push yourself because no one else is going to do it for you.",
+      "Don’t limit your challenges. Challenge your limits.",
+      "Sweat is fat crying.",
+      "Strive for progress, not perfection.",
+      "You don’t have to be great to start, but you have to start to be great.",
+      "Your body can stand almost anything. It’s your mind that you have to convince.",
+      "Fitness is not about being better than someone else. It’s about being better than you used to be."
+    ];
+
+    function updateGoalUI() {
+      currentGoalEl.textContent = currentGoal || 'No goal set';
+    }
+
+    function showRandomQuote() {
+      const idx = Math.floor(Math.random() * quotes.length);
+      quoteEl.textContent = `"${quotes[idx]}"`;
+    }
+
+    setGoalBtn.addEventListener('click', () => {
+      const goalText = goalInput.value.trim();
+      if (!goalText) {
+        alert('Please enter a goal.');
+        return;
+      }
+      currentGoal = goalText;
+      localStorage.setItem('fitnessGoal', currentGoal);
+      updateGoalUI();
+      goalInput.value = '';
+    });
+
+    updateGoalUI();
+    showRandomQuote();
+  </script>
+</body>
+</html>
