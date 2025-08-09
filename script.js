@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
-    const userDisplay = document.getElementById('user-display');
-    const userDisplayMobile = document.getElementById('user-display-mobile');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const userEmailDisplayMobile = document.getElementById('user-email-display-mobile');
     const profileDropdown = document.getElementById('profile-dropdown');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const profileSnap = await getDoc(doc(db, "profiles", userId));
             const username = profileSnap.data()?.username || user.email;
 
-            if (userDisplay) userDisplay.textContent = username;
-            if (userDisplayMobile) userDisplayMobile.textContent = username;
+            if (userEmailDisplay) userEmailDisplay.textContent = username;
+            if (userEmailDisplayMobile) userEmailDisplayMobile.textContent = username;
             if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
             
             loginContainer.classList.remove('active');
