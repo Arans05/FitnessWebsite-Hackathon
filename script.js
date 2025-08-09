@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
-    const userEmailDisplay = document.getElementById('user-email-display');
-    const userEmailDisplayMobile = document.getElementById('user-email-display-mobile');
+    const userDisplay = document.getElementById('user-display');
+    const userDisplayMobile = document.getElementById('user-display-mobile');
     const profileDropdown = document.getElementById('profile-dropdown');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -77,12 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Authentication ---
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
-            if (userEmailDisplay) userEmailDisplay.textContent = user.email;
-            if (userEmailDisplayMobile) userEmailDisplayMobile.textContent = user.email;
-            if (welcomeMessage) welcomeMessage.textContent = `Hi ${user.email}, here’s your summary today.`;
+            const profileSnap = await getDoc(doc(db, "profiles", userId));
+            const username = profileSnap.data()?.username || user.email;
+
+            if (userDisplay) userDisplay.textContent = username;
+            if (userDisplayMobile) userDisplayMobile.textContent = username;
+            if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
             
             loginContainer.classList.remove('active');
             appContainer.classList.add('active');
@@ -240,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         leaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
             <tr class="bg-gray-800 border-b border-gray-700">
                 <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
-                <td class="px-6 py-4">${p.email}</td>
+                <td class="px-6 py-4">${p.username || p.email}</td>
                 <td class="px-6 py-4">${p.workoutCount || 0}</td>
             </tr>
         `).join('');
@@ -393,7 +396,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function updateLeaderboard(workoutCount) {
         if (!userId) return;
         const profileRef = doc(db, "profiles", userId);
-        await setDoc(profileRef, { email: auth.currentUser.email, workoutCount }, { merge: true });
+        const profileSnap = await getDoc(profileRef);
+        const username = profileSnap.data()?.username || auth.currentUser.email;
+        await setDoc(profileRef, { username, workoutCount }, { merge: true });
     }
     
     function updateChallengeProgress(workouts) {
@@ -426,10 +431,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
     document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
 
-    const handleAuthAction = async (action, email, password, errorEl) => {
+    const handleAuthAction = async (action, email, password, errorEl, username) => {
         errorEl.textContent = '';
         try {
-            await action(auth, email, password);
+            const userCredential = await action(auth, email, password);
+            if (action === createUserWithEmailAndPassword) {
+                const userId = userCredential.user.uid;
+                await setDoc(doc(db, "profiles", userId), { username, email, workoutCount: 0 });
+            }
         } catch (error) { 
             errorEl.textContent = error.message; 
         }
@@ -443,10 +452,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('signup-btn').addEventListener('click', () => {
+        const username = document.getElementById('signup-username').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const errorEl = document.getElementById('signup-error');
-        handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl);
+        if (!username) {
+            errorEl.textContent = "Please enter a username.";
+            return;
+        }
+        handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl, username);
     });
 
     document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
