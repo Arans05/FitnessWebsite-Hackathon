@@ -376,13 +376,18 @@
                 loadingOverlay.classList.add('active');
                 document.getElementById('user-email-display').textContent = user.email;
                 
-                await initialDataLoad();
-                setupRealtimeListeners();
-
-                loginContainer.classList.remove('active');
-                appContainer.classList.add('active');
-                loadingOverlay.classList.remove('active');
-                showPage('dashboard');
+                const success = await loadAndRenderInitialData();
+                if (success) {
+                    setupRealtimeListeners();
+                    loginContainer.classList.remove('active');
+                    appContainer.classList.add('active');
+                    loadingOverlay.classList.remove('active');
+                    showPage('dashboard');
+                } else {
+                    loadingOverlay.classList.remove('active');
+                    alert("Failed to load your data. Please check your Firestore rules and ensure you are connected to the internet.");
+                    signOut(auth);
+                }
 
             } else {
                 console.log("Auth state changed: User is logged out.");
@@ -398,28 +403,58 @@
             }
         });
 
-        async function initialDataLoad() {
-            if (!userId) return;
-            console.log("Performing initial data load...");
+        async function loadAndRenderInitialData() {
+            if (!userId) return false;
+            console.log("Performing initial data load and render...");
             try {
-                const collections = ['workouts', 'progress', 'nutrition', 'water'];
-                const promises = collections.map(c => getDocs(query(collection(db, "users", userId, c))));
-                await Promise.all(promises);
-                console.log("Initial data load successful.");
+                const workoutsQuery = query(collection(db, "users", userId, "workouts"));
+                const progressQuery = query(collection(db, "users", userId, "progress"));
+                const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
+                const waterQuery = query(collection(db, "users", userId, "water"));
+
+                const [workoutsSnapshot, progressSnapshot, nutritionSnapshot, waterSnapshot] = await Promise.all([
+                    getDocs(workoutsQuery),
+                    getDocs(progressQuery),
+                    getDocs(nutritionQuery),
+                    getDocs(waterQuery)
+                ]);
+
+                console.log("All initial data fetched. Now rendering...");
+
+                const workouts = workoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderWorkouts(workouts);
+                updateDashboardWorkouts(workouts);
+                renderWeeklyWorkoutChart(workouts);
+
+                const progressData = progressSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+                renderProgressCharts(progressData);
+
+                const meals = nutritionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderMeals(meals);
+
+                const waterLogs = waterSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                updateWaterIntake(waterLogs);
+
+                console.log("Initial data rendered successfully.");
+                return true;
+
             } catch (error) {
                 console.error("Error during initial data load:", error);
-                alert("Could not load initial data. Please check Firestore rules.");
+                return false;
             }
         }
 
         function setupRealtimeListeners() {
             if (!userId) return;
-            console.log("Setting up Firestore real-time listeners...");
+            console.log("Setting up Firestore real-time listeners for updates...");
 
             const commonErrorHandler = (error) => console.error("Firestore listener error:", error);
 
-            const workoutQuery = query(collection(db, "users", userId, "workouts"));
-            unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
+            unsubscribeWorkout = onSnapshot(query(collection(db, "users", userId, "workouts")), (snapshot) => {
                 const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWorkouts(workouts);
@@ -427,22 +462,19 @@
                 renderWeeklyWorkoutChart(workouts);
             }, commonErrorHandler);
 
-            const progressQuery = query(collection(db, "users", userId, "progress"));
-            unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
+            unsubscribeProgress = onSnapshot(query(collection(db, "users", userId, "progress")), (snapshot) => {
                 const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
                 renderProgressCharts(progressData);
             }, commonErrorHandler);
 
-            const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
-            unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
+            unsubscribeNutrition = onSnapshot(query(collection(db, "users", userId, "nutrition")), (snapshot) => {
                 const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderMeals(meals);
             }, commonErrorHandler);
             
-            const waterQuery = query(collection(db, "users", userId, "water"));
-            unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
+            unsubscribeWater = onSnapshot(query(collection(db, "users", userId, "water")), (snapshot) => {
                 const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 updateWaterIntake(waterLogs);
@@ -617,4 +649,4 @@
         });
     </script>
 </body>
-</html>
+</ht
