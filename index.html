@@ -1,936 +1,580 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fitness & Wellness Tracker</title>
-  <!-- Use a modern, clean font and Tailwind CSS for styling -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Load Lucide icons for a cleaner visual style -->
-  <script src="https://unpkg.com/lucide@latest/dist/lucide.js"></script>
-  
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // Global variables for Firebase services
-    window.firebaseApp = initializeApp({});
-    window.auth = getAuth(window.firebaseApp);
-    window.db = getFirestore(window.firebaseApp);
-
-    // Initial authentication state check
-    onAuthStateChanged(window.auth, (user) => {
-      if (user) {
-        // User is signed in, show the main app
-        document.getElementById('login-page').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('user-email').textContent = user.email;
-        // Re-render all data for the signed-in user
-        renderWorkouts();
-        renderMeals();
-        renderSleepEntries();
-        renderMoods();
-      } else {
-        // User is signed out, show the login page
-        document.getElementById('login-page').classList.remove('hidden');
-        document.getElementById('main-app').classList.add('hidden');
-      }
-    });
-  </script>
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    /* Custom scrollbar for mood, workout, meal and sleep lists */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    .page-section {
-      display: none;
-    }
-    .page-section.active {
-      display: flex;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness App</title>
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            @apply bg-background text-foreground;
+        }
+        :root {
+            --background: 224 71.4% 4.1%;
+            --foreground: 210 20% 98%;
+            --card: 224 71.4% 4.1%;
+            --card-foreground: 210 20% 98%;
+            --popover: 224 71.4% 4.1%;
+            --popover-foreground: 210 20% 98%;
+            --primary: 210 20% 98%;
+            --primary-foreground: 220.9 39.3% 11%;
+            --secondary: 215 27.9% 16.9%;
+            --secondary-foreground: 210 20% 98%;
+            --muted: 215 27.9% 16.9%;
+            --muted-foreground: 217.9 10.6% 64.9%;
+            --accent: 215 27.9% 16.9%;
+            --accent-foreground: 210 20% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 20% 98%;
+            --border: 215 27.9% 16.9%;
+            --input: 215 27.9% 16.9%;
+            --ring: 217.9 10.6% 64.9%;
+            --radius: 0.5rem;
+        }
+        .dark {
+            color-scheme: dark;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 p-4 min-h-screen flex flex-col items-center">
+<body class="bg-[#0f172a] text-white">
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="flex flex-col w-64 bg-gray-900 border-r border-gray-800 p-4">
+            <h1 class="text-2xl font-bold mb-8 text-white">Fitness Tracker</h1>
+            <nav class="flex-grow">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" id="nav-dashboard" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-workouts" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m7.5 7.5 3.5-3.5"/><path d="m4.5 4.5 7 7"/></svg>
+                            Workouts
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-progress" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m16 16 3-3-6-6-3 3 6 6Z"/><path d="M7 21h10"/><path d="M10 21c-.5-4.5-2-9-6-12"/><path d="M14 21c.5-4.5 2-9 6-12"/><path d="M12 3v18"/></svg>
+                            Progress
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="nav-nutrition" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="M12 21a9 9 0 0 0 9-9c0-6.22-4.63-9-9-9s-9 2.78-9 9a9 9 0 0 0 9 9Z"/><path d="M8 12c0 2.21 1.79 4 4 4s4-1.79 4-4-1.79-4-4-4-4 1.79-4 4Z"/><path d="M16 12a4 4 0 0 0-4-4"/></svg>
+                            Nutrition
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div id="user-id-display" class="mt-8 text-xs text-gray-500 break-words">
+                <!-- User ID will be displayed here -->
+            </div>
+        </aside>
 
-  <!-- Login Page -->
-  <div id="login-page" class="w-full max-w-sm p-6 bg-white shadow-xl rounded-2xl flex flex-col gap-8 hidden">
-    <h2 class="text-3xl font-bold text-center text-emerald-600">Login / Sign Up</h2>
-    <div class="space-y-4">
-      <div>
-        <label for="login-email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-        <input type="email" id="login-email" placeholder="email@example.com"
-          class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
-      </div>
-      <div>
-        <label for="login-password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-        <input type="password" id="login-password" placeholder="********"
-          class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
-      </div>
-      <div class="flex gap-2">
-        <button id="login-btn"
-          class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
-          Login
-        </button>
-        <button id="signup-btn"
-          class="flex-1 bg-sky-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors">
-          Sign Up
-        </button>
-      </div>
+        <!-- Main Content Area -->
+        <main class="flex-grow p-8 overflow-y-auto">
+            <div id="dashboard-content" class="page-content" style="display: none;">
+                <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <!-- Progress Card -->
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold">Latest Progress</h3>
+                        </div>
+                        <p id="progress-summary" class="text-gray-400"></p>
+                    </div>
+                    <!-- Workout Card -->
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold">Last Workout</h3>
+                        </div>
+                        <p id="last-workout-summary" class="text-gray-400"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="workouts-content" class="page-content" style="display: none;">
+                <h2 class="text-3xl font-bold mb-6">Workout Tracker</h2>
+                <div class="mb-6">
+                    <button id="add-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
+                        Log New Workout
+                    </button>
+                </div>
+                <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                    <div class="relative w-full overflow-auto">
+                        <table class="w-full caption-bottom text-sm">
+                            <thead class="[&_tr]:border-b">
+                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Date</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Workout</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Duration</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workout-list">
+                                <!-- Workout rows will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="progress-content" class="page-content" style="display: none;">
+                <h2 class="text-3xl font-bold mb-6">Progress Tracker</h2>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <!-- Weight Progress Card -->
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <div class="flex flex-col space-y-1.5 p-6">
+                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Weight Progress</h3>
+                            <p class="text-sm text-muted-foreground">Track your weight over time.</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <canvas id="weight-chart" class="w-full h-80"></canvas>
+                        </div>
+                        <div class="flex items-center p-6 pt-0 space-x-2">
+                            <input type="number" id="weight-input" placeholder="Enter weight (lbs)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <button id="log-weight-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                                Log Weight
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Body Fat Progress Card -->
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <div class="flex flex-col space-y-1.5 p-6">
+                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Body Fat % Progress</h3>
+                            <p class="text-sm text-muted-foreground">Monitor your body fat percentage.</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <canvas id="bodyfat-chart" class="w-full h-80"></canvas>
+                        </div>
+                        <div class="flex items-center p-6 pt-0 space-x-2">
+                            <input type="number" id="bodyfat-input" placeholder="Enter body fat %" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <button id="log-bodyfat-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                                Log Body Fat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="nutrition-content" class="page-content" style="display: none;">
+                <h2 class="text-3xl font-bold mb-6">Nutrition Tracker</h2>
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6 col-span-2">
+                        <h3 class="text-xl font-semibold mb-4">Meal Logger</h3>
+                        <div class="flex flex-col space-y-4">
+                            <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <textarea id="meal-description-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                            <button id="log-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                                Log Meal
+                            </button>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <h3 class="text-xl font-semibold mb-4">Recent Meals</h3>
+                        <ul id="meal-list" class="space-y-2">
+                            <!-- Meal list items will be appended here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-  </div>
-  
-  <!-- Main Application Content (hidden until login) -->
-  <div id="main-app" class="w-full max-w-4xl p-6 bg-white shadow-xl rounded-2xl flex flex-col gap-8 hidden">
-    <header class="text-center mb-4">
-      <h1 class="text-4xl font-bold text-emerald-600 mb-2">Fitness & Wellness Tracker</h1>
-      <p class="text-slate-500 text-lg">
-        Logged in as: <span id="user-email" class="font-bold"></span>
-      </p>
-    </header>
 
-    <!-- Navigation Bar -->
-    <nav class="bg-slate-100 p-2 rounded-xl shadow-inner mb-4">
-      <ul class="flex flex-wrap justify-center gap-2 md:gap-4">
-        <li>
-          <a href="#" data-page="dashboard" class="nav-link bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors">
-            Dashboard
-          </a>
-        </li>
-        <li>
-          <a href="#" data-page="workout" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
-            Workout Log
-          </a>
-        </li>
-        <li>
-          <a href="#" data-page="meal" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
-            Meal Log
-          </a>
-        </li>
-        <li>
-          <a href="#" data-page="sleep" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
-            Sleep Tracker
-          </a>
-        </li>
-        <li>
-          <a href="#" data-page="mood" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
-            Mood Journal
-          </a>
-        </li>
-      </ul>
-      <button id="logout-btn" class="mt-4 w-full bg-red-500 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-red-600 transition-colors">
-        Logout
-      </button>
-    </nav>
-
-    <!-- Main content container for pages -->
-    <div class="flex flex-col gap-6">
-
-      <!-- Dashboard Page -->
-      <div id="page-dashboard" class="page-section active flex-col gap-6">
-        <h2 class="text-3xl font-bold text-slate-800 text-center mb-4">Dashboard</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Hydration Tracker section from previous code -->
-          <section id="hydration-section" class="bg-emerald-50 p-6 rounded-xl shadow-md">
-            <h2 class="text-2xl font-semibold text-emerald-700 mb-4 flex items-center gap-2">
-              <i data-lucide="droplet" class="text-emerald-500"></i>
-              Hydration Tracker
-            </h2>
-            <div class="space-y-4">
-              <div>
-                <label for="water-input" class="block text-sm font-medium text-slate-700 mb-1">Enter water intake (ml):</label>
-                <input type="number" id="water-input" min="0" step="50" placeholder="e.g. 250"
-                  class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
-              </div>
-              <div class="flex gap-2">
-                <button id="add-water-btn"
-                  class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
-                  Add Water
+    <!-- Modals -->
+    <!-- Workout Modal -->
+    <div id="workout-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log New Workout</h3>
+                <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
-                <button id="reset-water-btn"
-                  class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-                  Reset
-                </button>
-              </div>
             </div>
-            <div class="mt-4">
-              <div class="w-full bg-emerald-200 rounded-full h-4">
-                <div id="water-progress"
-                  class="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-in-out"
-                  style="width: 0%;"></div>
-              </div>
-              <p class="text-sm text-slate-500 mt-2">Daily goal: 2000 ml</p>
-              <p class="text-base font-medium mt-1">Total today: <span id="water-total" class="font-bold text-emerald-700">0</span> ml</p>
-            </div>
-          </section>
-
-          <!-- Goals & Quotes section from previous code -->
-          <section id="goals-section" class="bg-sky-50 p-6 rounded-xl shadow-md">
-            <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2">
-              <i data-lucide="target" class="text-sky-500"></i>
-              Goals & Quotes
-            </h2>
-            <div class="space-y-4">
-              <div>
-                <label for="goal-input" class="block text-sm font-medium text-slate-700 mb-1">Set a fitness goal:</label>
-                <input type="text" id="goal-input" placeholder="e.g. Run 5km, Drink 2L water daily"
-                  class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all" />
-              </div>
-              <div class="flex gap-2">
-                <button id="set-goal-btn"
-                  class="flex-1 bg-sky-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors">
-                  Set Goal
+            <div class="flex flex-col space-y-4">
+                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    Save Workout
                 </button>
-                <button id="reset-goal-btn"
-                  class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-                  Reset
-                </button>
-              </div>
-              <p class="text-sm font-medium text-slate-700">Current Goal:</p>
-              <p id="current-goal" class="text-base font-bold text-sky-700 p-3 bg-white rounded-md border border-sky-200">
-                No goal set
-              </p>
             </div>
-            <div id="motivational-quote" class="mt-6 p-4 bg-sky-100 rounded-md text-sky-800 italic text-center"></div>
-          </section>
         </div>
-      </div>
-
-      <!-- Workout Log Page -->
-      <div id="page-workout" class="page-section flex-col">
-        <!-- Workout Log section from previous code -->
-        <section id="workout-section" class="bg-violet-50 p-6 rounded-xl shadow-md">
-          <h2 class="text-2xl font-semibold text-violet-700 mb-4 flex items-center gap-2">
-            <i data-lucide="dumbbell" class="text-violet-500"></i>
-            Workout Log
-          </h2>
-          <div class="space-y-4">
-            <div>
-              <label for="workout-type" class="block text-sm font-medium text-slate-700 mb-1">Workout type:</label>
-              <input type="text" id="workout-type" placeholder="e.g. Running, Yoga"
-                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all" />
-            </div>
-            <div>
-              <label for="workout-duration" class="block text-sm font-medium text-slate-700 mb-1">Duration (minutes):</label>
-              <input type="number" id="workout-duration" min="1" max="600" placeholder="e.g. 30"
-                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all" />
-            </div>
-            <div class="flex gap-2">
-              <button id="add-workout-btn"
-                class="flex-1 bg-violet-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-colors">
-                Add Workout
-              </button>
-              <button id="reset-workout-btn"
-                class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-                Reset
-              </button>
-            </div>
-          </div>
-          <ul id="workout-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-        </section>
-      </div>
-
-      <!-- Meal Log Page -->
-      <div id="page-meal" class="page-section flex-col">
-        <!-- Meal Log section from previous code -->
-        <section id="meal-section" class="bg-orange-50 p-6 rounded-xl shadow-md">
-          <h2 class="text-2xl font-semibold text-orange-700 mb-4 flex items-center gap-2">
-            <i data-lucide="utensils" class="text-orange-500"></i>
-            Meal Log
-          </h2>
-          <div class="space-y-4">
-            <div>
-              <label for="meal-name" class="block text-sm font-medium text-slate-700 mb-1">Meal name:</label>
-              <input type="text" id="meal-name" placeholder="e.g. Lunch"
-                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" />
-            </div>
-            <div>
-              <label for="meal-calories" class="block text-sm font-medium text-slate-700 mb-1">Calories:</label>
-              <input type="number" id="meal-calories" min="1" placeholder="e.g. 500"
-                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" />
-            </div>
-            <div class="flex gap-2">
-              <button id="add-meal-btn"
-                class="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
-                Add Meal
-              </button>
-              <button id="reset-meal-btn"
-                class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-                Reset
-              </button>
-            </div>
-          </div>
-          <ul id="meal-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-        </section>
-      </div>
-
-      <!-- Sleep Tracker Page -->
-      <div id="page-sleep" class="page-section flex-col">
-        <!-- Sleep Tracker section from previous code -->
-        <section id="sleep-section" class="bg-blue-50 p-6 rounded-xl shadow-md">
-          <h2 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center gap-2">
-            <i data-lucide="moon" class="text-blue-500"></i>
-            Sleep Tracker
-          </h2>
-          <div class="space-y-4">
-            <div>
-              <label for="sleep-hours" class="block text-sm font-medium text-slate-700 mb-1">Hours slept:</label>
-              <input type="number" id="sleep-hours" min="1" max="24" step="0.5" placeholder="e.g. 8"
-                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
-            </div>
-            <div class="flex gap-2">
-              <button id="add-sleep-btn"
-                class="flex-1 bg-blue-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                Log Sleep
-              </button>
-              <button id="reset-sleep-btn"
-                class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-                Reset
-              </button>
-            </div>
-          </div>
-          <ul id="sleep-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-        </section>
-      </div>
-
-      <!-- Mood Journal Page -->
-      <div id="page-mood" class="page-section flex-col">
-        <!-- Mood Journal section from previous code -->
-        <section id="mood-section" class="bg-yellow-50 p-6 rounded-xl shadow-md">
-          <h2 class="text-2xl font-semibold text-yellow-700 mb-4 flex items-center gap-2">
-            <i data-lucide="smile" class="text-yellow-500"></i>
-            Mood Journal
-          </h2>
-          <p class="text-sm font-medium text-slate-700 mb-2">Select your current mood:</p>
-          <div class="flex flex-wrap gap-2 mb-4" role="radiogroup" aria-label="Mood selection">
-            <button type="button" data-mood="Happy"
-              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-              title="Happy">
-              😊
-            </button>
-            <button type="button" data-mood="Neutral"
-              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-              title="Neutral">
-              😐
-            </button>
-            <button type="button" data-mood="Sad"
-              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-              title="Sad">
-              😔
-            </button>
-            <button type="button" data-mood="Angry"
-              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-              title="Angry">
-              😡
-            </button>
-            <button type="button" data-mood="Tired"
-              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-              title="Tired">
-              😴
-            </button>
-          </div>
-          <div class="flex gap-2">
-            <button id="add-mood-btn"
-              class="flex-1 bg-yellow-600 text-white font-semibold py-2 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors">
-              Add Mood
-            </button>
-            <button id="reset-mood-btn"
-              class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-              Reset
-            </button>
-          </div>
-          <ul id="mood-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-        </section>
-      </div>
     </div>
+    
+    <script type="module">
+        // Import Firebase libraries from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { Chart, registerables } from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.min.js';
 
-    <!-- Custom Modal for Alerts and Confirmations -->
-    <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
-        <p id="modal-message" class="text-lg font-medium text-slate-800 mb-4"></p>
-        <div class="flex justify-end gap-2">
-          <button id="modal-cancel-btn" class="hidden bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md hover:bg-slate-400">
-            Cancel
-          </button>
-          <button id="modal-ok-btn" class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-emerald-700">
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+        Chart.register(...registerables);
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Initialize Lucide icons
-      lucide.createIcons();
+        // --- GLOBAL VARIABLES & FIREBASE SETUP ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-      // Custom Modal implementation to replace alert() and confirm()
-      const customModal = document.getElementById('custom-modal');
-      const modalMessage = document.getElementById('modal-message');
-      const modalOkBtn = document.getElementById('modal-ok-btn');
-      const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-      /**
-       * Shows a custom alert modal.
-       * @param {string} message The message to display.
-       */
-      function showAlert(message) {
-        modalMessage.textContent = message;
-        modalCancelBtn.classList.add('hidden');
-        customModal.classList.remove('hidden');
-        modalOkBtn.onclick = () => {
-          customModal.classList.add('hidden');
-        };
-      }
+        let userId = null;
+        let unsubscribeWorkout = null;
+        let unsubscribeProgress = null;
+        let unsubscribeNutrition = null;
+        let weightChart = null;
+        let bodyfatChart = null;
 
-      /**
-       * Shows a custom confirmation modal.
-       * @param {string} message The message to display.
-       * @returns {Promise<boolean>} A promise that resolves to true if 'OK' is clicked, false otherwise.
-       */
-      function showConfirm(message) {
-        return new Promise(resolve => {
-          modalMessage.textContent = message;
-          modalCancelBtn.classList.remove('hidden');
-          customModal.classList.remove('hidden');
+        // An array to store all pages
+        const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
 
-          modalOkBtn.onclick = () => {
-            customModal.classList.add('hidden');
-            resolve(true);
-          };
-          modalCancelBtn.onclick = () => {
-            customModal.classList.add('hidden');
-            resolve(false);
-          };
+        // --- DOM ELEMENTS ---
+        const pageContentElements = pages.reduce((acc, page) => {
+            acc[page] = document.getElementById(`${page}-content`);
+            return acc;
+        }, {});
+        const navLinks = pages.reduce((acc, page) => {
+            acc[page] = document.getElementById(`nav-${page}`);
+            return acc;
+        }, {});
+        
+        const workoutModal = document.getElementById('workout-modal');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const workoutListEl = document.getElementById('workout-list');
+        const mealListEl = document.getElementById('meal-list');
+        const progressSummaryEl = document.getElementById('progress-summary');
+        const lastWorkoutSummaryEl = document.getElementById('last-workout-summary');
+
+        // --- UI & PAGE NAVIGATION ---
+        function showPage(pageId) {
+            pages.forEach(page => {
+                if (page === pageId) {
+                    pageContentElements[page].style.display = 'block';
+                    navLinks[page].classList.add('bg-gray-700', 'text-white');
+                    navLinks[page].classList.remove('text-gray-400');
+                } else {
+                    pageContentElements[page].style.display = 'none';
+                    navLinks[page].classList.remove('bg-gray-700', 'text-white');
+                    navLinks[page].classList.add('text-gray-400');
+                }
+            });
+        }
+        
+        // Initial page load
+        window.addEventListener('load', () => {
+            showPage('dashboard');
         });
-      }
 
-      // Helper to check if it's a new day since last stored date
-      function isNewDay(lastDateStr) {
-        if (!lastDateStr) return true;
-        const lastDate = new Date(lastDateStr);
-        const today = new Date();
-        return lastDate.toDateString() !== today.toDateString();
-      }
-
-      // --- Firebase Authentication Logic ---
-      const loginEmailInput = document.getElementById('login-email');
-      const loginPasswordInput = document.getElementById('login-password');
-      const loginBtn = document.getElementById('login-btn');
-      const signupBtn = document.getElementById('signup-btn');
-      const logoutBtn = document.getElementById('logout-btn');
-
-      loginBtn.addEventListener('click', async () => {
-        const email = loginEmailInput.value;
-        const password = loginPasswordInput.value;
-        if (!email || !password) {
-          showAlert('Please enter both email and password.');
-          return;
+        // Add event listeners for navigation links
+        navLinks.dashboard.addEventListener('click', () => showPage('dashboard'));
+        navLinks.workouts.addEventListener('click', () => showPage('workouts'));
+        navLinks.progress.addEventListener('click', () => showPage('progress'));
+        navLinks.nutrition.addEventListener('click', () => showPage('nutrition'));
+        
+        // --- FIREBASE AUTHENTICATION ---
+        async function authenticate() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error signing in: ", error);
+            }
         }
-        try {
-          await signInWithEmailAndPassword(window.auth, email, password);
-        } catch (error) {
-          showAlert('Login failed: ' + error.message);
-        }
-      });
-
-      signupBtn.addEventListener('click', async () => {
-        const email = loginEmailInput.value;
-        const password = loginPasswordInput.value;
-        if (!email || !password) {
-          showAlert('Please enter both email and password.');
-          return;
-        }
-        try {
-          await createUserWithEmailAndPassword(window.auth, email, password);
-        } catch (error) {
-          showAlert('Sign up failed: ' + error.message);
-        }
-      });
-
-      logoutBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to log out?');
-        if (confirmed) {
-          await signOut(window.auth);
-          // Clear inputs after logout
-          loginEmailInput.value = '';
-          loginPasswordInput.value = '';
-          // Reset local storage for the next user
-          localStorage.clear();
-        }
-      });
-
-      // --- Page Navigation Logic ---
-      const pageSections = document.querySelectorAll('.page-section');
-      const navLinks = document.querySelectorAll('.nav-link');
-
-      function showPage(pageId) {
-        pageSections.forEach(section => {
-          section.classList.remove('active');
+        
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("User authenticated with UID:", userId);
+                userIdDisplay.textContent = `User ID: ${userId}`;
+                
+                // Start listening to Firestore data once authenticated
+                setupFirestoreListeners();
+            } else {
+                console.log("User is signed out.");
+                userId = null;
+                userIdDisplay.textContent = 'User ID: N/A';
+            }
         });
-        document.getElementById(`page-${pageId}`).classList.add('active');
 
-        navLinks.forEach(link => {
-          link.classList.remove('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
-          link.classList.add('text-slate-700', 'hover:bg-slate-200');
+        // --- FIREBASE LISTENERS ---
+        function setupFirestoreListeners() {
+            if (!userId) return;
+
+            // Unsubscribe existing listeners if they exist to avoid duplicates
+            if (unsubscribeWorkout) unsubscribeWorkout();
+            if (unsubscribeProgress) unsubscribeProgress();
+            if (unsubscribeNutrition) unsubscribeNutrition();
+
+            // Setup Workouts listener
+            const workoutQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
+            unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
+                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWorkouts(workouts);
+                updateDashboard(workouts, 'workouts');
+            });
+
+            // Setup Progress listener
+            const progressQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/progress`), orderBy("timestamp"));
+            unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
+                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProgressCharts(progressData);
+                updateDashboard(progressData, 'progress');
+            });
+
+            // Setup Nutrition listener
+            const nutritionQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
+            unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
+                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMeals(meals);
+            });
+        }
+        
+        // --- RENDERING FUNCTIONS ---
+        function renderWorkouts(workouts) {
+            workoutListEl.innerHTML = '';
+            if (workouts.length === 0) {
+                workoutListEl.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>`;
+                return;
+            }
+            workouts.forEach(workout => {
+                const date = new Date(workout.timestamp.seconds * 1000).toLocaleDateString();
+                const row = `
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                        <td class="p-4 align-middle">${date}</td>
+                        <td class="p-4 align-middle">${workout.type}</td>
+                        <td class="p-4 align-middle">${workout.duration} min</td>
+                        <td class="p-4 align-middle">${workout.notes}</td>
+                    </tr>
+                `;
+                workoutListEl.innerHTML += row;
+            });
+        }
+
+        function renderProgressCharts(progressData) {
+            const labels = progressData.map(item => new Date(item.timestamp.seconds * 1000).toLocaleDateString());
+            const weights = progressData.map(item => item.weight);
+            const bodyfats = progressData.map(item => item.bodyfat);
+            
+            // Recreate charts to update them
+            if (weightChart) weightChart.destroy();
+            weightChart = new Chart(document.getElementById('weight-chart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Weight (lbs)',
+                        data: weights,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                            
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            if (bodyfatChart) bodyfatChart.destroy();
+            bodyfatChart = new Chart(document.getElementById('bodyfat-chart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Body Fat %',
+                        data: bodyfats,
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMeals(meals) {
+            mealListEl.innerHTML = '';
+            if (meals.length === 0) {
+                mealListEl.innerHTML = `<li class="text-gray-500">No meals logged yet.</li>`;
+                return;
+            }
+            meals.forEach(meal => {
+                const date = new Date(meal.timestamp.seconds * 1000).toLocaleDateString();
+                const listItem = `
+                    <li class="p-4 rounded-md bg-gray-800">
+                        <p class="font-semibold text-white">${meal.name} - ${date}</p>
+                        <p class="text-sm text-gray-400">${meal.description}</p>
+                    </li>
+                `;
+                mealListEl.innerHTML += listItem;
+            });
+        }
+        
+        function updateDashboard(data, type) {
+            if (type === 'workouts' && data.length > 0) {
+                const lastWorkout = data[0];
+                const date = new Date(lastWorkout.timestamp.seconds * 1000).toLocaleDateString();
+                lastWorkoutSummaryEl.innerHTML = `
+                    <p class="text-white text-lg font-semibold">${lastWorkout.type}</p>
+                    <p>Date: ${date}</p>
+                    <p>Duration: ${lastWorkout.duration} min</p>
+                    <p>Notes: ${lastWorkout.notes}</p>
+                `;
+            } else if (type === 'progress' && data.length > 0) {
+                const lastProgress = data[data.length - 1];
+                const date = new Date(lastProgress.timestamp.seconds * 1000).toLocaleDateString();
+                progressSummaryEl.innerHTML = `
+                    <p class="text-white text-lg font-semibold">Latest Log (${date})</p>
+                    <p>Weight: ${lastProgress.weight} lbs</p>
+                    <p>Body Fat %: ${lastProgress.bodyfat}%</p>
+                `;
+            }
+        }
+        
+        // --- FORM & MODAL HANDLERS ---
+        document.getElementById('add-workout-btn').addEventListener('click', () => {
+            workoutModal.style.display = 'flex';
         });
-        const activeLink = document.querySelector(`[data-page="${pageId}"]`);
-        activeLink.classList.add('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
-        activeLink.classList.remove('text-slate-700', 'hover:bg-slate-200');
-      }
 
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const pageId = e.target.dataset.page;
-          showPage(pageId);
+        document.getElementById('close-workout-modal-btn').addEventListener('click', () => {
+            workoutModal.style.display = 'none';
         });
-      });
+        
+        // Log Workout Handler
+        document.getElementById('save-workout-btn').addEventListener('click', async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+            const type = document.getElementById('workout-type-input').value;
+            const duration = document.getElementById('workout-duration-input').value;
+            const notes = document.getElementById('workout-notes-input').value;
 
-      // --- Hydration Tracker ---
-      const waterInput = document.getElementById('water-input');
-      const addWaterBtn = document.getElementById('add-water-btn');
-      const resetWaterBtn = document.getElementById('reset-water-btn');
-      const waterTotalEl = document.getElementById('water-total');
-      const waterProgress = document.getElementById('water-progress');
-      const DAILY_WATER_GOAL = 2000; // 2000 ml daily goal
-
-      // Load hydration from localStorage or reset if new day
-      const lastWaterDate = localStorage.getItem('waterDate');
-      let waterTotal = 0;
-      if (isNewDay(lastWaterDate)) {
-        waterTotal = 0;
-        localStorage.setItem('waterTotal', waterTotal);
-        localStorage.setItem('waterDate', new Date().toISOString());
-      } else {
-        waterTotal = parseInt(localStorage.getItem('waterTotal')) || 0;
-      }
-
-      function updateWaterUI() {
-        waterTotalEl.textContent = waterTotal;
-        let progressPercent = Math.min((waterTotal / DAILY_WATER_GOAL) * 100, 100);
-        waterProgress.style.width = progressPercent + '%';
-      }
-
-      addWaterBtn.addEventListener('click', () => {
-        let intake = parseInt(waterInput.value);
-        if (isNaN(intake) || intake <= 0) {
-          showAlert('Please enter a positive number for water intake.');
-          return;
-        }
-        waterTotal += intake;
-        localStorage.setItem('waterTotal', waterTotal);
-        localStorage.setItem('waterDate', new Date().toISOString());
-        updateWaterUI();
-        waterInput.value = '';
-      });
-
-      resetWaterBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to reset your hydration data?');
-        if (confirmed) {
-          waterTotal = 0;
-          localStorage.removeItem('waterTotal');
-          localStorage.removeItem('waterDate');
-          updateWaterUI();
-        }
-      });
-
-      updateWaterUI();
-
-      // --- Workout Log ---
-      const workoutTypeInput = document.getElementById('workout-type');
-      const workoutDurationInput = document.getElementById('workout-duration');
-      const addWorkoutBtn = document.getElementById('add-workout-btn');
-      const resetWorkoutBtn = document.getElementById('reset-workout-btn');
-      const workoutList = document.getElementById('workout-list');
-
-      let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-
-      function renderWorkouts() {
-        workoutList.innerHTML = '';
-        if (workouts.length === 0) {
-          workoutList.innerHTML = '<li class="p-3 text-sm text-slate-500">No workouts logged yet.</li>';
-          return;
-        }
-        workouts.forEach((w, i) => {
-          const li = document.createElement('li');
-          li.className = 'p-3 text-sm flex items-center justify-between group';
-          li.innerHTML = `
-            <span>${w.type} &mdash; ${w.duration} min</span>
-            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete workout" data-index="${i}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          `;
-          workoutList.appendChild(li);
+            if (type && duration) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), {
+                        type,
+                        duration: parseInt(duration, 10),
+                        notes,
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('workout-type-input').value = '';
+                    document.getElementById('workout-duration-input').value = '';
+                    document.getElementById('workout-notes-input').value = '';
+                    workoutModal.style.display = 'none';
+                } catch (e) {
+                    console.error("Error adding workout: ", e);
+                }
+            } else {
+                console.error("Workout type and duration are required.");
+            }
         });
-        lucide.createIcons(); // Call once after rendering the list
-      }
 
-      // Use event delegation to handle clicks on the workout list
-      workoutList.addEventListener('click', async (e) => {
-        const deleteButton = e.target.closest('button');
-        if (deleteButton) {
-          const confirmed = await showConfirm('Are you sure you want to delete this workout entry?');
-          if (confirmed) {
-            const index = deleteButton.dataset.index;
-            workouts.splice(index, 1);
-            localStorage.setItem('workouts', JSON.stringify(workouts));
-            renderWorkouts();
-          }
-        }
-      });
-
-      addWorkoutBtn.addEventListener('click', () => {
-        const type = workoutTypeInput.value.trim();
-        const duration = parseInt(workoutDurationInput.value);
-        if (!type) {
-          showAlert('Please enter a workout type.');
-          return;
-        }
-        if (isNaN(duration) || duration <= 0) {
-          showAlert('Please enter a positive workout duration.');
-          return;
-        }
-        workouts.push({
-          type,
-          duration,
-          date: new Date().toLocaleString()
+        // Log Weight Handler
+        document.getElementById('log-weight-btn').addEventListener('click', async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+            const weight = document.getElementById('weight-input').value;
+            if (weight) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
+                        weight: parseFloat(weight),
+                        bodyfat: 0, // Placeholder
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('weight-input').value = '';
+                } catch (e) {
+                    console.error("Error logging weight: ", e);
+                }
+            }
         });
-        localStorage.setItem('workouts', JSON.stringify(workouts));
-        renderWorkouts();
-        workoutTypeInput.value = '';
-        workoutDurationInput.value = '';
-      });
-
-      resetWorkoutBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to reset all workout logs?');
-        if (confirmed) {
-          workouts = [];
-          localStorage.removeItem('workouts');
-          renderWorkouts();
-        }
-      });
-
-      renderWorkouts();
-
-      // --- Meal Log ---
-      const mealNameInput = document.getElementById('meal-name');
-      const mealCaloriesInput = document.getElementById('meal-calories');
-      const addMealBtn = document.getElementById('add-meal-btn');
-      const resetMealBtn = document.getElementById('reset-meal-btn');
-      const mealList = document.getElementById('meal-list');
-
-      let meals = JSON.parse(localStorage.getItem('meals')) || [];
-
-      function renderMeals() {
-        mealList.innerHTML = '';
-        if (meals.length === 0) {
-          mealList.innerHTML = '<li class="p-3 text-sm text-slate-500">No meals logged yet.</li>';
-          return;
-        }
-        meals.forEach((m, i) => {
-          const li = document.createElement('li');
-          li.className = 'p-3 text-sm flex items-center justify-between group';
-          li.innerHTML = `
-            <span>${m.name} &mdash; ${m.calories} calories</span>
-            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete meal" data-index="${i}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          `;
-          mealList.appendChild(li);
+        
+        // Log Body Fat Handler
+        document.getElementById('log-bodyfat-btn').addEventListener('click', async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+            const bodyfat = document.getElementById('bodyfat-input').value;
+            if (bodyfat) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
+                        weight: 0, // Placeholder
+                        bodyfat: parseFloat(bodyfat),
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('bodyfat-input').value = '';
+                } catch (e) {
+                    console.error("Error logging body fat: ", e);
+                }
+            }
         });
-        lucide.createIcons();
-      }
-
-      mealList.addEventListener('click', async (e) => {
-        const deleteButton = e.target.closest('button');
-        if (deleteButton) {
-          const confirmed = await showConfirm('Are you sure you want to delete this meal entry?');
-          if (confirmed) {
-            const index = deleteButton.dataset.index;
-            meals.splice(index, 1);
-            localStorage.setItem('meals', JSON.stringify(meals));
-            renderMeals();
-          }
-        }
-      });
-
-      addMealBtn.addEventListener('click', () => {
-        const name = mealNameInput.value.trim();
-        const calories = parseInt(mealCaloriesInput.value);
-        if (!name) {
-          showAlert('Please enter a meal name.');
-          return;
-        }
-        if (isNaN(calories) || calories <= 0) {
-          showAlert('Please enter a positive number for calories.');
-          return;
-        }
-        meals.push({ name, calories, date: new Date().toLocaleString() });
-        localStorage.setItem('meals', JSON.stringify(meals));
-        renderMeals();
-        mealNameInput.value = '';
-        mealCaloriesInput.value = '';
-      });
-
-      resetMealBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to reset all meal logs?');
-        if (confirmed) {
-          meals = [];
-          localStorage.removeItem('meals');
-          renderMeals();
-        }
-      });
-      
-      renderMeals();
-
-      // --- Sleep Tracker ---
-      const sleepHoursInput = document.getElementById('sleep-hours');
-      const addSleepBtn = document.getElementById('add-sleep-btn');
-      const resetSleepBtn = document.getElementById('reset-sleep-btn');
-      const sleepList = document.getElementById('sleep-list');
-
-      let sleepEntries = JSON.parse(localStorage.getItem('sleepEntries')) || [];
-      
-      function renderSleepEntries() {
-        sleepList.innerHTML = '';
-        if (sleepEntries.length === 0) {
-          sleepList.innerHTML = '<li class="p-3 text-sm text-slate-500">No sleep logged yet.</li>';
-          return;
-        }
-        sleepEntries.forEach((s, i) => {
-          const li = document.createElement('li');
-          li.className = 'p-3 text-sm flex items-center justify-between group';
-          li.innerHTML = `
-            <span>${s.hours} hours &mdash; ${s.date}</span>
-            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete sleep entry" data-index="${i}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          `;
-          sleepList.appendChild(li);
+        
+        // Log Meal Handler
+        document.getElementById('log-meal-btn').addEventListener('click', async () => {
+            if (!userId) {
+                console.error("User not authenticated.");
+                return;
+            }
+            const name = document.getElementById('meal-name-input').value;
+            const description = document.getElementById('meal-description-input').value;
+            if (name && description) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), {
+                        name,
+                        description,
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('meal-name-input').value = '';
+                    document.getElementById('meal-description-input').value = '';
+                } catch (e) {
+                    console.error("Error logging meal: ", e);
+                }
+            } else {
+                console.error("Meal name and description are required.");
+            }
         });
-        lucide.createIcons();
-      }
-      
-      sleepList.addEventListener('click', async (e) => {
-        const deleteButton = e.target.closest('button');
-        if (deleteButton) {
-          const confirmed = await showConfirm('Are you sure you want to delete this sleep entry?');
-          if (confirmed) {
-            const index = deleteButton.dataset.index;
-            sleepEntries.splice(index, 1);
-            localStorage.setItem('sleepEntries', JSON.stringify(sleepEntries));
-            renderSleepEntries();
-          }
-        }
-      });
-      
-      addSleepBtn.addEventListener('click', () => {
-        const hours = parseFloat(sleepHoursInput.value);
-        if (isNaN(hours) || hours <= 0) {
-          showAlert('Please enter a positive number for hours slept.');
-          return;
-        }
-        sleepEntries.push({ hours, date: new Date().toLocaleString() });
-        localStorage.setItem('sleepEntries', JSON.stringify(sleepEntries));
-        renderSleepEntries();
-        sleepHoursInput.value = '';
-      });
-      
-      resetSleepBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to reset all sleep logs?');
-        if (confirmed) {
-          sleepEntries = [];
-          localStorage.removeItem('sleepEntries');
-          renderSleepEntries();
-        }
-      });
 
-      renderSleepEntries();
-
-      // --- Mood Journal ---
-      const moodButtons = document.querySelectorAll('.mood-btn');
-      const addMoodBtn = document.getElementById('add-mood-btn');
-      const resetMoodBtn = document.getElementById('reset-mood-btn');
-      const moodList = document.getElementById('mood-list');
-
-      let selectedMood = null;
-      // Load moods from localStorage or reset if new day
-      const lastMoodDate = localStorage.getItem('moodDate');
-      let moods = [];
-      if (isNewDay(lastMoodDate)) {
-        moods = [];
-        localStorage.setItem('moods', JSON.stringify(moods));
-        localStorage.setItem('moodDate', new Date().toISOString());
-      } else {
-        moods = JSON.parse(localStorage.getItem('moods')) || [];
-      }
-
-      moodButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          moodButtons.forEach(b => {
-            b.classList.remove('bg-yellow-500', 'text-white');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          btn.classList.add('bg-yellow-500', 'text-white');
-          btn.setAttribute('aria-pressed', 'true');
-          selectedMood = btn.dataset.mood;
-          // The button should be enabled once a mood is selected
-          addMoodBtn.disabled = false;
-        });
-      });
-
-      addMoodBtn.addEventListener('click', () => {
-        if (!selectedMood) {
-          showAlert('Please select a mood before adding.');
-          return;
-        }
-        const now = new Date().toLocaleString();
-        moods.push({ mood: selectedMood, date: now });
-        localStorage.setItem('moods', JSON.stringify(moods));
-        localStorage.setItem('moodDate', new Date().toISOString());
-        renderMoods();
-        selectedMood = null;
-        addMoodBtn.disabled = true; // Disable the button after adding
-        moodButtons.forEach(b => {
-          b.classList.remove('bg-yellow-500', 'text-white');
-          b.setAttribute('aria-pressed', 'false');
-        });
-      });
-
-      resetMoodBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to reset your mood journal?');
-        if (confirmed) {
-          moods = [];
-          localStorage.removeItem('moods');
-          localStorage.removeItem('moodDate');
-          renderMoods();
-        }
-      });
-
-      function renderMoods() {
-        moodList.innerHTML = '';
-        if (moods.length === 0) {
-          moodList.innerHTML = '<li class="p-3 text-sm text-slate-500">No moods logged yet.</li>';
-          return;
-        }
-        moods.forEach((entry, i) => {
-          const li = document.createElement('li');
-          li.className = 'p-3 text-sm flex items-center justify-between group';
-          li.innerHTML = `
-            <span>${entry.date} &mdash; ${getMoodEmoji(entry.mood)}</span>
-            <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete mood entry" data-index="${i}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          `;
-          moodList.appendChild(li);
-        });
-        lucide.createIcons(); // Call once after rendering the list
-      }
-
-      // Use event delegation to handle clicks on the mood list
-      moodList.addEventListener('click', async (e) => {
-        const deleteButton = e.target.closest('button');
-        if (deleteButton) {
-          const confirmed = await showConfirm('Are you sure you want to delete this mood entry?');
-          if (confirmed) {
-            const index = deleteButton.dataset.index;
-            moods.splice(index, 1);
-            localStorage.setItem('moods', JSON.stringify(moods));
-            renderMoods();
-          }
-        }
-      });
-
-      function getMoodEmoji(mood) {
-        switch (mood) {
-          case 'Happy': return '😊';
-          case 'Neutral': return '😐';
-          case 'Sad': return '😔';
-          case 'Angry': return '😡';
-          case 'Tired': return '😴';
-          default: return '';
-        }
-      }
-
-      renderMoods();
-
-      // --- Goals & Motivational Quotes ---
-      const goalInput = document.getElementById('goal-input');
-      const setGoalBtn = document.getElementById('set-goal-btn');
-      const resetGoalBtn = document.getElementById('reset-goal-btn');
-      const currentGoalEl = document.getElementById('current-goal');
-      const quoteEl = document.getElementById('motivational-quote');
-
-      let currentGoal = localStorage.getItem('fitnessGoal') || null;
-
-      const quotes = [
-        "The only bad workout is the one that didn't happen.",
-        "Push yourself because no one else is going to do it for you.",
-        "Don’t limit your challenges. Challenge your limits.",
-        "Sweat is fat crying.",
-        "Strive for progress, not perfection.",
-        "You don’t have to be great to start, but you have to start to be great.",
-        "Your body can stand almost anything. It’s your mind that you have to convince.",
-        "Fitness is not about being better than someone else. It’s about being better than you used to be."
-      ];
-
-      function updateGoalUI() {
-        currentGoalEl.textContent = currentGoal || 'No goal set';
-      }
-
-      function showRandomQuote() {
-        const idx = Math.floor(Math.random() * quotes.length);
-        quoteEl.textContent = `"${quotes[idx]}"`;
-      }
-
-      setGoalBtn.addEventListener('click', () => {
-        const goalText = goalInput.value.trim();
-        if (!goalText) {
-          showAlert('Please enter a goal.');
-          return;
-        }
-        currentGoal = goalText;
-        localStorage.setItem('fitnessGoal', currentGoal);
-        updateGoalUI();
-        goalInput.value = '';
-      });
-
-      resetGoalBtn.addEventListener('click', async () => {
-        const confirmed = await showConfirm('Are you sure you want to clear your current goal?');
-        if (confirmed) {
-          currentGoal = null;
-          localStorage.removeItem('fitnessGoal');
-          updateGoalUI();
-        }
-      });
-
-      updateGoalUI();
-      showRandomQuote();
-
-      // Initial page load
-      showPage('dashboard');
-    });
-  </script>
+        // Start the authentication process on page load
+        authenticate();
+    </script>
 </body>
 </html>
