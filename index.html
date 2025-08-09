@@ -414,34 +414,41 @@
                 }
             };
 
-            const workoutQuery = query(collection(db, "users", userId, "workouts"), orderBy("timestamp", "desc"));
+            const workoutQuery = query(collection(db, "users", userId, "workouts"));
             unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
                 console.log("Received workout data.");
-                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWorkouts(workouts);
                 updateDashboardWorkouts(workouts);
                 renderWeeklyWorkoutChart(workouts);
                 onListenerAttached();
             }, commonErrorHandler);
 
-            const progressQuery = query(collection(db, "users", userId, "progress"), orderBy("timestamp"));
+            const progressQuery = query(collection(db, "users", userId, "progress"));
             unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
                 console.log("Received progress data.");
-                renderProgressCharts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+                renderProgressCharts(progressData);
                 onListenerAttached();
             }, commonErrorHandler);
 
-            const nutritionQuery = query(collection(db, "users", userId, "nutrition"), orderBy("timestamp", "desc"));
+            const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
             unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
                 console.log("Received nutrition data.");
-                renderMeals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderMeals(meals);
                 onListenerAttached();
             }, commonErrorHandler);
             
-            const waterQuery = query(collection(db, "users", userId, "water"), orderBy("timestamp", "desc"));
+            const waterQuery = query(collection(db, "users", userId, "water"));
             unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
                 console.log("Received water data.");
-                updateWaterIntake(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                updateWaterIntake(waterLogs);
                 onListenerAttached();
             }, commonErrorHandler);
         }
@@ -614,4 +621,4 @@
         });
     </script>
 </body>
-</html>
+</ht
