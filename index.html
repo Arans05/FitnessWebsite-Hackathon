@@ -86,11 +86,14 @@
                     </li>
                 </ul>
             </nav>
+            <div id="user-id-display" class="mt-8 text-xs text-gray-500 break-words">
+                <!-- User ID will be displayed here -->
+            </div>
         </aside>
 
         <!-- Main Content Area -->
         <main class="flex-grow p-8 overflow-y-auto">
-            <div id="dashboard-content" class="page-content active">
+            <div id="dashboard-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
 
                 <!-- Quick Stats Section -->
@@ -307,4 +310,494 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log Water Intake</h3>
                 <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="number" id="water-intake-modal-input" placeholder="Water intake (oz)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    Log Water
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase and Chart.js Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script type="module">
+        // Import Firebase libraries from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // --- GLOBAL VARIABLES & FIREBASE SETUP ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let userId = null;
+        let unsubscribeWorkout = null;
+        let unsubscribeProgress = null;
+        let unsubscribeNutrition = null;
+        let unsubscribeWater = null;
+        let weightChart = null;
+        let bodyfatChart = null;
+        let weeklyWorkoutChart = null;
+
+        // An array to store all pages
+        const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
+
+        // --- DOM ELEMENTS ---
+        const pageContentElements = pages.reduce((acc, page) => {
+            acc[page] = document.getElementById(`${page}-content`);
+            return acc;
+        }, {});
+        const navLinks = pages.reduce((acc, page) => {
+            acc[page] = document.getElementById(`nav-${page}`);
+            return acc;
+        }, {});
+        
+        const workoutModal = document.getElementById('workout-modal');
+        const mealModal = document.getElementById('meal-modal');
+        const waterModal = document.getElementById('water-modal');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const workoutListEl = document.getElementById('workout-list');
+        const mealListEl = document.getElementById('meal-list');
+        const progressSummaryEl = document.getElementById('progress-summary');
+        const lastWorkoutSummaryEl = document.getElementById('last-workout-summary');
+        
+        const waterIntakeEl = document.getElementById('water-intake');
+        const waterGoalEl = document.getElementById('water-goal');
+        const waterProgressBarEl = document.getElementById('water-progress-bar');
+        
+        // --- UI & PAGE NAVIGATION ---
+        function showPage(pageId) {
+            // Deactivate all nav links and hide all pages
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            pages.forEach(page => {
+                pageContentElements[page].classList.remove('active');
+            });
+
+            // Activate the selected nav link and show the corresponding page
+            const activeLink = document.getElementById(`nav-${pageId}`);
+            const activePage = document.getElementById(`${pageId}-content`);
+            
+            if (activeLink) activeLink.classList.add('active');
+            if (activePage) activePage.classList.add('active');
+        }
+        
+        // Initial page load, show the dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('dashboard');
+        });
+
+        // Add event listeners for navigation links
+        navLinks.dashboard.addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
+        navLinks.workouts.addEventListener('click', (e) => { e.preventDefault(); showPage('workouts'); });
+        navLinks.progress.addEventListener('click', (e) => { e.preventDefault(); showPage('progress'); });
+        navLinks.nutrition.addEventListener('click', (e) => { e.preventDefault(); showPage('nutrition'); });
+        
+        // --- FIREBASE AUTHENTICATION ---
+        async function authenticate() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error signing in: ", error);
+            }
+        }
+        
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("User authenticated with UID:", userId);
+                userIdDisplay.textContent = `User ID: ${userId}`;
+                
+                // Start listening to Firestore data once authenticated
+                setupFirestoreListeners();
+            } else {
+                console.log("User is signed out.");
+                userId = null;
+                userIdDisplay.textContent = 'User ID: N/A';
+            }
+        });
+
+        // --- FIREBASE LISTENERS ---
+        function setupFirestoreListeners() {
+            if (!userId) return;
+
+            // Unsubscribe existing listeners if they exist to avoid duplicates
+            if (unsubscribeWorkout) unsubscribeWorkout();
+            if (unsubscribeProgress) unsubscribeProgress();
+            if (unsubscribeNutrition) unsubscribeNutrition();
+            if (unsubscribeWater) unsubscribeWater();
+
+            // Setup Workouts listener
+            const workoutQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
+            unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
+                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWorkouts(workouts);
+                updateDashboardWorkouts(workouts);
+                renderWeeklyWorkoutChart(workouts);
+            });
+
+            // Setup Progress listener
+            const progressQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/progress`), orderBy("timestamp"));
+            unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
+                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProgressCharts(progressData);
+                updateDashboardProgress(progressData);
+            });
+
+            // Setup Nutrition listener
+            const nutritionQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
+            unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
+                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMeals(meals);
+            });
+            
+            // Setup Water listener
+            const waterQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/water`), orderBy("timestamp", "desc"));
+            unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
+                const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateWaterIntake(waterLogs);
+            });
+        }
+        
+        // --- RENDERING FUNCTIONS ---
+        function renderWorkouts(workouts) {
+            const workoutListEl = document.getElementById('workout-list');
+            workoutListEl.innerHTML = '';
+            if (workouts.length === 0) {
+                workoutListEl.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>`;
+                return;
+            }
+            workouts.forEach(workout => {
+                const date = workout.timestamp ? new Date(workout.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                const row = `
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                        <td class="p-4 align-middle">${date}</td>
+                        <td class="p-4 align-middle">${workout.type}</td>
+                        <td class="p-4 align-middle">${workout.duration} min</td>
+                        <td class="p-4 align-middle">${workout.notes}</td>
+                    </tr>
+                `;
+                workoutListEl.innerHTML += row;
+            });
+        }
+
+        function renderProgressCharts(progressData) {
+            const weights = progressData.filter(item => item.weight > 0);
+            const bodyfats = progressData.filter(item => item.bodyfat > 0);
+            
+            const weightLabels = weights.map(item => item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : 'N/A');
+            const weightValues = weights.map(item => item.weight);
+
+            const bodyfatLabels = bodyfats.map(item => item.timestamp ? new Date(item.timestamp.seconds * 1000).toLocaleDateString() : 'N/A');
+            const bodyfatValues = bodyfats.map(item => item.bodyfat);
+            
+            // Recreate charts to update them
+            if (weightChart) weightChart.destroy();
+            weightChart = new Chart(document.getElementById('weight-chart'), {
+                type: 'line',
+                data: {
+                    labels: weightLabels,
+                    datasets: [{
+                        label: 'Weight (lbs)',
+                        data: weightValues,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(156, 163, 175, 0.2)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            if (bodyfatChart) bodyfatChart.destroy();
+            bodyfatChart = new Chart(document.getElementById('bodyfat-chart'), {
+                type: 'line',
+                data: {
+                    labels: bodyfatLabels,
+                    datasets: [{
+                        label: 'Body Fat %',
+                        data: bodyfatValues,
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(156, 163, 175, 0.2)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderMeals(meals) {
+            const mealListEl = document.getElementById('meal-list');
+            mealListEl.innerHTML = '';
+            if (meals.length === 0) {
+                mealListEl.innerHTML = `<li class="text-gray-500">No meals logged yet.</li>`;
+                return;
+            }
+            meals.forEach(meal => {
+                const date = meal.timestamp ? new Date(meal.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                const listItem = `
+                    <li class="p-4 rounded-md bg-gray-800">
+                        <p class="font-semibold text-white">${meal.name} - ${date}</p>
+                        <p class="text-sm text-gray-400">${meal.description}</p>
+                    </li>
+                `;
+                mealListEl.innerHTML += listItem;
+            });
+        }
+        
+        function updateDashboardWorkouts(workouts) {
+            const lastWorkoutSummaryEl = document.getElementById('last-workout-summary');
+            const workoutStatusEl = document.getElementById('workout-status');
+            const today = new Date().toLocaleDateString();
+            
+            if (workouts.length > 0) {
+                const lastWorkout = workouts[0];
+                const date = lastWorkout.timestamp ? new Date(lastWorkout.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                
+                lastWorkoutSummaryEl.innerHTML = `
+                    <p class="text-white text-lg font-semibold">${lastWorkout.type}</p>
+                    <p>Date: ${date}</p>
+                    <p>Duration: ${lastWorkout.duration} min</p>
+                    <p>Notes: ${lastWorkout.notes}</p>
+                `;
+                if (date === today) {
+                    workoutStatusEl.textContent = `Yes (${lastWorkout.duration} min)`;
+                } else {
+                    workoutStatusEl.textContent = `No`;
+                }
+            } else {
+                lastWorkoutSummaryEl.innerHTML = `<p class="text-gray-500">No workouts logged yet.</p>`;
+                workoutStatusEl.textContent = `No`;
+            }
+        }
+        
+        function updateDashboardProgress(progressData) {
+            const progressSummaryEl = document.getElementById('progress-summary');
+            if (progressData.length > 0) {
+                const lastProgress = progressData[progressData.length - 1];
+                const date = lastProgress.timestamp ? new Date(lastProgress.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                progressSummaryEl.innerHTML = `
+                    <p class="text-white text-lg font-semibold">Latest Log (${date})</p>
+                    <p>Weight: ${lastProgress.weight || 'N/A'} lbs</p>
+                    <p>Body Fat %: ${lastProgress.bodyfat || 'N/A'}%</p>
+                `;
+            } else {
+                progressSummaryEl.innerHTML = `<p class="text-gray-500">No progress logged yet.</p>`;
+            }
+        }
+
+        function updateWaterIntake(waterLogs) {
+            const today = new Date().toLocaleDateString();
+            const todayWater = waterLogs.filter(log => new Date(log.timestamp.seconds * 1000).toLocaleDateString() === today);
+            const totalWater = todayWater.reduce((sum, log) => sum + (log.amount || 0), 0);
+            
+            const waterIntakeEl = document.getElementById('water-intake');
+            const waterGoalEl = document.getElementById('water-goal');
+            const waterProgressBarEl = document.getElementById('water-progress-bar');
+            
+            const waterGoal = parseFloat(waterGoalEl.textContent);
+            waterIntakeEl.textContent = totalWater;
+
+            const waterProgress = (totalWater / waterGoal) * 100;
+            waterProgressBarEl.style.width = `${Math.min(waterProgress, 100)}%`;
+            waterProgressBarEl.classList.remove('bg-blue-500', 'bg-green-500');
+            waterProgressBarEl.classList.add(waterProgress >= 100 ? 'bg-green-500' : 'bg-blue-500');
+        }
+
+        function renderWeeklyWorkoutChart(workouts) {
+            if (weeklyWorkoutChart) weeklyWorkoutChart.destroy();
+            const ctx = document.getElementById('weekly-workout-chart');
+            
+            const today = new Date();
+            const last7Days = Array.from({length: 7}).map((_, i) => {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                return d.toLocaleDateString();
+            }).reverse();
+
+            const workoutCounts = last7Days.map(day => {
+                return workouts.filter(w => w.timestamp && new Date(w.timestamp.seconds * 1000).toLocaleDateString() === day).length;
+            });
+            
+            const data = {
+                labels: last7Days,
+                datasets: [{
+                    label: 'Workouts',
+                    data: workoutCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgb(75, 192, 192)',
+                    borderWidth: 1,
+                    barPercentage: 0.6
+                }]
+            };
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 },
+                        grid: { color: 'rgba(156, 163, 175, 0.2)' }
+                    },
+                    x: {
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            };
+            weeklyWorkoutChart = new Chart(ctx, { type: 'bar', data: data, options: options });
+        }
+        
+        // --- FORM & MODAL HANDLERS ---
+        // Open modals
+        document.getElementById('log-workout-btn').addEventListener('click', () => { workoutModal.style.display = 'flex'; });
+        document.getElementById('add-workout-page-btn').addEventListener('click', () => { workoutModal.style.display = 'flex'; });
+        document.getElementById('add-meal-btn').addEventListener('click', () => { mealModal.style.display = 'flex'; });
+        document.getElementById('add-water-btn').addEventListener('click', () => { waterModal.style.display = 'flex'; });
+
+        // Close modals
+        document.getElementById('close-workout-modal-btn').addEventListener('click', () => { workoutModal.style.display = 'none'; });
+        document.getElementById('close-meal-modal-btn').addEventListener('click', () => { mealModal.style.display = 'none'; });
+        document.getElementById('close-water-modal-btn').addEventListener('click', () => { waterModal.style.display = 'none'; });
+        
+        // Log Workout Handler
+        document.getElementById('save-workout-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const type = document.getElementById('workout-type-input').value;
+            const duration = document.getElementById('workout-duration-input').value;
+            const notes = document.getElementById('workout-notes-input').value;
+
+            if (type && duration) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), {
+                        type,
+                        duration: parseInt(duration, 10),
+                        notes,
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('workout-type-input').value = '';
+                    document.getElementById('workout-duration-input').value = '';
+                    document.getElementById('workout-notes-input').value = '';
+                    workoutModal.style.display = 'none';
+                } catch (e) { console.error("Error adding workout: ", e); }
+            } else { console.error("Workout type and duration are required."); }
+        });
+
+        // Log Weight Handler
+        document.getElementById('log-weight-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const weight = document.getElementById('weight-input').value;
+            if (weight) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
+                        weight: parseFloat(weight),
+                        bodyfat: 0, // Placeholder
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('weight-input').value = '';
+                } catch (e) { console.error("Error logging weight: ", e); }
+            } else { console.error("Weight is required."); }
+        });
+        
+        // Log Body Fat Handler
+        document.getElementById('log-bodyfat-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const bodyfat = document.getElementById('bodyfat-input').value;
+            if (bodyfat) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
+                        weight: 0, // Placeholder
+                        bodyfat: parseFloat(bodyfat),
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('bodyfat-input').value = '';
+                } catch (e) { console.error("Error logging body fat: ", e); }
+            } else { console.error("Body fat is required."); }
+        });
+        
+        // Log Meal Handler
+        document.getElementById('save-meal-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const name = document.getElementById('meal-name-modal-input').value;
+            const description = document.getElementById('meal-description-modal-input').value;
+            if (name && description) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), {
+                        name,
+                        description,
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('meal-name-modal-input').value = '';
+                    document.getElementById('meal-description-modal-input').value = '';
+                    mealModal.style.display = 'none';
+                } catch (e) { console.error("Error logging meal: ", e); }
+            } else { console.error("Meal name and description are required."); }
+        });
+
+        // Log Water Handler
+        document.getElementById('save-water-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const amount = document.getElementById('water-intake-modal-input').value;
+            if (amount) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/water`), {
+                        amount: parseInt(amount, 10),
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('water-intake-modal-input').value = '';
+                    waterModal.style.display = 'none';
+                } catch (e) { console.error("Error logging water: ", e); }
+            } else { console.error("Water amount is required."); }
+        });
+
+        // Start the authentication process on page load
+        authenticate();
+    </script>
+</body>
+</html>
