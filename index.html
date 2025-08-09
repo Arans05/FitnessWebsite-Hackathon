@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -18,25 +18,22 @@
             --foreground: 210 20% 98%;
             --card: 224 71.4% 4.1%;
             --card-foreground: 210 20% 98%;
-            --popover: 224 71.4% 4.1%;
-            --popover-foreground: 210 20% 98%;
             --primary: 210 20% 98%;
             --primary-foreground: 220.9 39.3% 11%;
-            --secondary: 215 27.9% 16.9%;
-            --secondary-foreground: 210 20% 98%;
             --muted: 215 27.9% 16.9%;
             --muted-foreground: 217.9 10.6% 64.9%;
-            --accent: 215 27.9% 16.9%;
-            --accent-foreground: 210 20% 98%;
-            --destructive: 0 62.8% 30.6%;
-            --destructive-foreground: 210 20% 98%;
-            --border: 215 27.9% 16.9%;
-            --input: 215 27.9% 16.9%;
-            --ring: 217.9 10.6% 64.9%;
-            --radius: 0.5rem;
         }
         .dark {
             color-scheme: dark;
+        }
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+        .nav-link.active {
+            @apply bg-gray-700 text-white;
         }
     </style>
 </head>
@@ -48,544 +45,90 @@
             <nav class="flex-grow">
                 <ul class="space-y-2">
                     <li>
-                        <a href="#" id="nav-dashboard" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
+                        <a href="#" id="nav-dashboard" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                             Dashboard
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="nav-workouts" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
+                        <a href="#" id="nav-workouts" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m7.5 7.5 3.5-3.5"/><path d="m4.5 4.5 7 7"/></svg>
                             Workouts
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="nav-progress" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
+                        <a href="#" id="nav-progress" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m16 16 3-3-6-6-3 3 6 6Z"/><path d="M7 21h10"/><path d="M10 21c-.5-4.5-2-9-6-12"/><path d="M14 21c.5-4.5 2-9 6-12"/><path d="M12 3v18"/></svg>
                             Progress
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="nav-nutrition" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
+                        <a href="#" id="nav-nutrition" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="M12 21a9 9 0 0 0 9-9c0-6.22-4.63-9-9-9s-9 2.78-9 9a9 9 0 0 0 9 9Z"/><path d="M8 12c0 2.21 1.79 4 4 4s4-1.79 4-4-1.79-4-4-4-4 1.79-4 4Z"/><path d="M16 12a4 4 0 0 0-4-4"/></svg>
                             Nutrition
                         </a>
                     </li>
                 </ul>
             </nav>
-            <div id="user-id-display" class="mt-8 text-xs text-gray-500 break-words">
-                <!-- User ID will be displayed here -->
-            </div>
         </aside>
 
         <!-- Main Content Area -->
         <main class="flex-grow p-8 overflow-y-auto">
-            <div id="dashboard-content" class="page-content">
+            <div id="dashboard-content" class="page-content active">
                 <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <!-- Progress Card -->
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold">Latest Progress</h3>
-                        </div>
-                        <p id="progress-summary" class="text-gray-400"></p>
-                    </div>
-                    <!-- Workout Card -->
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold">Last Workout</h3>
-                        </div>
-                        <p id="last-workout-summary" class="text-gray-400"></p>
-                    </div>
-                </div>
+                <p class="text-gray-400">This is your main dashboard. You can log new workouts and track your progress from here.</p>
             </div>
 
-            <div id="workouts-content" class="page-content" style="display: none;">
+            <div id="workouts-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Workout Tracker</h2>
-                <div class="mb-6">
-                    <button id="add-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
-                        Log New Workout
-                    </button>
-                </div>
-                <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                    <div class="relative w-full overflow-auto">
-                        <table class="w-full caption-bottom text-sm">
-                            <thead class="[&_tr]:border-b">
-                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Date</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Workout</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Duration</th>
-                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="workout-list">
-                                <!-- Workout rows will be added here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <p class="text-gray-400">This is where you'd log your workouts and view a history of your past sessions.</p>
             </div>
 
-            <div id="progress-content" class="page-content" style="display: none;">
+            <div id="progress-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Progress Tracker</h2>
-                <div class="grid gap-6 md:grid-cols-2">
-                    <!-- Weight Progress Card -->
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <div class="flex flex-col space-y-1.5 p-6">
-                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Weight Progress</h3>
-                            <p class="text-sm text-muted-foreground">Track your weight over time.</p>
-                        </div>
-                        <div class="p-6 pt-0">
-                            <canvas id="weight-chart" class="w-full h-80"></canvas>
-                        </div>
-                        <div class="flex items-center p-6 pt-0 space-x-2">
-                            <input type="number" id="weight-input" placeholder="Enter weight (lbs)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <button id="log-weight-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                                Log Weight
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Body Fat Progress Card -->
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <div class="flex flex-col space-y-1.5 p-6">
-                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Body Fat % Progress</h3>
-                            <p class="text-sm text-muted-foreground">Monitor your body fat percentage.</p>
-                        </div>
-                        <div class="p-6 pt-0">
-                            <canvas id="bodyfat-chart" class="w-full h-80"></canvas>
-                        </div>
-                        <div class="flex items-center p-6 pt-0 space-x-2">
-                            <input type="number" id="bodyfat-input" placeholder="Enter body fat %" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <button id="log-bodyfat-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                                Log Body Fat
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <p class="text-gray-400">Here you can track metrics like your weight and body fat percentage over time.</p>
             </div>
 
-            <div id="nutrition-content" class="page-content" style="display: none;">
+            <div id="nutrition-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Nutrition Tracker</h2>
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6 col-span-2">
-                        <h3 class="text-xl font-semibold mb-4">Meal Logger</h3>
-                        <div class="flex flex-col space-y-4">
-                            <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <textarea id="meal-description-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
-                            <button id="log-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                                Log Meal
-                            </button>
-                        </div>
-                    </div>
-                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-                        <h3 class="text-xl font-semibold mb-4">Recent Meals</h3>
-                        <ul id="meal-list" class="space-y-2">
-                            <!-- Meal list items will be appended here -->
-                        </ul>
-                    </div>
-                </div>
+                <p class="text-gray-400">This page would be used to log your daily meals and track your nutrition.</p>
             </div>
         </main>
     </div>
-
-    <!-- Modals -->
-    <!-- Workout Modal -->
-    <div id="workout-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
-        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-semibold">Log New Workout</h3>
-                <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="flex flex-col space-y-4">
-                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
-                <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                    Save Workout
-                </button>
-            </div>
-        </div>
-    </div>
     
-    <script type="module">
-        // Import Firebase libraries from CDN
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { Chart, registerables } from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.min.js';
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page-content');
 
-        Chart.register(...registerables);
+            function showPage(pageId) {
+                // Deactivate all nav links and hide all pages
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                });
 
-        // --- GLOBAL VARIABLES & FIREBASE SETUP ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        let userId = null;
-        let unsubscribeWorkout = null;
-        let unsubscribeProgress = null;
-        let unsubscribeNutrition = null;
-        let weightChart = null;
-        let bodyfatChart = null;
-
-        // An array to store all pages
-        const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
-
-        // --- DOM ELEMENTS ---
-        const pageContentElements = pages.reduce((acc, page) => {
-            acc[page] = document.getElementById(`${page}-content`);
-            return acc;
-        }, {});
-        const navLinks = pages.reduce((acc, page) => {
-            acc[page] = document.getElementById(`nav-${page}`);
-            return acc;
-        }, {});
-        
-        const workoutModal = document.getElementById('workout-modal');
-        const userIdDisplay = document.getElementById('user-id-display');
-        const workoutListEl = document.getElementById('workout-list');
-        const mealListEl = document.getElementById('meal-list');
-        const progressSummaryEl = document.getElementById('progress-summary');
-        const lastWorkoutSummaryEl = document.getElementById('last-workout-summary');
-
-        // --- UI & PAGE NAVIGATION ---
-        function showPage(pageId) {
-            // Hide all pages and deactivate all nav links
-            pages.forEach(page => {
-                pageContentElements[page].style.display = 'none';
-                navLinks[page].classList.remove('bg-gray-700', 'text-white');
-                navLinks[page].classList.add('text-gray-400');
-            });
-            // Show the selected page and activate its nav link
-            pageContentElements[pageId].style.display = 'block';
-            navLinks[pageId].classList.add('bg-gray-700', 'text-white');
-            navLinks[pageId].classList.remove('text-gray-400');
-        }
-        
-        // Initial page load, show the dashboard
-        window.addEventListener('load', () => {
-            showPage('dashboard');
-        });
-
-        // Add event listeners for navigation links
-        navLinks.dashboard.addEventListener('click', (e) => {
-            e.preventDefault();
-            showPage('dashboard');
-        });
-        navLinks.workouts.addEventListener('click', (e) => {
-            e.preventDefault();
-            showPage('workouts');
-        });
-        navLinks.progress.addEventListener('click', (e) => {
-            e.preventDefault();
-            showPage('progress');
-        });
-        navLinks.nutrition.addEventListener('click', (e) => {
-            e.preventDefault();
-            showPage('nutrition');
-        });
-        
-        // --- FIREBASE AUTHENTICATION ---
-        async function authenticate() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Error signing in: ", error);
-            }
-        }
-        
-        // Listen for authentication state changes
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log("User authenticated with UID:", userId);
-                userIdDisplay.textContent = `User ID: ${userId}`;
+                // Activate the selected nav link and show the corresponding page
+                const activeLink = document.getElementById(`nav-${pageId}`);
+                const activePage = document.getElementById(`${pageId}-content`);
                 
-                // Start listening to Firestore data once authenticated
-                setupFirestoreListeners();
-            } else {
-                console.log("User is signed out.");
-                userId = null;
-                userIdDisplay.textContent = 'User ID: N/A';
+                if (activeLink) activeLink.classList.add('active');
+                if (activePage) activePage.classList.add('active');
             }
-        });
 
-        // --- FIREBASE LISTENERS ---
-        function setupFirestoreListeners() {
-            if (!userId) return;
-
-            // Unsubscribe existing listeners if they exist to avoid duplicates
-            if (unsubscribeWorkout) unsubscribeWorkout();
-            if (unsubscribeProgress) unsubscribeProgress();
-            if (unsubscribeNutrition) unsubscribeNutrition();
-
-            // Setup Workouts listener
-            const workoutQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
-            unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
-                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderWorkouts(workouts);
-                updateDashboard(workouts, 'workouts');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.id.replace('nav-', '');
+                    showPage(pageId);
+                });
             });
-
-            // Setup Progress listener
-            const progressQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/progress`), orderBy("timestamp"));
-            unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
-                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderProgressCharts(progressData);
-                updateDashboard(progressData, 'progress');
-            });
-
-            // Setup Nutrition listener
-            const nutritionQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
-            unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
-                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderMeals(meals);
-            });
-        }
-        
-        // --- RENDERING FUNCTIONS ---
-        function renderWorkouts(workouts) {
-            workoutListEl.innerHTML = '';
-            if (workouts.length === 0) {
-                workoutListEl.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>`;
-                return;
-            }
-            workouts.forEach(workout => {
-                const date = new Date(workout.timestamp.seconds * 1000).toLocaleDateString();
-                const row = `
-                    <tr class="border-b transition-colors hover:bg-muted/50">
-                        <td class="p-4 align-middle">${date}</td>
-                        <td class="p-4 align-middle">${workout.type}</td>
-                        <td class="p-4 align-middle">${workout.duration} min</td>
-                        <td class="p-4 align-middle">${workout.notes}</td>
-                    </tr>
-                `;
-                workoutListEl.innerHTML += row;
-            });
-        }
-
-        function renderProgressCharts(progressData) {
-            const labels = progressData.map(item => new Date(item.timestamp.seconds * 1000).toLocaleDateString());
-            const weights = progressData.map(item => item.weight);
-            const bodyfats = progressData.map(item => item.bodyfat);
             
-            // Recreate charts to update them
-            if (weightChart) weightChart.destroy();
-            weightChart = new Chart(document.getElementById('weight-chart'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Weight (lbs)',
-                        data: weights,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                            
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-
-            if (bodyfatChart) bodyfatChart.destroy();
-            bodyfatChart = new Chart(document.getElementById('bodyfat-chart'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Body Fat %',
-                        data: bodyfats,
-                        borderColor: 'rgb(255, 99, 132)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderMeals(meals) {
-            mealListEl.innerHTML = '';
-            if (meals.length === 0) {
-                mealListEl.innerHTML = `<li class="text-gray-500">No meals logged yet.</li>`;
-                return;
-            }
-            meals.forEach(meal => {
-                const date = new Date(meal.timestamp.seconds * 1000).toLocaleDateString();
-                const listItem = `
-                    <li class="p-4 rounded-md bg-gray-800">
-                        <p class="font-semibold text-white">${meal.name} - ${date}</p>
-                        <p class="text-sm text-gray-400">${meal.description}</p>
-                    </li>
-                `;
-                mealListEl.innerHTML += listItem;
-            });
-        }
-        
-        function updateDashboard(data, type) {
-            if (type === 'workouts' && data.length > 0) {
-                const lastWorkout = data[0];
-                const date = new Date(lastWorkout.timestamp.seconds * 1000).toLocaleDateString();
-                lastWorkoutSummaryEl.innerHTML = `
-                    <p class="text-white text-lg font-semibold">${lastWorkout.type}</p>
-                    <p>Date: ${date}</p>
-                    <p>Duration: ${lastWorkout.duration} min</p>
-                    <p>Notes: ${lastWorkout.notes}</p>
-                `;
-            } else if (type === 'progress' && data.length > 0) {
-                const lastProgress = data[data.length - 1];
-                const date = new Date(lastProgress.timestamp.seconds * 1000).toLocaleDateString();
-                progressSummaryEl.innerHTML = `
-                    <p class="text-white text-lg font-semibold">Latest Log (${date})</p>
-                    <p>Weight: ${lastProgress.weight} lbs</p>
-                    <p>Body Fat %: ${lastProgress.bodyfat}%</p>
-                `;
-            }
-        }
-        
-        // --- FORM & MODAL HANDLERS ---
-        document.getElementById('add-workout-btn').addEventListener('click', () => {
-            workoutModal.style.display = 'flex';
+            // Set the initial active page on load
+            showPage('dashboard');
         });
-
-        document.getElementById('close-workout-modal-btn').addEventListener('click', () => {
-            workoutModal.style.display = 'none';
-        });
-        
-        // Log Workout Handler
-        document.getElementById('save-workout-btn').addEventListener('click', async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-            const type = document.getElementById('workout-type-input').value;
-            const duration = document.getElementById('workout-duration-input').value;
-            const notes = document.getElementById('workout-notes-input').value;
-
-            if (type && duration) {
-                try {
-                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), {
-                        type,
-                        duration: parseInt(duration, 10),
-                        notes,
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('workout-type-input').value = '';
-                    document.getElementById('workout-duration-input').value = '';
-                    document.getElementById('workout-notes-input').value = '';
-                    workoutModal.style.display = 'none';
-                } catch (e) {
-                    console.error("Error adding workout: ", e);
-                }
-            } else {
-                console.error("Workout type and duration are required.");
-            }
-        });
-
-        // Log Weight Handler
-        document.getElementById('log-weight-btn').addEventListener('click', async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-            const weight = document.getElementById('weight-input').value;
-            if (weight) {
-                try {
-                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
-                        weight: parseFloat(weight),
-                        bodyfat: 0, // Placeholder
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('weight-input').value = '';
-                } catch (e) {
-                    console.error("Error logging weight: ", e);
-                }
-            }
-        });
-        
-        // Log Body Fat Handler
-        document.getElementById('log-bodyfat-btn').addEventListener('click', async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-            const bodyfat = document.getElementById('bodyfat-input').value;
-            if (bodyfat) {
-                try {
-                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
-                        weight: 0, // Placeholder
-                        bodyfat: parseFloat(bodyfat),
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('bodyfat-input').value = '';
-                } catch (e) {
-                    console.error("Error logging body fat: ", e);
-                }
-            }
-        });
-        
-        // Log Meal Handler
-        document.getElementById('log-meal-btn').addEventListener('click', async () => {
-            if (!userId) {
-                console.error("User not authenticated.");
-                return;
-            }
-            const name = document.getElementById('meal-name-input').value;
-            const description = document.getElementById('meal-description-input').value;
-            if (name && description) {
-                try {
-                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), {
-                        name,
-                        description,
-                        timestamp: serverTimestamp(),
-                    });
-                    document.getElementById('meal-name-input').value = '';
-                    document.getElementById('meal-description-input').value = '';
-                } catch (e) {
-                    console.error("Error logging meal: ", e);
-                }
-            } else {
-                console.error("Meal name and description are required.");
-            }
-        });
-
-        // Start the authentication process on page load
-        authenticate();
     </script>
 </body>
 </html>
