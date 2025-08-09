@@ -91,7 +91,7 @@
         <!-- Main Content Area -->
         <main class="flex-grow p-8 overflow-y-auto">
             <div id="dashboard-content" class="page-content active">
-                <h2 class="text-3xl font-bold mb-6" id="welcome-message">Hi User, here's your summary today.</h2>
+                <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
 
                 <!-- Quick Stats Section -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -99,7 +99,7 @@
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Calories</p>
-                            <p class="text-2xl font-bold">1850 / 2500</p>
+                            <p class="text-2xl font-bold"><span id="calories-consumed">0</span> / <span id="calories-goal">2000</span></p>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-red-400"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </div>
@@ -107,7 +107,7 @@
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Steps</p>
-                            <p class="text-2xl font-bold">7240 / 10000</p>
+                            <p class="text-2xl font-bold"><span id="steps-taken">0</span> / <span id="steps-goal">10000</span></p>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-yellow-400"><path d="M19 12.5c0 .3-.1.5-.4.8l-4.5 4.5c-.3.3-.5.4-.8.4s-.5-.1-.8-.4l-2-2-4.5-4.5c-.3-.3-.4-.5-.4-.8s.1-.5.4-.8l4.5-4.5c.3-.3.5-.4.8-.4s.5.1.8.4l2 2 4.5 4.5c.3.3.4.5.4.8zM5 19.5l1-1m-1 1l-1 1m-1-1l1-1m-1 1l-1-1"/></svg>
                     </div>
@@ -115,7 +115,7 @@
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Workout Today</p>
-                            <p class="text-2xl font-bold">Yes (45 min)</p>
+                            <p class="text-2xl font-bold" id="workout-status"></p>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-green-400"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </div>
@@ -123,9 +123,9 @@
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Water Intake</p>
-                            <p class="text-2xl font-bold">48 / 64 oz</p>
+                            <p class="text-2xl font-bold"><span id="water-intake">0</span> / <span id="water-goal">64</span> oz</p>
                             <div class="progress-bar-container mt-2">
-                                <div id="water-progress-bar" class="progress-bar bg-blue-500" style="width: 75%;"></div>
+                                <div id="water-progress-bar" class="progress-bar bg-blue-500" style="width: 0%;"></div>
                             </div>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-blue-400"><path d="M6 15c0 6 1-1 7-1s6-6 7-1V4H6v11zM20 4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v13.5a.5.5 0 0 0 1 0V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13.5a.5.5 0 0 0 1 0V4zM12 18V8"/></svg>
@@ -137,12 +137,12 @@
                     <!-- Next Workout Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <h3 class="text-xl font-semibold mb-2">Next Scheduled Workout</h3>
-                        <p class="text-gray-400">Wednesday at 6:00 PM (Strength Training)</p>
+                        <p class="text-gray-400" id="next-workout-info"></p>
                     </div>
                     <!-- Quote of the Day Card -->
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <h3 class="text-xl font-semibold mb-2">Tip of the Day</h3>
-                        <p class="italic text-gray-300">"The only bad workout is the one that didn't happen."</p>
+                        <p class="italic text-gray-300" id="motivational-quote"></p>
                     </div>
                 </div>
 
@@ -192,19 +192,7 @@
                                 </tr>
                             </thead>
                             <tbody id="workout-list">
-                                <!-- Static workout data -->
-                                <tr class="border-b transition-colors hover:bg-muted/50">
-                                    <td class="p-4 align-middle">08/10/2025</td>
-                                    <td class="p-4 align-middle">Strength Training</td>
-                                    <td class="p-4 align-middle">45 min</td>
-                                    <td class="p-4 align-middle">Leg day, 3 sets of 10 squats.</td>
-                                </tr>
-                                <tr class="border-b transition-colors hover:bg-muted/50">
-                                    <td class="p-4 align-middle">08/08/2025</td>
-                                    <td class="p-4 align-middle">Cardio</td>
-                                    <td class="p-4 align-middle">30 min</td>
-                                    <td class="p-4 align-middle">Running on treadmill.</td>
-                                </tr>
+                                <!-- Workout rows will be populated by JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -255,9 +243,9 @@
                     <div class="rounded-xl border bg-card text-card-foreground shadow p-6 col-span-2">
                         <h3 class="text-xl font-semibold mb-4">Meal Logger</h3>
                         <div class="flex flex-col space-y-4">
-                            <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                            <textarea id="meal-description-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
-                            <button id="log-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                            <input type="text" id="meal-name-modal-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <textarea id="meal-description-modal-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                            <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
                                 Log Meal
                             </button>
                         </div>
@@ -265,15 +253,7 @@
                     <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
                         <h3 class="text-xl font-semibold mb-4">Recent Meals</h3>
                         <ul id="meal-list" class="space-y-2">
-                            <!-- Static meal data -->
-                            <li class="p-4 rounded-md bg-gray-800">
-                                <p class="font-semibold text-white">Lunch - 08/10/2025</p>
-                                <p class="text-sm text-gray-400">Grilled chicken and salad</p>
-                            </li>
-                            <li class="p-4 rounded-md bg-gray-800">
-                                <p class="font-semibold text-white">Breakfast - 08/10/2025</p>
-                                <p class="text-sm text-gray-400">Oatmeal with berries</p>
-                            </li>
+                            <!-- Meal list items will be appended here -->
                         </ul>
                     </div>
                 </div>
@@ -315,7 +295,7 @@
                 <input type="text" id="meal-name-modal-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
                 <textarea id="meal-description-modal-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
                 <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                    Save Meal
+                    Log Meal
                 </button>
             </div>
         </div>
@@ -327,160 +307,4 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log Water Intake</h3>
                 <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="flex flex-col space-y-4">
-                <input type="number" id="water-intake-modal-input" placeholder="Water intake (oz)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-                    Log Water
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const navLinks = document.querySelectorAll('.nav-link');
-            const pages = document.querySelectorAll('.page-content');
-            
-            const workoutModal = document.getElementById('workout-modal');
-            const mealModal = document.getElementById('meal-modal');
-            const waterModal = document.getElementById('water-modal');
-
-            function showPage(pageId) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                pages.forEach(page => {
-                    page.classList.remove('active');
-                });
-
-                const activeLink = document.getElementById(`nav-${pageId}`);
-                const activePage = document.getElementById(`${pageId}-content`);
-                
-                if (activeLink) activeLink.classList.add('active');
-                if (activePage) activePage.classList.add('active');
-                
-                if (pageId === 'dashboard') {
-                    renderWeeklyWorkoutChart();
-                } else if (pageId === 'progress') {
-                    renderProgressCharts();
-                }
-            }
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const pageId = link.id.replace('nav-', '');
-                    showPage(pageId);
-                });
-            });
-
-            // Quick Log Buttons
-            document.getElementById('log-workout-btn').addEventListener('click', () => { workoutModal.style.display = 'flex'; });
-            document.getElementById('add-workout-page-btn').addEventListener('click', () => { workoutModal.style.display = 'flex'; });
-            document.getElementById('add-meal-btn').addEventListener('click', () => { mealModal.style.display = 'flex'; });
-            document.getElementById('add-water-btn').addEventListener('click', () => { waterModal.style.display = 'flex'; });
-
-            // Close modals
-            document.getElementById('close-workout-modal-btn').addEventListener('click', () => { workoutModal.style.display = 'none'; });
-            document.getElementById('close-meal-modal-btn').addEventListener('click', () => { mealModal.style.display = 'none'; });
-            document.getElementById('close-water-modal-btn').addEventListener('click', () => { waterModal.style.display = 'none'; });
-            
-            // "Save" buttons (now just console logs and close modal)
-            document.getElementById('save-workout-btn').addEventListener('click', () => {
-                alert('Workout logged locally!');
-                workoutModal.style.display = 'none';
-            });
-            document.getElementById('log-weight-btn').addEventListener('click', () => {
-                alert('Weight logged locally!');
-            });
-            document.getElementById('log-bodyfat-btn').addEventListener('click', () => {
-                alert('Body fat logged locally!');
-            });
-            document.getElementById('save-meal-btn').addEventListener('click', () => {
-                alert('Meal logged locally!');
-                mealModal.style.display = 'none';
-            });
-            document.getElementById('save-water-btn').addEventListener('click', () => {
-                alert('Water logged locally!');
-                waterModal.style.display = 'none';
-            });
-
-            // --- Chart Rendering Functions (Static Data) ---
-            let weeklyWorkoutChart;
-            function renderWeeklyWorkoutChart() {
-                if (weeklyWorkoutChart) weeklyWorkoutChart.destroy();
-                const ctx = document.getElementById('weekly-workout-chart');
-                const data = {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Workouts',
-                        data: [1, 1, 0, 1, 0, 2, 0],
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                        borderColor: 'rgb(75, 192, 192)',
-                        borderWidth: 1,
-                        barPercentage: 0.6
-                    }]
-                };
-                const options = {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 },
-                            grid: { color: 'rgba(156, 163, 175, 0.2)' }
-                        },
-                        x: {
-                            ticks: { color: 'rgb(156, 163, 175)' },
-                            grid: { display: false }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { mode: 'index', intersect: false }
-                    }
-                };
-                weeklyWorkoutChart = new Chart(ctx, { type: 'bar', data: data, options: options });
-            }
-
-            let weightChart;
-            let bodyfatChart;
-            function renderProgressCharts() {
-                // Weight Chart
-                if (weightChart) weightChart.destroy();
-                const weightCtx = document.getElementById('weight-chart');
-                const weightData = {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Weight (lbs)',
-                        data: [185, 182, 179, 178],
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                };
-                weightChart = new Chart(weightCtx, { type: 'line', data: weightData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-
-                // Body Fat Chart
-                if (bodyfatChart) bodyfatChart.destroy();
-                const bodyfatCtx = document.getElementById('bodyfat-chart');
-                const bodyfatData = {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Body Fat %',
-                        data: [25, 24, 23, 22],
-                        borderColor: 'rgb(255, 99, 132)',
-                        tension: 0.1
-                    }]
-                };
-                bodyfatChart = new Chart(bodyfatCtx, { type: 'line', data: bodyfatData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-            }
-
-            // Set the initial active page on load
-            showPage('dashboard');
-        });
-    </script>
-</body>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12
