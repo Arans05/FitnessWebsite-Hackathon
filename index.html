@@ -325,24 +325,28 @@
         li.className = 'p-3 text-sm flex items-center justify-between group';
         li.innerHTML = `
           <span>${w.type} &mdash; ${w.duration} min</span>
-          <button class="text-slate-400 hover:text-red-500 transition-colors hidden group-hover:block" title="Delete workout">
+          <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete workout" data-index="${i}">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         `;
-
-        li.querySelector('button').addEventListener('click', async () => {
-          const confirmed = await showConfirm('Are you sure you want to delete this workout entry?');
-          if (confirmed) {
-            workouts.splice(i, 1);
-            localStorage.setItem('workouts', JSON.stringify(workouts));
-            renderWorkouts();
-          }
-        });
-
         workoutList.appendChild(li);
-        lucide.createIcons(); // Re-render icons for new elements
       });
+      lucide.createIcons(); // Call once after rendering the list
     }
+
+    // Use event delegation to handle clicks on the workout list
+    workoutList.addEventListener('click', async (e) => {
+      const deleteButton = e.target.closest('button');
+      if (deleteButton) {
+        const confirmed = await showConfirm('Are you sure you want to delete this workout entry?');
+        if (confirmed) {
+          const index = deleteButton.dataset.index;
+          workouts.splice(index, 1);
+          localStorage.setItem('workouts', JSON.stringify(workouts));
+          renderWorkouts();
+        }
+      }
+    });
 
     addWorkoutBtn.addEventListener('click', () => {
       const type = workoutTypeInput.value.trim();
@@ -444,31 +448,35 @@
         li.className = 'p-3 text-sm flex items-center justify-between group';
         li.innerHTML = `
           <span>${entry.date} &mdash; ${getMoodEmoji(entry.mood)}</span>
-          <button class="text-slate-400 hover:text-red-500 transition-colors hidden group-hover:block" title="Delete mood entry">
+          <button class="text-slate-400 hover:text-red-500 transition-colors" title="Delete mood entry" data-index="${i}">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         `;
-
-        li.querySelector('button').addEventListener('click', async () => {
-          const confirmed = await showConfirm('Are you sure you want to delete this mood entry?');
-          if (confirmed) {
-            moods.splice(i, 1);
-            localStorage.setItem('moods', JSON.stringify(moods));
-            renderMoods();
-          }
-        });
-
         moodList.appendChild(li);
-        lucide.createIcons();
       });
+      lucide.createIcons(); // Call once after rendering the list
     }
+
+    // Use event delegation to handle clicks on the mood list
+    moodList.addEventListener('click', async (e) => {
+      const deleteButton = e.target.closest('button');
+      if (deleteButton) {
+        const confirmed = await showConfirm('Are you sure you want to delete this mood entry?');
+        if (confirmed) {
+          const index = deleteButton.dataset.index;
+          moods.splice(index, 1);
+          localStorage.setItem('moods', JSON.stringify(moods));
+          renderMoods();
+        }
+      }
+    });
 
     function getMoodEmoji(mood) {
       switch (mood) {
         case 'Happy': return '😊';
         case 'Neutral': return '😐';
         case 'Sad': return '😔';
-        case 'Angry': return '�';
+        case 'Angry': return '😡';
         case 'Tired': return '😴';
         default: return '';
       }
