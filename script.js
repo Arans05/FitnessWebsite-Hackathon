@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userId = null;
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
     let weightChart, bodyfatChart, macroChart;
+    let dailyCalories = { meals: 0, steps: 0 };
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -121,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
             const meals = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
             renderMeals(meals);
-            updateDashboardCalories(meals);
+            updateDashboardCaloriesFromMeals(meals);
             renderMacroChart(meals);
         });
 
@@ -258,11 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
         calculateStreak(workouts);
     }
 
-    function updateDashboardCalories(meals) {
+    function updateTotalCalories() {
+        const total = Math.round(dailyCalories.meals + dailyCalories.steps);
+        const caloriesEl = document.getElementById('calories-burned');
+        if (caloriesEl) {
+            caloriesEl.textContent = total;
+        }
+    }
+
+    function updateDashboardCaloriesFromMeals(meals) {
         const totalCalories = meals
             .filter(m => m.timestamp && new Date(m.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
             .reduce((sum, m) => sum + (m.calories || 0), 0);
-        document.getElementById('calories-burned').textContent = totalCalories;
+        dailyCalories.meals = totalCalories;
+        updateTotalCalories();
     }
 
     function updateWaterIntake(logs) {
@@ -273,10 +283,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function updateDashboardSteps(steps) {
+        const stepsEl = document.getElementById('steps-taken');
+        if (!stepsEl) return;
+        
         const totalSteps = steps
             .filter(s => s.timestamp && new Date(s.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
             .reduce((sum, s) => sum + (s.amount || 0), 0);
-        document.getElementById('steps-taken').textContent = totalSteps;
+        
+        stepsEl.textContent = totalSteps;
+        dailyCalories.steps = totalSteps * 0.04; // Approx. 0.04 calories per step
+        updateTotalCalories();
     }
 
     function setMotivationalQuote() {
