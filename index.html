@@ -321,7 +321,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -369,14 +369,21 @@
             showPage(pageId);
         }));
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 console.log("Auth state changed: User is logged in. UID:", user.uid);
                 userId = user.uid;
                 loadingOverlay.classList.add('active');
-                
                 document.getElementById('user-email-display').textContent = user.email;
-                setupFirestoreListeners();
+                
+                await initialDataLoad();
+                setupRealtimeListeners();
+
+                loginContainer.classList.remove('active');
+                appContainer.classList.add('active');
+                loadingOverlay.classList.remove('active');
+                showPage('dashboard');
+
             } else {
                 console.log("Auth state changed: User is logged out.");
                 userId = null;
@@ -391,65 +398,54 @@
             }
         });
 
-        function setupFirestoreListeners() {
+        async function initialDataLoad() {
             if (!userId) return;
-            console.log("Setting up Firestore listeners...");
+            console.log("Performing initial data load...");
+            try {
+                const collections = ['workouts', 'progress', 'nutrition', 'water'];
+                const promises = collections.map(c => getDocs(query(collection(db, "users", userId, c))));
+                await Promise.all(promises);
+                console.log("Initial data load successful.");
+            } catch (error) {
+                console.error("Error during initial data load:", error);
+                alert("Could not load initial data. Please check Firestore rules.");
+            }
+        }
 
-            const commonErrorHandler = (error) => {
-                console.error("Firestore permission error:", error);
-                loadingOverlay.classList.remove('active');
-                alert("Error: Could not load data. Please check your Firestore rules and database setup.");
-            };
+        function setupRealtimeListeners() {
+            if (!userId) return;
+            console.log("Setting up Firestore real-time listeners...");
 
-            let listenersAttached = 0;
-            const totalListeners = 4;
-            const onListenerAttached = () => {
-                listenersAttached++;
-                if (listenersAttached === totalListeners) {
-                    console.log("All Firestore listeners attached successfully. Showing app.");
-                    loginContainer.classList.remove('active');
-                    appContainer.classList.add('active');
-                    loadingOverlay.classList.remove('active');
-                    showPage('dashboard');
-                }
-            };
+            const commonErrorHandler = (error) => console.error("Firestore listener error:", error);
 
             const workoutQuery = query(collection(db, "users", userId, "workouts"));
             unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
-                console.log("Received workout data.");
                 const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderWorkouts(workouts);
                 updateDashboardWorkouts(workouts);
                 renderWeeklyWorkoutChart(workouts);
-                onListenerAttached();
             }, commonErrorHandler);
 
             const progressQuery = query(collection(db, "users", userId, "progress"));
             unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
-                console.log("Received progress data.");
                 const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
                 renderProgressCharts(progressData);
-                onListenerAttached();
             }, commonErrorHandler);
 
             const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
             unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
-                console.log("Received nutrition data.");
                 const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderMeals(meals);
-                onListenerAttached();
             }, commonErrorHandler);
             
             const waterQuery = query(collection(db, "users", userId, "water"));
             unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
-                console.log("Received water data.");
                 const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                     .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 updateWaterIntake(waterLogs);
-                onListenerAttached();
             }, commonErrorHandler);
         }
         
@@ -621,4 +617,4 @@
         });
     </script>
 </body>
-</ht
+</html>
