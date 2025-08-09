@@ -150,7 +150,7 @@
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Water Intake</p>
-                        <p class="text-2xl font-bold"><span id="water-intake">0</span> / 64 oz</p>
+                        <p class="text-2xl font-bold"><span id="water-intake">0</span> / 2000 ml</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
@@ -169,6 +169,7 @@
                         <button id="log-workout-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Log Workout</button>
                         <button id="add-meal-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Add Meal</button>
                         <button id="add-water-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Add Water</button>
+                        <button id="log-steps-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Log Steps</button>
                     </div>
                 </div>
             </div>
@@ -322,8 +323,20 @@
                 <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
-                <input type="number" id="water-amount-input" placeholder="Amount (oz)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <input type="number" id="water-amount-input" placeholder="Amount (ml)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
                 <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Water</button>
+            </div>
+        </div>
+    </div>
+    <div id="steps-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log Steps</h3>
+                <button id="close-steps-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="number" id="steps-amount-input" placeholder="Number of steps" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <button id="save-steps-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Steps</button>
             </div>
         </div>
     </div>
@@ -333,4 +346,3 @@
     <script src="script.js" type="module"></script>
 </body>
 </html>
-
