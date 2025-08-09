@@ -1,1 +1,26 @@
+body {
+    font-family: 'Inter', sans-serif;
+    @apply bg-[#0f172a] text-white;
+}
+.view-container, .page-content {
+    display: none;
+}
+.view-container.active {
+    display: flex;
+}
+.page-content.active {
+    display: block;
+}
+#app-container.active {
+    flex-direction: column;
+}
+.nav-link.active {
+    @apply bg-gray-700 text-white;
+}
+.progress-bar-container {
+    @apply relative w-full h-2 rounded-full bg-gray-700;
+}
+.progress-bar {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+}
 
