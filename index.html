@@ -48,25 +48,25 @@
             <nav class="flex-grow">
                 <ul class="space-y-2">
                     <li>
-                        <a href="#" id="nav-dashboard" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                        <a href="#" id="nav-dashboard" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                             Dashboard
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="nav-workouts" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                        <a href="#" id="nav-workouts" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m7.5 7.5 3.5-3.5"/><path d="m4.5 4.5 7 7"/></svg>
                             Workouts
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="nav-progress" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                        <a href="#" id="nav-progress" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m16 16 3-3-6-6-3 3 6 6Z"/><path d="M7 21h10"/><path d="M10 21c-.5-4.5-2-9-6-12"/><path d="M14 21c.5-4.5 2-9 6-12"/><path d="M12 3v18"/></svg>
                             Progress
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="nav-nutrition" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active:text-white active:bg-gray-700">
+                        <a href="#" id="nav-nutrition" class="flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="M12 21a9 9 0 0 0 9-9c0-6.22-4.63-9-9-9s-9 2.78-9 9a9 9 0 0 0 9 9Z"/><path d="M8 12c0 2.21 1.79 4 4 4s4-1.79 4-4-1.79-4-4-4-4 1.79-4 4Z"/><path d="M16 12a4 4 0 0 0-4-4"/></svg>
                             Nutrition
                         </a>
@@ -80,7 +80,7 @@
 
         <!-- Main Content Area -->
         <main class="flex-grow p-8 overflow-y-auto">
-            <div id="dashboard-content" class="page-content" style="display: none;">
+            <div id="dashboard-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <!-- Progress Card -->
@@ -257,20 +257,19 @@
 
         // --- UI & PAGE NAVIGATION ---
         function showPage(pageId) {
+            // Hide all pages and deactivate all nav links
             pages.forEach(page => {
-                if (page === pageId) {
-                    pageContentElements[page].style.display = 'block';
-                    navLinks[page].classList.add('bg-gray-700', 'text-white');
-                    navLinks[page].classList.remove('text-gray-400');
-                } else {
-                    pageContentElements[page].style.display = 'none';
-                    navLinks[page].classList.remove('bg-gray-700', 'text-white');
-                    navLinks[page].classList.add('text-gray-400');
-                }
+                pageContentElements[page].style.display = 'none';
+                navLinks[page].classList.remove('bg-gray-700', 'text-white');
+                navLinks[page].classList.add('text-gray-400');
             });
+            // Show the selected page and activate its nav link
+            pageContentElements[pageId].style.display = 'block';
+            navLinks[pageId].classList.add('bg-gray-700', 'text-white');
+            navLinks[pageId].classList.remove('text-gray-400');
         }
         
-        // Initial page load
+        // Initial page load, show the dashboard
         window.addEventListener('load', () => {
             showPage('dashboard');
         });
