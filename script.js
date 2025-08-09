@@ -32,10 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const workoutModal = document.getElementById('workout-modal');
     const mealModal = document.getElementById('meal-modal');
     const waterModal = document.getElementById('water-modal');
+    const stepsModal = document.getElementById('steps-modal');
 
     const pages = ['dashboard', 'workouts', 'progress', 'nutrition', 'profile', 'community'];
     let userId = null;
-    let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard;
+    let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
     let weightChart, bodyfatChart, macroChart;
 
     // --- Page Navigation ---
@@ -97,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (unsubscribeProgress) unsubscribeProgress();
             if (unsubscribeProfile) unsubscribeProfile();
             if (unsubscribeLeaderboard) unsubscribeLeaderboard();
+            if (unsubscribeSteps) unsubscribeSteps();
         }
     });
 
@@ -146,6 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
         unsubscribeLeaderboard = onSnapshot(leaderboardQuery, (snapshot) => {
             const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderLeaderboard(profiles);
+        });
+
+        const stepsQuery = query(collection(db, "users", userId, "steps"));
+        unsubscribeSteps = onSnapshot(stepsQuery, (snapshot) => {
+            const steps = snapshot.docs.map(doc => doc.data());
+            updateDashboardSteps(steps);
         });
     }
 
@@ -261,7 +269,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = logs
             .filter(l => l.timestamp && new Date(l.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
             .reduce((sum, l) => sum + (l.amount || 0), 0);
-        document.getElementById('water-intake').textContent = `${total} / 64 oz`;
+        document.getElementById('water-intake').textContent = `${total} / 2000 ml`;
+    }
+    
+    function updateDashboardSteps(steps) {
+        const totalSteps = steps
+            .filter(s => s.timestamp && new Date(s.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+            .reduce((sum, s) => sum + (s.amount || 0), 0);
+        document.getElementById('steps-taken').textContent = totalSteps;
     }
 
     function setMotivationalQuote() {
@@ -489,6 +504,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('water-amount-input').value = '';
                 document.getElementById('water-modal').style.display = 'none';
             } catch (error) { console.error("Error adding water:", error); }
+        }
+    });
+
+    setupModal(['log-steps-btn'], 'steps-modal', 'close-steps-modal-btn', 'save-steps-btn', async () => {
+        if (!userId) return;
+        const amount = document.getElementById('steps-amount-input').value;
+
+        if (amount) {
+            try {
+                await addDoc(collection(db, "users", userId, "steps"), { amount: parseInt(amount), timestamp: serverTimestamp() });
+                document.getElementById('steps-amount-input').value = '';
+                document.getElementById('steps-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding steps:", error); }
         }
     });
 
