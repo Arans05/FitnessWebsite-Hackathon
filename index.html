@@ -20,8 +20,18 @@
             --card-foreground: 210 20% 98%;
             --primary: 210 20% 98%;
             --primary-foreground: 220.9 39.3% 11%;
+            --secondary: 215 27.9% 16.9%;
+            --secondary-foreground: 210 20% 98%;
             --muted: 215 27.9% 16.9%;
             --muted-foreground: 217.9 10.6% 64.9%;
+            --accent: 215 27.9% 16.9%;
+            --accent-foreground: 210 20% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 20% 98%;
+            --border: 215 27.9% 16.9%;
+            --input: 215 27.9% 16.9%;
+            --ring: 217.9 10.6% 64.9%;
+            --radius: 0.5rem;
         }
         .dark {
             color-scheme: dark;
@@ -39,7 +49,7 @@
             @apply relative w-full h-2 rounded-full bg-gray-700;
         }
         .progress-bar {
-            @apply h-full rounded-full bg-blue-500 transition-all duration-500 ease-out;
+            @apply h-full rounded-full transition-all duration-500 ease-out;
         }
     </style>
 </head>
@@ -51,7 +61,7 @@
             <nav class="flex-grow">
                 <ul class="space-y-2">
                     <li>
-                        <a href="#" id="nav-dashboard" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400">
+                        <a href="#" id="nav-dashboard" class="nav-link flex items-center p-3 rounded-md transition-colors hover:bg-gray-800 text-gray-400 active">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3 h-5 w-5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                             Dashboard
                         </a>
@@ -113,9 +123,9 @@
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-400">Water Intake</p>
-                            <p class="text-2xl font-bold"><span id="water-intake">0</span> oz</p>
+                            <p class="text-2xl font-bold"><span id="water-intake">0</span> / <span id="water-goal">64</span> oz</p>
                             <div class="progress-bar-container mt-2">
-                                <div id="water-progress-bar" class="progress-bar" style="width: 0%;"></div>
+                                <div id="water-progress-bar" class="progress-bar bg-blue-500" style="width: 0%;"></div>
                             </div>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 text-blue-400"><path d="M6 15c0 6 1-1 7-1s6-6 7-1V4H6v11zM20 4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v13.5a.5.5 0 0 0 1 0V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13.5a.5.5 0 0 0 1 0V4zM12 18V8"/></svg>
@@ -135,7 +145,7 @@
                         <p class="italic text-gray-300" id="motivational-quote"></p>
                     </div>
                 </div>
-                
+
                 <!-- Quick Log Buttons -->
                 <div class="mb-8">
                     <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
@@ -144,11 +154,11 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
                             Log Workout
                         </button>
-                        <button id="log-meal-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
+                        <button id="add-meal-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
                             Add Meal
                         </button>
-                        <button id="log-water-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
+                        <button id="add-water-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
                             Add Water
                         </button>
@@ -164,161 +174,619 @@
 
             <div id="workouts-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Workout Tracker</h2>
-                <p class="text-gray-400">This is where you'd log your workouts and view a history of your past sessions.</p>
+                <div class="mb-6">
+                    <button id="add-workout-page-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M12 5v14m-7-7h14"/></svg>
+                        Log New Workout
+                    </button>
+                </div>
+                <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                    <div class="relative w-full overflow-auto">
+                        <table class="w-full caption-bottom text-sm">
+                            <thead class="[&_tr]:border-b">
+                                <tr class="border-b transition-colors hover:bg-muted/50">
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Workout</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Duration</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workout-list">
+                                <!-- Workout rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div id="progress-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Progress Tracker</h2>
-                <p class="text-gray-400">Here you can track metrics like your weight and body fat percentage over time.</p>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <!-- Weight Progress Card -->
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <div class="flex flex-col space-y-1.5 p-6">
+                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Weight Progress</h3>
+                            <p class="text-sm text-muted-foreground">Track your weight over time.</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <canvas id="weight-chart" class="w-full h-80"></canvas>
+                        </div>
+                        <div class="flex items-center p-6 pt-0 space-x-2">
+                            <input type="number" id="weight-input" placeholder="Enter weight (lbs)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <button id="log-weight-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                                Log Weight
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Body Fat Progress Card -->
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <div class="flex flex-col space-y-1.5 p-6">
+                            <h3 class="text-2xl font-semibold leading-none tracking-tight">Body Fat % Progress</h3>
+                            <p class="text-sm text-muted-foreground">Monitor your body fat percentage.</p>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <canvas id="bodyfat-chart" class="w-full h-80"></canvas>
+                        </div>
+                        <div class="flex items-center p-6 pt-0 space-x-2">
+                            <input type="number" id="bodyfat-input" placeholder="Enter body fat %" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <button id="log-bodyfat-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                                Log Body Fat
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="nutrition-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Nutrition Tracker</h2>
-                <p class="text-gray-400">This page would be used to log your daily meals and track your nutrition.</p>
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6 col-span-2">
+                        <h3 class="text-xl font-semibold mb-4">Meal Logger</h3>
+                        <div class="flex flex-col space-y-4">
+                            <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                            <textarea id="meal-description-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                            <button id="log-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                                Log Meal
+                            </button>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+                        <h3 class="text-xl font-semibold mb-4">Recent Meals</h3>
+                        <ul id="meal-list" class="space-y-2">
+                            <!-- Meal list items will be appended here -->
+                        </ul>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
+
+    <!-- Modals -->
+    <!-- Workout Modal -->
+    <div id="workout-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log New Workout</h3>
+                <button id="close-workout-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="text" id="workout-type-input" placeholder="Workout Type (e.g., Strength)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    Save Workout
+                </button>
+            </div>
+        </div>
+    </div>
     
+    <!-- Modal for Meal Logging -->
+    <div id="meal-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log New Meal</h3>
+                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="text" id="meal-name-modal-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <textarea id="meal-description-modal-input" placeholder="Description (e.g., Chicken breast, brown rice)" class="flex h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                <button id="save-meal-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    Save Meal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Water Intake -->
+    <div id="water-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log Water Intake</h3>
+                <button id="close-water-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="number" id="water-intake-modal-input" placeholder="Water intake (oz)" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                <button id="save-water-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                    Log Water
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase and Chart.js Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const navLinks = document.querySelectorAll('.nav-link');
-            const pages = document.querySelectorAll('.page-content');
+    <script type="module">
+        // Import Firebase libraries from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // --- GLOBAL VARIABLES & FIREBASE SETUP ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-            function showPage(pageId) {
-                // Deactivate all nav links and hide all pages
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                pages.forEach(page => {
-                    page.classList.remove('active');
-                });
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-                // Activate the selected nav link and show the corresponding page
-                const activeLink = document.getElementById(`nav-${pageId}`);
-                const activePage = document.getElementById(`${pageId}-content`);
-                
-                if (activeLink) activeLink.classList.add('active');
-                if (activePage) activePage.classList.add('active');
+        let userId = null;
+        let unsubscribeWorkout = null;
+        let unsubscribeProgress = null;
+        let unsubscribeNutrition = null;
+        let unsubscribeWater = null;
+        let weightChart = null;
+        let bodyfatChart = null;
+        let weeklyWorkoutChart = null;
 
-                // If the dashboard is active, re-render the chart
-                if (pageId === 'dashboard') {
-                    renderWeeklyWorkoutChart();
-                }
-            }
+        // An array to store all pages
+        const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
 
+        // --- DOM ELEMENTS ---
+        const pageContentElements = pages.reduce((acc, page) => {
+            acc[page] = document.getElementById(`${page}-content`);
+            return acc;
+        }, {});
+        const navLinks = pages.reduce((acc, page) => {
+            acc[page] = document.getElementById(`nav-${page}`);
+            return acc;
+        }, {});
+        
+        const workoutModal = document.getElementById('workout-modal');
+        const mealModal = document.getElementById('meal-modal');
+        const waterModal = document.getElementById('water-modal');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const workoutListEl = document.getElementById('workout-list');
+        const mealListEl = document.getElementById('meal-list');
+        const progressSummaryEl = document.getElementById('progress-summary');
+        const lastWorkoutSummaryEl = document.getElementById('last-workout-summary');
+        
+        const waterIntakeEl = document.getElementById('water-intake');
+        const waterGoalEl = document.getElementById('water-goal');
+        const waterProgressBarEl = document.getElementById('water-progress-bar');
+        
+        // --- UI & PAGE NAVIGATION ---
+        function showPage(pageId) {
+            // Deactivate all nav links and hide all pages
             navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const pageId = link.id.replace('nav-', '');
-                    showPage(pageId);
-                });
+                link.classList.remove('active');
+            });
+            pages.forEach(page => {
+                pageContentElements[page].classList.remove('active');
             });
 
-            // --- Dashboard Mock Data & Logic ---
-            const mockUser = { name: "Alex" };
-            const todayStats = {
-                caloriesConsumed: 1850,
-                caloriesGoal: 2500,
-                stepsTaken: 7240,
-                stepsGoal: 10000,
-                workoutCompleted: true,
-                workoutDuration: 45,
-                waterIntake: 48,
-                waterGoal: 64
-            };
-            const nextWorkout = {
-                date: "Wednesday",
-                time: "6:00 PM",
-                type: "Strength Training"
-            };
-            const motivationalQuotes = [
-                "The only bad workout is the one that didn't happen.",
-                "Success is not a destination, it's a journey.",
-                "Don't wish for it, work for it.",
-                "Believe you can and you're halfway there."
-            ];
-
-            // DOM elements
-            const welcomeMessageEl = document.getElementById('welcome-message');
-            const caloriesConsumedEl = document.getElementById('calories-consumed');
-            const caloriesGoalEl = document.getElementById('calories-goal');
-            const stepsTakenEl = document.getElementById('steps-taken');
-            const stepsGoalEl = document.getElementById('steps-goal');
-            const workoutStatusEl = document.getElementById('workout-status');
-            const waterIntakeEl = document.getElementById('water-intake');
-            const waterProgressBarEl = document.getElementById('water-progress-bar');
-            const nextWorkoutInfoEl = document.getElementById('next-workout-info');
-            const motivationalQuoteEl = document.getElementById('motivational-quote');
-
-            // Populate dashboard data
-            welcomeMessageEl.textContent = `Hi ${mockUser.name}, here's your summary today.`;
-            caloriesConsumedEl.textContent = todayStats.caloriesConsumed;
-            caloriesGoalEl.textContent = todayStats.caloriesGoal;
-            stepsTakenEl.textContent = todayStats.stepsTaken;
-            stepsGoalEl.textContent = todayStats.stepsGoal;
-            workoutStatusEl.textContent = todayStats.workoutCompleted ? `Yes (${todayStats.workoutDuration} min)` : "No";
-            waterIntakeEl.textContent = todayStats.waterIntake;
-
-            const waterProgress = (todayStats.waterIntake / todayStats.waterGoal) * 100;
-            waterProgressBarEl.style.width = `${Math.min(waterProgress, 100)}%`;
-            waterProgressBarEl.classList.toggle('bg-green-500', waterProgress >= 100);
-
-            nextWorkoutInfoEl.textContent = `On ${nextWorkout.date} at ${nextWorkout.time} (${nextWorkout.type}).`;
-            motivationalQuoteEl.textContent = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+            // Activate the selected nav link and show the corresponding page
+            const activeLink = document.getElementById(`nav-${pageId}`);
+            const activePage = document.getElementById(`${pageId}-content`);
             
-            // Log button handlers (just a console log for now)
-            document.getElementById('log-workout-btn').addEventListener('click', () => {
-                alert('Log Workout button clicked!');
-            });
-            document.getElementById('log-meal-btn').addEventListener('click', () => {
-                alert('Add Meal button clicked!');
-            });
-            document.getElementById('log-water-btn').addEventListener('click', () => {
-                alert('Add Water button clicked!');
+            if (activeLink) activeLink.classList.add('active');
+            if (activePage) activePage.classList.add('active');
+
+            // If the dashboard is active, re-render the chart
+            if (pageId === 'dashboard' && userId) {
+                // The chart will be rendered by the Firestore listener now
+            }
+        }
+        
+        // Initial page load, show the dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('dashboard');
+        });
+
+        // Add event listeners for navigation links
+        navLinks.dashboard.addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
+        navLinks.workouts.addEventListener('click', (e) => { e.preventDefault(); showPage('workouts'); });
+        navLinks.progress.addEventListener('click', (e) => { e.preventDefault(); showPage('progress'); });
+        navLinks.nutrition.addEventListener('click', (e) => { e.preventDefault(); showPage('nutrition'); });
+        
+        // --- FIREBASE AUTHENTICATION ---
+        async function authenticate() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error signing in: ", error);
+            }
+        }
+        
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("User authenticated with UID:", userId);
+                userIdDisplay.textContent = `User ID: ${userId}`;
+                
+                // Start listening to Firestore data once authenticated
+                setupFirestoreListeners();
+            } else {
+                console.log("User is signed out.");
+                userId = null;
+                userIdDisplay.textContent = 'User ID: N/A';
+            }
+        });
+
+        // --- FIREBASE LISTENERS ---
+        function setupFirestoreListeners() {
+            if (!userId) return;
+
+            // Unsubscribe existing listeners if they exist to avoid duplicates
+            if (unsubscribeWorkout) unsubscribeWorkout();
+            if (unsubscribeProgress) unsubscribeProgress();
+            if (unsubscribeNutrition) unsubscribeNutrition();
+            if (unsubscribeWater) unsubscribeWater();
+
+            // Setup Workouts listener
+            const workoutQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
+            unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
+                const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWorkouts(workouts);
+                updateDashboardWorkouts(workouts);
+                renderWeeklyWorkoutChart(workouts);
             });
 
-            // Weekly Workout Frequency Chart
-            let weeklyWorkoutChart;
-            function renderWeeklyWorkoutChart() {
-                if (weeklyWorkoutChart) weeklyWorkoutChart.destroy();
-                const ctx = document.getElementById('weekly-workout-chart');
-                const data = {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            // Setup Progress listener
+            const progressQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/progress`), orderBy("timestamp"));
+            unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
+                const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProgressCharts(progressData);
+                updateDashboardProgress(progressData);
+            });
+
+            // Setup Nutrition listener
+            const nutritionQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
+            unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
+                const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMeals(meals);
+            });
+            
+            // Setup Water listener
+            const waterQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/water`), orderBy("timestamp", "desc"));
+            unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
+                const waterLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateWaterIntake(waterLogs);
+            });
+        }
+        
+        // --- RENDERING FUNCTIONS ---
+        function renderWorkouts(workouts) {
+            const workoutListEl = document.getElementById('workout-list');
+            workoutListEl.innerHTML = '';
+            if (workouts.length === 0) {
+                workoutListEl.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>`;
+                return;
+            }
+            workouts.forEach(workout => {
+                const date = new Date(workout.timestamp.seconds * 1000).toLocaleDateString();
+                const row = `
+                    <tr class="border-b transition-colors hover:bg-muted/50">
+                        <td class="p-4 align-middle">${date}</td>
+                        <td class="p-4 align-middle">${workout.type}</td>
+                        <td class="p-4 align-middle">${workout.duration} min</td>
+                        <td class="p-4 align-middle">${workout.notes}</td>
+                    </tr>
+                `;
+                workoutListEl.innerHTML += row;
+            });
+        }
+
+        function renderProgressCharts(progressData) {
+            const labels = progressData.map(item => new Date(item.timestamp.seconds * 1000).toLocaleDateString());
+            const weights = progressData.map(item => item.weight).filter(w => w > 0);
+            const bodyfats = progressData.map(item => item.bodyfat).filter(b => b > 0);
+            const weightLabels = progressData.filter(item => item.weight > 0).map(item => new Date(item.timestamp.seconds * 1000).toLocaleDateString());
+            const bodyfatLabels = progressData.filter(item => item.bodyfat > 0).map(item => new Date(item.timestamp.seconds * 1000).toLocaleDateString());
+            
+            // Recreate charts to update them
+            if (weightChart) weightChart.destroy();
+            weightChart = new Chart(document.getElementById('weight-chart'), {
+                type: 'line',
+                data: {
+                    labels: weightLabels,
                     datasets: [{
-                        label: 'Workouts',
-                        data: [1, 1, 0, 1, 0, 2, 0],
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        label: 'Weight (lbs)',
+                        data: weights,
                         borderColor: 'rgb(75, 192, 192)',
-                        borderWidth: 1,
-                        barPercentage: 0.6
+                        tension: 0.1
                     }]
-                };
-                const options = {
+                },
+                options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 },
+                            beginAtZero: false,
                             grid: { color: 'rgba(156, 163, 175, 0.2)' }
                         },
                         x: {
-                            ticks: { color: 'rgb(156, 163, 175)' },
                             grid: { display: false }
                         }
                     },
                     plugins: {
-                        legend: { display: false },
-                        tooltip: { mode: 'index', intersect: false }
+                        legend: { display: false }
                     }
-                };
-                weeklyWorkoutChart = new Chart(ctx, { type: 'bar', data: data, options: options });
-            }
+                }
+            });
 
-            // Set the initial active page on load
-            showPage('dashboard');
+            if (bodyfatChart) bodyfatChart.destroy();
+            bodyfatChart = new Chart(document.getElementById('bodyfat-chart'), {
+                type: 'line',
+                data: {
+                    labels: bodyfatLabels,
+                    datasets: [{
+                        label: 'Body Fat %',
+                        data: bodyfats,
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(156, 163, 175, 0.2)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderMeals(meals) {
+            const mealListEl = document.getElementById('meal-list');
+            mealListEl.innerHTML = '';
+            if (meals.length === 0) {
+                mealListEl.innerHTML = `<li class="text-gray-500">No meals logged yet.</li>`;
+                return;
+            }
+            meals.forEach(meal => {
+                const date = new Date(meal.timestamp.seconds * 1000).toLocaleDateString();
+                const listItem = `
+                    <li class="p-4 rounded-md bg-gray-800">
+                        <p class="font-semibold text-white">${meal.name} - ${date}</p>
+                        <p class="text-sm text-gray-400">${meal.description}</p>
+                    </li>
+                `;
+                mealListEl.innerHTML += listItem;
+            });
+        }
+        
+        function updateDashboardWorkouts(workouts) {
+            const lastWorkoutSummaryEl = document.getElementById('last-workout-summary');
+            if (workouts.length > 0) {
+                const lastWorkout = workouts[0];
+                const date = new Date(lastWorkout.timestamp.seconds * 1000).toLocaleDateString();
+                lastWorkoutSummaryEl.innerHTML = `
+                    <p class="text-white text-lg font-semibold">${lastWorkout.type}</p>
+                    <p>Date: ${date}</p>
+                    <p>Duration: ${lastWorkout.duration} min</p>
+                    <p>Notes: ${lastWorkout.notes}</p>
+                `;
+            } else {
+                lastWorkoutSummaryEl.innerHTML = `<p class="text-gray-500">No workouts logged yet.</p>`;
+            }
+        }
+        
+        function updateDashboardProgress(progressData) {
+            const progressSummaryEl = document.getElementById('progress-summary');
+            if (progressData.length > 0) {
+                const lastProgress = progressData[progressData.length - 1];
+                const date = new Date(lastProgress.timestamp.seconds * 1000).toLocaleDateString();
+                progressSummaryEl.innerHTML = `
+                    <p class="text-white text-lg font-semibold">Latest Log (${date})</p>
+                    <p>Weight: ${lastProgress.weight || 'N/A'} lbs</p>
+                    <p>Body Fat %: ${lastProgress.bodyfat || 'N/A'}%</p>
+                `;
+            } else {
+                progressSummaryEl.innerHTML = `<p class="text-gray-500">No progress logged yet.</p>`;
+            }
+        }
+
+        function updateWaterIntake(waterLogs) {
+            const today = new Date().toLocaleDateString();
+            const todayWater = waterLogs.filter(log => new Date(log.timestamp.seconds * 1000).toLocaleDateString() === today);
+            const totalWater = todayWater.reduce((sum, log) => sum + log.amount, 0);
+            
+            const waterIntakeEl = document.getElementById('water-intake');
+            const waterGoalEl = document.getElementById('water-goal');
+            const waterProgressBarEl = document.getElementById('water-progress-bar');
+            
+            const waterGoal = parseFloat(waterGoalEl.textContent);
+            waterIntakeEl.textContent = totalWater;
+
+            const waterProgress = (totalWater / waterGoal) * 100;
+            waterProgressBarEl.style.width = `${Math.min(waterProgress, 100)}%`;
+            waterProgressBarEl.classList.remove('bg-blue-500', 'bg-green-500');
+            waterProgressBarEl.classList.add(waterProgress >= 100 ? 'bg-green-500' : 'bg-blue-500');
+        }
+
+        function renderWeeklyWorkoutChart(workouts) {
+            if (weeklyWorkoutChart) weeklyWorkoutChart.destroy();
+            const ctx = document.getElementById('weekly-workout-chart');
+            
+            const today = new Date();
+            const last7Days = Array.from({length: 7}).map((_, i) => {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                return d.toLocaleDateString();
+            }).reverse();
+
+            const workoutCounts = last7Days.map(day => {
+                return workouts.filter(w => new Date(w.timestamp.seconds * 1000).toLocaleDateString() === day).length;
+            });
+            
+            const data = {
+                labels: last7Days,
+                datasets: [{
+                    label: 'Workouts',
+                    data: workoutCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgb(75, 192, 192)',
+                    borderWidth: 1,
+                    barPercentage: 0.6
+                }]
+            };
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: 'rgb(156, 163, 175)', stepSize: 1 },
+                        grid: { color: 'rgba(156, 163, 175, 0.2)' }
+                    },
+                    x: {
+                        ticks: { color: 'rgb(156, 163, 175)' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            };
+            weeklyWorkoutChart = new Chart(ctx, { type: 'bar', data: data, options: options });
+        }
+        
+        // --- FORM & MODAL HANDLERS ---
+        // Open modals
+        document.getElementById('log-workout-btn').addEventListener('click', () => { workoutModal.style.display = 'flex'; });
+        document.getElementById('add-workout-page-btn').addEventListener('click', () => { workoutModal.style.display = 'flex'; });
+        document.getElementById('add-meal-btn').addEventListener('click', () => { mealModal.style.display = 'flex'; });
+        document.getElementById('add-water-btn').addEventListener('click', () => { waterModal.style.display = 'flex'; });
+
+        // Close modals
+        document.getElementById('close-workout-modal-btn').addEventListener('click', () => { workoutModal.style.display = 'none'; });
+        document.getElementById('close-meal-modal-btn').addEventListener('click', () => { mealModal.style.display = 'none'; });
+        document.getElementById('close-water-modal-btn').addEventListener('click', () => { waterModal.style.display = 'none'; });
+        
+        // Log Workout Handler
+        document.getElementById('save-workout-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const type = document.getElementById('workout-type-input').value;
+            const duration = document.getElementById('workout-duration-input').value;
+            const notes = document.getElementById('workout-notes-input').value;
+
+            if (type && duration) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/workouts`), {
+                        type,
+                        duration: parseInt(duration, 10),
+                        notes,
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('workout-type-input').value = '';
+                    document.getElementById('workout-duration-input').value = '';
+                    document.getElementById('workout-notes-input').value = '';
+                    workoutModal.style.display = 'none';
+                } catch (e) { console.error("Error adding workout: ", e); }
+            } else { console.error("Workout type and duration are required."); }
         });
+
+        // Log Weight Handler
+        document.getElementById('log-weight-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const weight = document.getElementById('weight-input').value;
+            if (weight) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
+                        weight: parseFloat(weight),
+                        bodyfat: 0, // Placeholder
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('weight-input').value = '';
+                } catch (e) { console.error("Error logging weight: ", e); }
+            } else { console.error("Weight is required."); }
+        });
+        
+        // Log Body Fat Handler
+        document.getElementById('log-bodyfat-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const bodyfat = document.getElementById('bodyfat-input').value;
+            if (bodyfat) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/progress`), {
+                        weight: 0, // Placeholder
+                        bodyfat: parseFloat(bodyfat),
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('bodyfat-input').value = '';
+                } catch (e) { console.error("Error logging body fat: ", e); }
+            } else { console.error("Body fat is required."); }
+        });
+        
+        // Log Meal Handler
+        document.getElementById('save-meal-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const name = document.getElementById('meal-name-modal-input').value;
+            const description = document.getElementById('meal-description-modal-input').value;
+            if (name && description) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/nutrition`), {
+                        name,
+                        description,
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('meal-name-modal-input').value = '';
+                    document.getElementById('meal-description-modal-input').value = '';
+                    mealModal.style.display = 'none';
+                } catch (e) { console.error("Error logging meal: ", e); }
+            } else { console.error("Meal name and description are required."); }
+        });
+
+        // Log Water Handler
+        document.getElementById('save-water-btn').addEventListener('click', async () => {
+            if (!userId) { console.error("User not authenticated."); return; }
+            const amount = document.getElementById('water-intake-modal-input').value;
+            if (amount) {
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/water`), {
+                        amount: parseInt(amount, 10),
+                        timestamp: serverTimestamp(),
+                    });
+                    document.getElementById('water-intake-modal-input').value = '';
+                    waterModal.style.display = 'none';
+                } catch (e) { console.error("Error logging water: ", e); }
+            } else { console.error("Water amount is required."); }
+        });
+
+        // Start the authentication process on page load
+        authenticate();
     </script>
 </body>
 </html>
