@@ -28,12 +28,6 @@
         .nav-link.active {
             @apply bg-gray-700 text-white;
         }
-        .progress-bar-container {
-            @apply relative w-full h-2 rounded-full bg-gray-700;
-        }
-        .progress-bar {
-            @apply h-full rounded-full transition-all duration-500 ease-out;
-        }
     </style>
 </head>
 <body>
@@ -186,104 +180,101 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const loginContainer = document.getElementById('login-container');
-        const appContainer = document.getElementById('app-container');
-        const userEmailDisplay = document.getElementById('user-email-display');
-        const userEmailDisplayMobile = document.getElementById('user-email-display-mobile');
-        const profileDropdown = document.getElementById('profile-dropdown');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenuOpenIcon = document.getElementById('mobile-menu-open-icon');
-        const mobileMenuCloseIcon = document.getElementById('mobile-menu-close-icon');
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginContainer = document.getElementById('login-container');
+            const appContainer = document.getElementById('app-container');
+            const userEmailDisplay = document.getElementById('user-email-display');
+            const userEmailDisplayMobile = document.getElementById('user-email-display-mobile');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuOpenIcon = document.getElementById('mobile-menu-open-icon');
+            const mobileMenuCloseIcon = document.getElementById('mobile-menu-close-icon');
 
-        const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
+            const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
 
-        function showPage(pageId) {
-            pages.forEach(page => {
-                document.getElementById(`${page}-content`).classList.remove('active');
-                document.getElementById(`nav-${page}`).classList.remove('active');
-                document.getElementById(`mobile-nav-${page}`)?.classList.remove('active');
+            function showPage(pageId) {
+                pages.forEach(page => {
+                    document.getElementById(`${page}-content`).classList.remove('active');
+                    document.getElementById(`nav-${page}`).classList.remove('active');
+                    document.getElementById(`mobile-nav-${page}`)?.classList.remove('active');
+                });
+                document.getElementById(`${pageId}-content`).classList.add('active');
+                document.getElementById(`nav-${pageId}`).classList.add('active');
+                document.getElementById(`mobile-nav-${pageId}`)?.classList.add('active');
+            }
+
+            pages.forEach(pageId => {
+                document.getElementById(`nav-${pageId}`).addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(pageId);
+                });
+                document.getElementById(`mobile-nav-${pageId}`)?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(pageId);
+                    mobileMenu.classList.add('hidden');
+                    mobileMenuOpenIcon.classList.remove('hidden');
+                    mobileMenuCloseIcon.classList.add('hidden');
+                });
             });
-            document.getElementById(`${pageId}-content`).classList.add('active');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
-            document.getElementById(`mobile-nav-${pageId}`)?.classList.add('active');
-        }
 
-        pages.forEach(pageId => {
-            document.getElementById(`nav-${pageId}`).addEventListener('click', (e) => {
+            document.getElementById('nav-logo').addEventListener('click', (e) => {
                 e.preventDefault();
-                showPage(pageId);
-            });
-            document.getElementById(`mobile-nav-${pageId}`)?.addEventListener('click', (e) => {
-                e.preventDefault();
-                showPage(pageId);
-                mobileMenu.classList.add('hidden');
-                mobileMenuOpenIcon.classList.remove('hidden');
-                mobileMenuCloseIcon.classList.add('hidden');
-            });
-        });
-
-        document.getElementById('nav-logo').addEventListener('click', (e) => {
-            e.preventDefault();
-            showPage('dashboard');
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userEmailDisplay.textContent = user.email;
-                userEmailDisplayMobile.textContent = user.email;
-                loginContainer.classList.remove('active');
-                appContainer.classList.add('active');
                 showPage('dashboard');
-            } else {
-                appContainer.classList.remove('active');
-                loginContainer.classList.add('active');
-            }
+            });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userEmailDisplay.textContent = user.email;
+                    userEmailDisplayMobile.textContent = user.email;
+                    loginContainer.classList.remove('active');
+                    appContainer.classList.add('active');
+                    showPage('dashboard');
+                } else {
+                    appContainer.classList.remove('active');
+                    loginContainer.classList.add('active');
+                }
+            });
+
+            document.getElementById('user-menu-button').addEventListener('click', () => {
+                profileDropdown.classList.toggle('hidden');
+            });
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuOpenIcon.classList.toggle('hidden');
+                mobileMenuCloseIcon.classList.toggle('hidden');
+            });
+
+            document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
+            document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
+
+            const handleAuthAction = async (action, email, password, errorEl) => {
+                errorEl.textContent = '';
+                try {
+                    await action(auth, email, password);
+                } catch (error) { 
+                    errorEl.textContent = error.message; 
+                }
+            };
+
+            document.getElementById('login-btn').addEventListener('click', () => {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const errorEl = document.getElementById('login-error');
+                handleAuthAction(signInWithEmailAndPassword, email, password, errorEl);
+            });
+
+            document.getElementById('signup-btn').addEventListener('click', () => {
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const errorEl = document.getElementById('signup-error');
+                handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl);
+            });
+
+            document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
+            document.getElementById('sign-out-btn-mobile').addEventListener('click', () => signOut(auth));
         });
-
-        document.getElementById('user-menu-button').addEventListener('click', () => {
-            profileDropdown.classList.toggle('hidden');
-        });
-
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            mobileMenuOpenIcon.classList.toggle('hidden');
-            mobileMenuCloseIcon.classList.toggle('hidden');
-        });
-
-        document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
-        document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
-
-        const handleAuthAction = async (action, email, password, errorEl) => {
-            const loadingOverlay = document.getElementById('loading-overlay');
-            errorEl.textContent = '';
-            loadingOverlay.classList.add('active');
-            try {
-                await action(auth, email, password);
-            } catch (error) { 
-                errorEl.textContent = error.message; 
-            } finally {
-                loadingOverlay.classList.remove('active');
-            }
-        };
-
-        document.getElementById('login-btn').addEventListener('click', () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const errorEl = document.getElementById('login-error');
-            handleAuthAction(signInWithEmailAndPassword, email, password, errorEl);
-        });
-
-        document.getElementById('signup-btn').addEventListener('click', () => {
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const errorEl = document.getElementById('signup-error');
-            handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl);
-        });
-
-        document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
-        document.getElementById('sign-out-btn-mobile').addEventListener('click', () => signOut(auth));
-
     </script>
 </body>
 </html>
