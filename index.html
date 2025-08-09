@@ -13,46 +13,33 @@
             font-family: 'Inter', sans-serif;
             @apply bg-[#0f172a] text-white;
         }
-        .container-view, .page-content, #app-container, #loading-overlay {
+        .view-container, .page-content {
             display: none;
         }
-        .container-view.active, #app-container.active, #loading-overlay.active {
+        .view-container.active {
             display: flex;
-        }
-        #app-container.active {
-            display: flex;
-            flex-direction: column;
         }
         .page-content.active {
             display: block;
         }
+        #app-container.active {
+            flex-direction: column;
+        }
         .nav-link.active {
             @apply bg-gray-700 text-white;
         }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 4px solid #fff;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        .progress-bar-container {
+            @apply relative w-full h-2 rounded-full bg-gray-700;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .progress-bar {
+            @apply h-full rounded-full transition-all duration-500 ease-out;
         }
     </style>
 </head>
 <body>
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 z-50 bg-black/80 flex-col justify-center items-center container-view">
-        <div class="spinner"></div>
-        <p class="text-white mt-4">Loading...</p>
-    </div>
-
     <!-- Login/Signup Container -->
-    <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 container-view active">
+    <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 view-container active">
         <div class="w-full max-w-md">
             <h1 class="text-4xl font-bold text-center mb-8 text-white">Fitness Tracker</h1>
             <!-- Login Form -->
@@ -77,7 +64,7 @@
     </div>
 
     <!-- Main App Container -->
-    <div id="app-container" class="min-h-screen w-full container-view">
+    <div id="app-container" class="min-h-screen w-full view-container">
         <!-- Responsive Navigation Bar -->
         <nav class="bg-gray-900 border-b border-gray-800">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -201,9 +188,6 @@
 
         const loginContainer = document.getElementById('login-container');
         const appContainer = document.getElementById('app-container');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
         const userEmailDisplay = document.getElementById('user-email-display');
         const userEmailDisplayMobile = document.getElementById('user-email-display-mobile');
         const profileDropdown = document.getElementById('profile-dropdown');
@@ -245,7 +229,6 @@
         });
 
         onAuthStateChanged(auth, (user) => {
-            loadingOverlay.classList.remove('active');
             if (user) {
                 userEmailDisplay.textContent = user.email;
                 userEmailDisplayMobile.textContent = user.email;
@@ -268,35 +251,34 @@
             mobileMenuCloseIcon.classList.toggle('hidden');
         });
 
-        document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); loginForm.style.display = 'none'; signupForm.style.display = 'block'; });
-        document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); signupForm.style.display = 'none'; loginForm.style.display = 'block'; });
+        document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
+        document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
+        const handleAuthAction = async (action, email, password, errorEl) => {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            errorEl.textContent = '';
+            loadingOverlay.classList.add('active');
+            try {
+                await action(auth, email, password);
+            } catch (error) { 
+                errorEl.textContent = error.message; 
+            } finally {
+                loadingOverlay.classList.remove('active');
+            }
+        };
+
+        document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const errorEl = document.getElementById('login-error');
-            errorEl.textContent = '';
-            loadingOverlay.classList.add('active');
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) { 
-                errorEl.textContent = error.message; 
-                loadingOverlay.classList.remove('active');
-            }
+            handleAuthAction(signInWithEmailAndPassword, email, password, errorEl);
         });
 
-        document.getElementById('signup-btn').addEventListener('click', async () => {
+        document.getElementById('signup-btn').addEventListener('click', () => {
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const errorEl = document.getElementById('signup-error');
-            errorEl.textContent = '';
-            loadingOverlay.classList.add('active');
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (error) { 
-                errorEl.textContent = error.message; 
-                loadingOverlay.classList.remove('active');
-            }
+            handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl);
         });
 
         document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
