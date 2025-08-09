@@ -225,8 +225,8 @@
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    userEmailDisplay.textContent = user.email;
-                    userEmailDisplayMobile.textContent = user.email;
+                    if (userEmailDisplay) userEmailDisplay.textContent = user.email;
+                    if (userEmailDisplayMobile) userEmailDisplayMobile.textContent = user.email;
                     loginContainer.classList.remove('active');
                     appContainer.classList.add('active');
                     showPage('dashboard');
