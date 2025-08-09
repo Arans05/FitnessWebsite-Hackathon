@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -275,10 +275,22 @@
         });
 
         // Add event listeners for navigation links
-        navLinks.dashboard.addEventListener('click', () => showPage('dashboard'));
-        navLinks.workouts.addEventListener('click', () => showPage('workouts'));
-        navLinks.progress.addEventListener('click', () => showPage('progress'));
-        navLinks.nutrition.addEventListener('click', () => showPage('nutrition'));
+        navLinks.dashboard.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('dashboard');
+        });
+        navLinks.workouts.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('workouts');
+        });
+        navLinks.progress.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('progress');
+        });
+        navLinks.nutrition.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('nutrition');
+        });
         
         // --- FIREBASE AUTHENTICATION ---
         async function authenticate() {
