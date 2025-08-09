@@ -28,6 +28,12 @@
         .nav-link.active {
             @apply bg-gray-700 text-white;
         }
+        .progress-bar-container {
+            @apply relative w-full h-2 rounded-full bg-gray-700;
+        }
+        .progress-bar {
+            @apply h-full rounded-full transition-all duration-500 ease-out;
+        }
     </style>
 </head>
 <body>
@@ -149,7 +155,43 @@
         <!-- Main Content Area -->
         <main class="flex-grow p-8">
             <div id="dashboard-content" class="page-content">
-                <h1 class="text-3xl font-bold">Dashboard</h1>
+                <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Calories Burned</p>
+                        <p class="text-2xl font-bold"><span id="calories-burned">0</span></p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Steps Today</p>
+                        <p class="text-2xl font-bold"><span id="steps-taken">0</span></p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Workout Today</p>
+                        <p class="text-2xl font-bold" id="workout-status">No</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Water Intake</p>
+                        <p class="text-2xl font-bold"><span id="water-intake">0</span> / 64 oz</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-2">Next Scheduled Workout</h3>
+                        <p class="text-gray-400">Tomorrow, 8:00 AM - Cardio</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-2">Motivational Quote</h3>
+                        <p class="italic text-gray-300" id="motivational-quote"></p>
+                    </div>
+                </div>
+                 <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <button id="log-workout-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Log Workout</button>
+                        <button id="add-meal-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Add Meal</button>
+                        <button id="add-water-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Add Water</button>
+                    </div>
+                </div>
             </div>
             <div id="workouts-content" class="page-content">
                 <h1 class="text-3xl font-bold">Workouts</h1>
@@ -166,7 +208,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
+        import { getFirestore, collection, onSnapshot, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         const firebaseConfig = {
           apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
           authDomain: "fitnessapp-721d9.firebaseapp.com",
@@ -179,6 +222,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         document.addEventListener('DOMContentLoaded', () => {
             const loginContainer = document.getElementById('login-container');
@@ -190,8 +234,11 @@
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenuOpenIcon = document.getElementById('mobile-menu-open-icon');
             const mobileMenuCloseIcon = document.getElementById('mobile-menu-close-icon');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const motivationalQuoteEl = document.getElementById('motivational-quote');
 
             const pages = ['dashboard', 'workouts', 'progress', 'nutrition'];
+            let userId = null;
 
             function showPage(pageId) {
                 pages.forEach(page => {
@@ -225,16 +272,73 @@
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    userId = user.uid;
                     if (userEmailDisplay) userEmailDisplay.textContent = user.email;
                     if (userEmailDisplayMobile) userEmailDisplayMobile.textContent = user.email;
+                    if (welcomeMessage) welcomeMessage.textContent = `Hi ${user.email}, here’s your summary today.`;
+                    
                     loginContainer.classList.remove('active');
                     appContainer.classList.add('active');
                     showPage('dashboard');
+                    setMotivationalQuote();
+                    loadDashboardData();
                 } else {
+                    userId = null;
                     appContainer.classList.remove('active');
                     loginContainer.classList.add('active');
                 }
             });
+
+            async function loadDashboardData() {
+                if (!userId) return;
+                try {
+                    const workoutsQuery = query(collection(db, "users", userId, "workouts"));
+                    const waterQuery = query(collection(db, "users", userId, "water"));
+
+                    const [workoutsSnapshot, waterSnapshot] = await Promise.all([
+                        getDocs(workoutsQuery),
+                        getDocs(waterQuery)
+                    ]);
+
+                    updateDashboardWorkouts(workoutsSnapshot.docs.map(doc => doc.data()));
+                    updateWaterIntake(waterSnapshot.docs.map(doc => doc.data()));
+                } catch (error) {
+                    console.error("Error loading dashboard data:", error);
+                }
+            }
+
+            function updateDashboardWorkouts(workouts) {
+                const sortedWorkouts = workouts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                const statusEl = document.getElementById('workout-status');
+                if (!statusEl) return;
+
+                if (sortedWorkouts.length > 0) {
+                    const last = sortedWorkouts[0];
+                    const date = new Date(last.timestamp?.seconds * 1000).toLocaleDateString();
+                    if (date === new Date().toLocaleDateString()) {
+                        statusEl.textContent = `Yes (${last.duration} min)`;
+                    } else {
+                        statusEl.textContent = 'No';
+                    }
+                } else {
+                    statusEl.textContent = 'No';
+                }
+            }
+
+            function updateWaterIntake(logs) {
+                const total = logs
+                    .filter(l => new Date(l.timestamp?.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+                    .reduce((sum, l) => sum + (l.amount || 0), 0);
+                
+                document.getElementById('water-intake').textContent = `${total} / 64 oz`;
+            }
+
+            function setMotivationalQuote() {
+                const quotes = ["The only bad workout is the one that didn't happen.", "Success isn't always about greatness. It's about consistency.", "Your body can stand almost anything. It’s your mind that you have to convince."];
+                if (motivationalQuoteEl) {
+                    motivationalQuoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+                }
+            }
 
             document.getElementById('user-menu-button').addEventListener('click', () => {
                 profileDropdown.classList.toggle('hidden');
