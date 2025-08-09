@@ -301,13 +301,24 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
+          authDomain: "fitnessapp-721d9.firebaseapp.com",
+          projectId: "fitnessapp-721d9",
+          storageBucket: "fitnessapp-721d9.appspot.com",
+          messagingSenderId: "339656705043",
+          appId: "1:339656705043:web:b5dbd141d09398014a2be6",
+          measurementId: "G-XFQYPFN6GR"
+        };
+
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const db = getFirestore(app);
         const auth = getAuth(app);
         setLogLevel('debug');
@@ -361,8 +372,9 @@
         function setupFirestoreListeners() {
             if (!userId) return;
             const commonErrorHandler = (error) => console.error("Firestore error:", error);
+            const firestoreAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-            const workoutQuery = query(collection(db, `artifacts/${appId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
+            const workoutQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/workouts`), orderBy("timestamp", "desc"));
             unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
                 const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderWorkouts(workouts);
@@ -370,17 +382,17 @@
                 renderWeeklyWorkoutChart(workouts);
             }, commonErrorHandler);
 
-            const progressQuery = query(collection(db, `artifacts/${appId}/users/${userId}/progress`), orderBy("timestamp"));
+            const progressQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/progress`), orderBy("timestamp"));
             unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
                 renderProgressCharts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, commonErrorHandler);
 
-            const nutritionQuery = query(collection(db, `artifacts/${appId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
+            const nutritionQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/nutrition`), orderBy("timestamp", "desc"));
             unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
                 renderMeals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, commonErrorHandler);
             
-            const waterQuery = query(collection(db, `artifacts/${appId}/users/${userId}/water`), orderBy("timestamp", "desc"));
+            const waterQuery = query(collection(db, `artifacts/${firestoreAppId}/users/${userId}/water`), orderBy("timestamp", "desc"));
             unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
                 updateWaterIntake(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }, commonErrorHandler);
@@ -403,12 +415,11 @@
             const createChart = (id, label, data, color) => {
                 const ctx = document.getElementById(id);
                 if (!ctx) return null;
-                return new Chart(ctx, { type: 'line', data: { labels: data.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString()), datasets: [{ label, data: data.map(d => d.value), borderColor: color, tension: 0.1 }] }, options: chartOptions });
+                if(window[id]) window[id].destroy();
+                window[id] = new Chart(ctx, { type: 'line', data: { labels: data.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString()), datasets: [{ label, data: data.map(d => d.value), borderColor: color, tension: 0.1 }] }, options: chartOptions });
             };
-            if (weightChart) weightChart.destroy();
-            weightChart = createChart('weight-chart', 'Weight (lbs)', progressData.filter(d => d.weight).map(d => ({...d, value: d.weight})), 'rgb(59, 130, 246)');
-            if (bodyfatChart) bodyfatChart.destroy();
-            bodyfatChart = createChart('bodyfat-chart', 'Body Fat %', progressData.filter(d => d.bodyfat).map(d => ({...d, value: d.bodyfat})), 'rgb(239, 68, 68)');
+            createChart('weight-chart', 'Weight (lbs)', progressData.filter(d => d.weight).map(d => ({...d, value: d.weight})), 'rgb(59, 130, 246)');
+            createChart('bodyfat-chart', 'Body Fat %', progressData.filter(d => d.bodyfat).map(d => ({...d, value: d.bodyfat})), 'rgb(239, 68, 68)');
         }
 
         function renderMeals(meals) {
@@ -470,8 +481,9 @@
 
         const addData = async (collectionName, data) => {
             if (!userId) { console.error("User not authenticated."); return; }
+            const firestoreAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             try {
-                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/${collectionName}`), { ...data, timestamp: serverTimestamp() });
+                await addDoc(collection(db, `artifacts/${firestoreAppId}/users/${userId}/${collectionName}`), { ...data, timestamp: serverTimestamp() });
             } catch (e) { console.error(`Error adding ${collectionName}:`, e); }
         };
 
