@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
-    const userEmailDisplay = document.getElementById('user-email-display');
-    const userEmailDisplayMobile = document.getElementById('user-email-display-mobile');
+    const userDisplay = document.getElementById('user-display');
+    const userDisplayMobile = document.getElementById('user-display-mobile');
     const profileDropdown = document.getElementById('profile-dropdown');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const profileSnap = await getDoc(doc(db, "profiles", userId));
             const username = profileSnap.data()?.username || user.email;
 
-            if (userEmailDisplay) userEmailDisplay.textContent = username;
-            if (userEmailDisplayMobile) userEmailDisplayMobile.textContent = username;
+            if (userDisplay) userDisplay.textContent = username;
+            if (userDisplayMobile) userDisplayMobile.textContent = username;
             if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
             
             loginContainer.classList.remove('active');
@@ -481,14 +481,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
         if (!userId) return;
-        const type = document.getElementById('workout-type-input').value;
+        const type = document.getElementById('workout-type-select').value;
         const duration = document.getElementById('workout-duration-input').value;
         const notes = document.getElementById('workout-notes-input').value;
 
         if (type && duration) {
             try {
                 await addDoc(collection(db, "users", userId, "workouts"), { type, duration: parseInt(duration), notes, timestamp: serverTimestamp() });
-                document.getElementById('workout-type-input').value = '';
+                document.getElementById('workout-type-select').selectedIndex = 0;
                 document.getElementById('workout-duration-input').value = '';
                 document.getElementById('workout-notes-input').value = '';
                 document.getElementById('workout-modal').style.display = 'none';
