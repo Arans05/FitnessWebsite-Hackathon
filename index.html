@@ -11,6 +11,38 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Load Lucide icons for a cleaner visual style -->
   <script src="https://unpkg.com/lucide@latest/dist/lucide.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Global variables for Firebase services
+    window.firebaseApp = initializeApp({});
+    window.auth = getAuth(window.firebaseApp);
+    window.db = getFirestore(window.firebaseApp);
+
+    // Initial authentication state check
+    onAuthStateChanged(window.auth, (user) => {
+      if (user) {
+        // User is signed in, show the main app
+        document.getElementById('login-page').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('user-email').textContent = user.email;
+        // Re-render all data for the signed-in user
+        renderWorkouts();
+        renderMeals();
+        renderSleepEntries();
+        renderMoods();
+      } else {
+        // User is signed out, show the login page
+        document.getElementById('login-page').classList.remove('hidden');
+        document.getElementById('main-app').classList.add('hidden');
+      }
+    });
+  </script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -30,218 +62,306 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    .page-section {
+      display: none;
+    }
+    .page-section.active {
+      display: flex;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 p-4 min-h-screen flex flex-col items-center">
-  <!-- Main application container -->
-  <div class="w-full max-w-4xl p-6 bg-white shadow-xl rounded-2xl flex flex-col gap-8">
+
+  <!-- Login Page -->
+  <div id="login-page" class="w-full max-w-sm p-6 bg-white shadow-xl rounded-2xl flex flex-col gap-8 hidden">
+    <h2 class="text-3xl font-bold text-center text-emerald-600">Login / Sign Up</h2>
+    <div class="space-y-4">
+      <div>
+        <label for="login-email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+        <input type="email" id="login-email" placeholder="email@example.com"
+          class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
+      </div>
+      <div>
+        <label for="login-password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+        <input type="password" id="login-password" placeholder="********"
+          class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
+      </div>
+      <div class="flex gap-2">
+        <button id="login-btn"
+          class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
+          Login
+        </button>
+        <button id="signup-btn"
+          class="flex-1 bg-sky-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors">
+          Sign Up
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Application Content (hidden until login) -->
+  <div id="main-app" class="w-full max-w-4xl p-6 bg-white shadow-xl rounded-2xl flex flex-col gap-8 hidden">
     <header class="text-center mb-4">
       <h1 class="text-4xl font-bold text-emerald-600 mb-2">Fitness & Wellness Tracker</h1>
-      <p class="text-slate-500 text-lg">Track your hydration, workouts, moods, and goals.</p>
+      <p class="text-slate-500 text-lg">
+        Logged in as: <span id="user-email" class="font-bold"></span>
+      </p>
     </header>
 
-    <!-- Main content grid -->
-    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    <!-- Navigation Bar -->
+    <nav class="bg-slate-100 p-2 rounded-xl shadow-inner mb-4">
+      <ul class="flex flex-wrap justify-center gap-2 md:gap-4">
+        <li>
+          <a href="#" data-page="dashboard" class="nav-link bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors">
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="workout" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
+            Workout Log
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="meal" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
+            Meal Log
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="sleep" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
+            Sleep Tracker
+          </a>
+        </li>
+        <li>
+          <a href="#" data-page="mood" class="nav-link text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors">
+            Mood Journal
+          </a>
+        </li>
+      </ul>
+      <button id="logout-btn" class="mt-4 w-full bg-red-500 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-red-600 transition-colors">
+        Logout
+      </button>
+    </nav>
 
-      <!-- Hydration Tracker -->
-      <section id="hydration-section" class="bg-emerald-50 p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold text-emerald-700 mb-4 flex items-center gap-2">
-          <i data-lucide="droplet" class="text-emerald-500"></i>
-          Hydration Tracker
-        </h2>
-        <div class="space-y-4">
-          <div>
-            <label for="water-input" class="block text-sm font-medium text-slate-700 mb-1">Enter water intake (ml):</label>
-            <input type="number" id="water-input" min="0" step="50" placeholder="e.g. 250"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
+    <!-- Main content container for pages -->
+    <div class="flex flex-col gap-6">
+
+      <!-- Dashboard Page -->
+      <div id="page-dashboard" class="page-section active flex-col gap-6">
+        <h2 class="text-3xl font-bold text-slate-800 text-center mb-4">Dashboard</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Hydration Tracker section from previous code -->
+          <section id="hydration-section" class="bg-emerald-50 p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-semibold text-emerald-700 mb-4 flex items-center gap-2">
+              <i data-lucide="droplet" class="text-emerald-500"></i>
+              Hydration Tracker
+            </h2>
+            <div class="space-y-4">
+              <div>
+                <label for="water-input" class="block text-sm font-medium text-slate-700 mb-1">Enter water intake (ml):</label>
+                <input type="number" id="water-input" min="0" step="50" placeholder="e.g. 250"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all" />
+              </div>
+              <div class="flex gap-2">
+                <button id="add-water-btn"
+                  class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
+                  Add Water
+                </button>
+                <button id="reset-water-btn"
+                  class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
+                  Reset
+                </button>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="w-full bg-emerald-200 rounded-full h-4">
+                <div id="water-progress"
+                  class="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-in-out"
+                  style="width: 0%;"></div>
+              </div>
+              <p class="text-sm text-slate-500 mt-2">Daily goal: 2000 ml</p>
+              <p class="text-base font-medium mt-1">Total today: <span id="water-total" class="font-bold text-emerald-700">0</span> ml</p>
+            </div>
+          </section>
+
+          <!-- Goals & Quotes section from previous code -->
+          <section id="goals-section" class="bg-sky-50 p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2">
+              <i data-lucide="target" class="text-sky-500"></i>
+              Goals & Quotes
+            </h2>
+            <div class="space-y-4">
+              <div>
+                <label for="goal-input" class="block text-sm font-medium text-slate-700 mb-1">Set a fitness goal:</label>
+                <input type="text" id="goal-input" placeholder="e.g. Run 5km, Drink 2L water daily"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all" />
+              </div>
+              <div class="flex gap-2">
+                <button id="set-goal-btn"
+                  class="flex-1 bg-sky-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors">
+                  Set Goal
+                </button>
+                <button id="reset-goal-btn"
+                  class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
+                  Reset
+                </button>
+              </div>
+              <p class="text-sm font-medium text-slate-700">Current Goal:</p>
+              <p id="current-goal" class="text-base font-bold text-sky-700 p-3 bg-white rounded-md border border-sky-200">
+                No goal set
+              </p>
+            </div>
+            <div id="motivational-quote" class="mt-6 p-4 bg-sky-100 rounded-md text-sky-800 italic text-center"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Workout Log Page -->
+      <div id="page-workout" class="page-section flex-col">
+        <!-- Workout Log section from previous code -->
+        <section id="workout-section" class="bg-violet-50 p-6 rounded-xl shadow-md">
+          <h2 class="text-2xl font-semibold text-violet-700 mb-4 flex items-center gap-2">
+            <i data-lucide="dumbbell" class="text-violet-500"></i>
+            Workout Log
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label for="workout-type" class="block text-sm font-medium text-slate-700 mb-1">Workout type:</label>
+              <input type="text" id="workout-type" placeholder="e.g. Running, Yoga"
+                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all" />
+            </div>
+            <div>
+              <label for="workout-duration" class="block text-sm font-medium text-slate-700 mb-1">Duration (minutes):</label>
+              <input type="number" id="workout-duration" min="1" max="600" placeholder="e.g. 30"
+                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all" />
+            </div>
+            <div class="flex gap-2">
+              <button id="add-workout-btn"
+                class="flex-1 bg-violet-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-colors">
+                Add Workout
+              </button>
+              <button id="reset-workout-btn"
+                class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
+                Reset
+              </button>
+            </div>
+          </div>
+          <ul id="workout-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
+        </section>
+      </div>
+
+      <!-- Meal Log Page -->
+      <div id="page-meal" class="page-section flex-col">
+        <!-- Meal Log section from previous code -->
+        <section id="meal-section" class="bg-orange-50 p-6 rounded-xl shadow-md">
+          <h2 class="text-2xl font-semibold text-orange-700 mb-4 flex items-center gap-2">
+            <i data-lucide="utensils" class="text-orange-500"></i>
+            Meal Log
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label for="meal-name" class="block text-sm font-medium text-slate-700 mb-1">Meal name:</label>
+              <input type="text" id="meal-name" placeholder="e.g. Lunch"
+                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" />
+            </div>
+            <div>
+              <label for="meal-calories" class="block text-sm font-medium text-slate-700 mb-1">Calories:</label>
+              <input type="number" id="meal-calories" min="1" placeholder="e.g. 500"
+                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" />
+            </div>
+            <div class="flex gap-2">
+              <button id="add-meal-btn"
+                class="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
+                Add Meal
+              </button>
+              <button id="reset-meal-btn"
+                class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
+                Reset
+              </button>
+            </div>
+          </div>
+          <ul id="meal-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
+        </section>
+      </div>
+
+      <!-- Sleep Tracker Page -->
+      <div id="page-sleep" class="page-section flex-col">
+        <!-- Sleep Tracker section from previous code -->
+        <section id="sleep-section" class="bg-blue-50 p-6 rounded-xl shadow-md">
+          <h2 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center gap-2">
+            <i data-lucide="moon" class="text-blue-500"></i>
+            Sleep Tracker
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label for="sleep-hours" class="block text-sm font-medium text-slate-700 mb-1">Hours slept:</label>
+              <input type="number" id="sleep-hours" min="1" max="24" step="0.5" placeholder="e.g. 8"
+                class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
+            </div>
+            <div class="flex gap-2">
+              <button id="add-sleep-btn"
+                class="flex-1 bg-blue-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                Log Sleep
+              </button>
+              <button id="reset-sleep-btn"
+                class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
+                Reset
+              </button>
+            </div>
+          </div>
+          <ul id="sleep-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
+        </section>
+      </div>
+
+      <!-- Mood Journal Page -->
+      <div id="page-mood" class="page-section flex-col">
+        <!-- Mood Journal section from previous code -->
+        <section id="mood-section" class="bg-yellow-50 p-6 rounded-xl shadow-md">
+          <h2 class="text-2xl font-semibold text-yellow-700 mb-4 flex items-center gap-2">
+            <i data-lucide="smile" class="text-yellow-500"></i>
+            Mood Journal
+          </h2>
+          <p class="text-sm font-medium text-slate-700 mb-2">Select your current mood:</p>
+          <div class="flex flex-wrap gap-2 mb-4" role="radiogroup" aria-label="Mood selection">
+            <button type="button" data-mood="Happy"
+              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
+              title="Happy">
+              😊
+            </button>
+            <button type="button" data-mood="Neutral"
+              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
+              title="Neutral">
+              😐
+            </button>
+            <button type="button" data-mood="Sad"
+              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
+              title="Sad">
+              😔
+            </button>
+            <button type="button" data-mood="Angry"
+              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
+              title="Angry">
+              😡
+            </button>
+            <button type="button" data-mood="Tired"
+              class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
+              title="Tired">
+              😴
+            </button>
           </div>
           <div class="flex gap-2">
-            <button id="add-water-btn"
-              class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
-              Add Water
+            <button id="add-mood-btn"
+              class="flex-1 bg-yellow-600 text-white font-semibold py-2 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors">
+              Add Mood
             </button>
-            <button id="reset-water-btn"
+            <button id="reset-mood-btn"
               class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
               Reset
             </button>
           </div>
-        </div>
-        <div class="mt-4">
-          <div class="w-full bg-emerald-200 rounded-full h-4">
-            <div id="water-progress"
-              class="bg-emerald-600 h-full rounded-full transition-all duration-500 ease-in-out"
-              style="width: 0%;"></div>
-          </div>
-          <p class="text-sm text-slate-500 mt-2">Daily goal: 2000 ml</p>
-          <p class="text-base font-medium mt-1">Total today: <span id="water-total" class="font-bold text-emerald-700">0</span> ml</p>
-        </div>
-      </section>
-
-      <!-- Workout Log -->
-      <section id="workout-section" class="bg-violet-50 p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold text-violet-700 mb-4 flex items-center gap-2">
-          <i data-lucide="dumbbell" class="text-violet-500"></i>
-          Workout Log
-        </h2>
-        <div class="space-y-4">
-          <div>
-            <label for="workout-type" class="block text-sm font-medium text-slate-700 mb-1">Workout type:</label>
-            <input type="text" id="workout-type" placeholder="e.g. Running, Yoga"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all" />
-          </div>
-          <div>
-            <label for="workout-duration" class="block text-sm font-medium text-slate-700 mb-1">Duration (minutes):</label>
-            <input type="number" id="workout-duration" min="1" max="600" placeholder="e.g. 30"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all" />
-          </div>
-          <div class="flex gap-2">
-            <button id="add-workout-btn"
-              class="flex-1 bg-violet-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-colors">
-              Add Workout
-            </button>
-            <button id="reset-workout-btn"
-              class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-              Reset
-            </button>
-          </div>
-        </div>
-        <ul id="workout-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-      </section>
-
-      <!-- Meal Log -->
-      <section id="meal-section" class="bg-orange-50 p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold text-orange-700 mb-4 flex items-center gap-2">
-          <i data-lucide="utensils" class="text-orange-500"></i>
-          Meal Log
-        </h2>
-        <div class="space-y-4">
-          <div>
-            <label for="meal-name" class="block text-sm font-medium text-slate-700 mb-1">Meal name:</label>
-            <input type="text" id="meal-name" placeholder="e.g. Lunch"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" />
-          </div>
-          <div>
-            <label for="meal-calories" class="block text-sm font-medium text-slate-700 mb-1">Calories:</label>
-            <input type="number" id="meal-calories" min="1" placeholder="e.g. 500"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" />
-          </div>
-          <div class="flex gap-2">
-            <button id="add-meal-btn"
-              class="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
-              Add Meal
-            </button>
-            <button id="reset-meal-btn"
-              class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-              Reset
-            </button>
-          </div>
-        </div>
-        <ul id="meal-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-      </section>
-
-      <!-- Sleep Tracker -->
-      <section id="sleep-section" class="bg-blue-50 p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center gap-2">
-          <i data-lucide="moon" class="text-blue-500"></i>
-          Sleep Tracker
-        </h2>
-        <div class="space-y-4">
-          <div>
-            <label for="sleep-hours" class="block text-sm font-medium text-slate-700 mb-1">Hours slept:</label>
-            <input type="number" id="sleep-hours" min="1" max="24" step="0.5" placeholder="e.g. 8"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" />
-          </div>
-          <div class="flex gap-2">
-            <button id="add-sleep-btn"
-              class="flex-1 bg-blue-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-              Log Sleep
-            </button>
-            <button id="reset-sleep-btn"
-              class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-              Reset
-            </button>
-          </div>
-        </div>
-        <ul id="sleep-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-      </section>
-
-      <!-- Mood Journal -->
-      <section id="mood-section" class="bg-yellow-50 p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold text-yellow-700 mb-4 flex items-center gap-2">
-          <i data-lucide="smile" class="text-yellow-500"></i>
-          Mood Journal
-        </h2>
-        <p class="text-sm font-medium text-slate-700 mb-2">Select your current mood:</p>
-        <div class="flex flex-wrap gap-2 mb-4" role="radiogroup" aria-label="Mood selection">
-          <button type="button" data-mood="Happy"
-            class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-            title="Happy">
-            😊
-          </button>
-          <button type="button" data-mood="Neutral"
-            class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-            title="Neutral">
-            😐
-          </button>
-          <button type="button" data-mood="Sad"
-            class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-            title="Sad">
-            😔
-          </button>
-          <button type="button" data-mood="Angry"
-            class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-            title="Angry">
-            😡
-          </button>
-          <button type="button" data-mood="Tired"
-            class="mood-btn bg-white border border-slate-300 rounded-full w-10 h-10 flex items-center justify-center text-xl hover:bg-yellow-100 transition-colors"
-            title="Tired">
-            😴
-          </button>
-        </div>
-        <div class="flex gap-2">
-          <button id="add-mood-btn"
-            class="flex-1 bg-yellow-600 text-white font-semibold py-2 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors">
-            Add Mood
-          </button>
-          <button id="reset-mood-btn"
-            class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-            Reset
-          </button>
-        </div>
-        <ul id="mood-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
-      </section>
-
-      <!-- Goals & Quotes -->
-      <section id="goals-section" class="bg-sky-50 p-6 rounded-xl shadow-md">
-        <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2">
-          <i data-lucide="target" class="text-sky-500"></i>
-          Goals & Quotes
-        </h2>
-        <div class="space-y-4">
-          <div>
-            <label for="goal-input" class="block text-sm font-medium text-slate-700 mb-1">Set a fitness goal:</label>
-            <input type="text" id="goal-input" placeholder="e.g. Run 5km, Drink 2L water daily"
-              class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all" />
-          </div>
-          <div class="flex gap-2">
-            <button id="set-goal-btn"
-              class="flex-1 bg-sky-600 text-white font-semibold py-2 rounded-md shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors">
-              Set Goal
-            </button>
-            <button id="reset-goal-btn"
-              class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors">
-              Reset
-            </button>
-          </div>
-          <p class="text-sm font-medium text-slate-700">Current Goal:</p>
-          <p id="current-goal" class="text-base font-bold text-sky-700 p-3 bg-white rounded-md border border-sky-200">
-            No goal set
-          </p>
-        </div>
-        <div id="motivational-quote" class="mt-6 p-4 bg-sky-100 rounded-md text-sky-800 italic text-center"></div>
-      </section>
-    </main>
+          <ul id="mood-list" class="mt-4 h-32 overflow-y-auto bg-white border border-slate-200 rounded-md divide-y divide-slate-100"></ul>
+        </section>
+      </div>
+    </div>
 
     <!-- Custom Modal for Alerts and Confirmations -->
     <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -312,6 +432,80 @@
         const today = new Date();
         return lastDate.toDateString() !== today.toDateString();
       }
+
+      // --- Firebase Authentication Logic ---
+      const loginEmailInput = document.getElementById('login-email');
+      const loginPasswordInput = document.getElementById('login-password');
+      const loginBtn = document.getElementById('login-btn');
+      const signupBtn = document.getElementById('signup-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      loginBtn.addEventListener('click', async () => {
+        const email = loginEmailInput.value;
+        const password = loginPasswordInput.value;
+        if (!email || !password) {
+          showAlert('Please enter both email and password.');
+          return;
+        }
+        try {
+          await signInWithEmailAndPassword(window.auth, email, password);
+        } catch (error) {
+          showAlert('Login failed: ' + error.message);
+        }
+      });
+
+      signupBtn.addEventListener('click', async () => {
+        const email = loginEmailInput.value;
+        const password = loginPasswordInput.value;
+        if (!email || !password) {
+          showAlert('Please enter both email and password.');
+          return;
+        }
+        try {
+          await createUserWithEmailAndPassword(window.auth, email, password);
+        } catch (error) {
+          showAlert('Sign up failed: ' + error.message);
+        }
+      });
+
+      logoutBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirm('Are you sure you want to log out?');
+        if (confirmed) {
+          await signOut(window.auth);
+          // Clear inputs after logout
+          loginEmailInput.value = '';
+          loginPasswordInput.value = '';
+          // Reset local storage for the next user
+          localStorage.clear();
+        }
+      });
+
+      // --- Page Navigation Logic ---
+      const pageSections = document.querySelectorAll('.page-section');
+      const navLinks = document.querySelectorAll('.nav-link');
+
+      function showPage(pageId) {
+        pageSections.forEach(section => {
+          section.classList.remove('active');
+        });
+        document.getElementById(`page-${pageId}`).classList.add('active');
+
+        navLinks.forEach(link => {
+          link.classList.remove('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
+          link.classList.add('text-slate-700', 'hover:bg-slate-200');
+        });
+        const activeLink = document.querySelector(`[data-page="${pageId}"]`);
+        activeLink.classList.add('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
+        activeLink.classList.remove('text-slate-700', 'hover:bg-slate-200');
+      }
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const pageId = e.target.dataset.page;
+          showPage(pageId);
+        });
+      });
 
       // --- Hydration Tracker ---
       const waterInput = document.getElementById('water-input');
@@ -733,6 +927,9 @@
 
       updateGoalUI();
       showRandomQuote();
+
+      // Initial page load
+      showPage('dashboard');
     });
   </script>
 </body>
