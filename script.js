@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('total-workouts').textContent = totalWorkouts;
         document.getElementById('total-time').textContent = totalTime;
-        document.getElementById('total-calories-burned').textContent = totalCalories;
+        document.getElementById('total-calories-burned-workouts').textContent = totalCalories;
 
         workoutListEl.innerHTML = workouts.length === 0 
             ? `<tr><td colspan="5" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` 
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateTotalCaloriesBurned() {
         const total = Math.round(dailyCaloriesBurned.workouts + dailyCaloriesBurned.steps);
-        const caloriesEl = document.getElementById('calories-burned');
+        const caloriesEl = document.getElementById('total-calories-burned-dash');
         if (caloriesEl) {
             caloriesEl.textContent = total;
         }
@@ -341,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayWorkouts = workouts.filter(w => w.timestamp && isToday(new Date(w.timestamp.seconds * 1000)));
         const totalCalories = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
         dailyCaloriesBurned.workouts = totalCalories;
+        document.getElementById('calories-burned-workouts').textContent = Math.round(totalCalories);
         updateTotalCaloriesBurned();
     }
 
@@ -360,7 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .reduce((sum, s) => sum + (s.amount || 0), 0);
         
         stepsEl.textContent = totalSteps;
-        dailyCaloriesBurned.steps = totalSteps * 0.04; // Approx. 0.04 calories per step
+        const caloriesFromSteps = totalSteps * 0.04;
+        dailyCaloriesBurned.steps = caloriesFromSteps;
+        document.getElementById('calories-burned-steps').textContent = Math.round(caloriesFromSteps);
         updateTotalCaloriesBurned();
     }
 
@@ -888,3 +891,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('user-profile-modal').style.display = 'none';
     });
 });
+
