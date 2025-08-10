@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- Login/Signup Form Event Listeners ---
     document.getElementById('login-btn').addEventListener('click', () => {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
@@ -134,6 +135,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
+
+    // --- FIX: Added back listeners to toggle between login and signup forms ---
+    document.getElementById('show-signup').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('signup-form').style.display = 'block';
+    });
+
+    document.getElementById('show-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+    });
+
 
     // --- Firestore Listeners Setup ---
     function setupListeners(uid) {
