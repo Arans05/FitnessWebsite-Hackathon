@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
-    const userDisplay = document.getElementById('user-display');
     const userDisplayMobile = document.getElementById('user-display-mobile');
     const profileDropdown = document.getElementById('profile-dropdown');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -98,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = profileData.username || user.email;
             userWeight = profileData.weight || 150;
 
-            if (userDisplay) userDisplay.textContent = username;
             if (userDisplayMobile) userDisplayMobile.textContent = username;
             if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
             
@@ -169,6 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fitness-level').value = profileData.fitnessLevel || 'Beginner';
             document.getElementById('profile-pic-nav').src = profileData.profilePicUrl || 'https://placehold.co/32x32/0f172a/FFF?text=U';
             document.getElementById('profile-pic-nav-mobile').src = profileData.profilePicUrl || 'https://placehold.co/40x40/0f172a/FFF?text=U';
+            document.getElementById('profile-pic-main').src = profileData.profilePicUrl || 'https://placehold.co/96x96/0f172a/FFF?text=U';
+            document.getElementById('profile-username').textContent = profileData.username || auth.currentUser.email;
+            document.getElementById('profile-fitness-level').textContent = profileData.fitnessLevel || 'Beginner';
             updateStreakDisplay(profileData.streak || 0);
         });
 
@@ -719,5 +720,16 @@ document.addEventListener('DOMContentLoaded', () => {
             list.appendChild(listItem);
             exerciseInput.value = '';
         }
+    });
+    
+    document.getElementById('profile-pic-main').addEventListener('click', () => {
+        const modal = document.getElementById('profile-pic-modal');
+        const modalImg = document.getElementById('profile-pic-modal-img');
+        modalImg.src = document.getElementById('profile-pic-main').src;
+        modal.style.display = 'flex';
+    });
+    
+    document.getElementById('close-profile-pic-modal-btn').addEventListener('click', () => {
+        document.getElementById('profile-pic-modal').style.display = 'none';
     });
 });
