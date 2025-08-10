@@ -85,6 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // --- Other UI Listeners ---
+    document.getElementById('nav-logo').addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
+    document.getElementById('nav-profile-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('profile'); profileDropdown.classList.add('hidden'); });
+    document.getElementById('nav-settings-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('settings'); profileDropdown.classList.add('hidden'); });
+    document.getElementById('mobile-nav-profile-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('profile'); mobileMenu.classList.add('hidden'); });
+    document.getElementById('mobile-nav-settings-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('settings'); mobileMenu.classList.add('hidden'); });
     document.getElementById('user-menu-button').addEventListener('click', () => profileDropdown.classList.toggle('hidden'));
     mobileMenuButton.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
@@ -392,8 +397,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         await setDoc(doc(db, "users", userId, "profile", "data"), { streak }, { merge: true });
     }
+
+    const achievements = {
+        FIRST_WORKOUT: { name: 'First Step', description: 'Log your first workout' },
+        FIVE_WORKOUTS: { name: 'Getting Started', description: 'Log 5 workouts' },
+    };
+
+    async function checkAchievements(data) {
+        if (!userId) return;
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        const profileSnap = await getDoc(profileRef);
+        const earnedAchievements = profileSnap.data()?.achievements || [];
+        const newAchievements = [];
+        if (data.workouts.length >= 1 && !earnedAchievements.includes('FIRST_WORKOUT')) newAchievements.push('FIRST_WORKOUT');
+        if (data.workouts.length >= 5 && !earnedAchievements.includes('FIVE_WORKOUTS')) newAchievements.push('FIVE_WORKOUTS');
+        if (newAchievements.length > 0) {
+            await setDoc(profileRef, { achievements: [...earnedAchievements, ...newAchievements] }, { merge: true });
+        }
+    }
+
+    function renderAchievements(earnedIds) {
+        const container = document.getElementById('badges-display');
+        if (!container) return;
+        container.innerHTML = earnedIds.length === 0
+            ? `<p class="text-gray-500 col-span-3">No achievements yet.</p>`
+            : earnedIds.map(id => `<div class="text-center" title="${achievements[id].description}"><div class="text-4xl">🏆</div><p class="text-sm font-semibold">${achievements[id].name}</p></div>`).join('');
+    }
+
+    async function updateLeaderboard(workoutCount) {
+        if (!userId) return;
+        const profileRef = doc(db, "profiles", userId);
+        const profileSnap = await getDoc(profileRef);
+        const username = profileSnap.data()?.username || auth.currentUser.email;
+        await setDoc(profileRef, { username, workoutCount }, { merge: true });
+    }
     
-    // ... other gamification functions like checkAchievements, renderAchievements, etc.
+    async function updateStepsLeaderboard(steps) {
+        if (!userId) return;
+        const totalSteps = steps.reduce((sum, s) => sum + (s.amount || 0), 0);
+        const profileRef = doc(db, "profiles", userId);
+        await setDoc(profileRef, { totalSteps }, { merge: true });
+    }
+    
+    async function updatePersonalBests(workouts) {
+        if (!userId) return;
+        const strengthWorkouts = workouts.filter(w => w.type === 'Strength' && w.exerciseName && w.weight && w.reps);
+        if (strengthWorkouts.length === 0) return;
+
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        const profileSnap = await getDoc(profileRef);
+        const currentBests = profileSnap.data()?.personalBests || {};
+        let updated = false;
+        strengthWorkouts.forEach(workout => {
+            const exercise = workout.exerciseName.toLowerCase();
+            const weight = workout.weight;
+            if (!currentBests[exercise] || weight > currentBests[exercise].weight) {
+                currentBests[exercise] = { weight: weight, reps: workout.reps, date: new Date(workout.timestamp.seconds * 1000).toLocaleDateString() };
+                updated = true;
+            }
+        });
+        if (updated) {
+            await setDoc(profileRef, { personalBests: currentBests }, { merge: true });
+        }
+    }
+
+    function renderPersonalBests(bests) {
+        const container = document.getElementById('personal-bests-display');
+        if (!container) return;
+        const bestsHtml = Object.entries(bests).map(([exercise, data]) => `<div class="p-2 bg-gray-700 rounded-md"><p class="font-bold capitalize">${exercise}</p><p>${data.weight} lbs x ${data.reps} reps <span class="text-gray-400 text-sm">(${data.date})</span></p></div>`).join('');
+        container.innerHTML = bestsHtml || `<p class="text-gray-500">No personal bests yet.</p>`;
+    }
     
     // --- Modal Handling ---
     function setupModal(openBtnIds, modalId, closeBtnId, saveBtnId, saveAction) {
@@ -403,7 +476,115 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(closeBtnId)?.addEventListener('click', () => modal.style.display = 'none');
         document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
     }
-    
-    // ... All modal setup calls and their save actions ...
-    
+
+    function getWorkoutCalories(type, duration) {
+        const metValues = { 'Cardio': 7, 'Strength': 4, 'Yoga': 2.5, 'Running': 11, 'Walking': 3.5, 'Jogging': 7, 'Swimming': 8 };
+        const met = metValues[type] || 5;
+        return Math.round((met * 3.5 * (userProfileData.weight / 2.2)) / 200 * duration);
+    }
+
+    document.getElementById('workout-type-select').addEventListener('change', (e) => {
+        document.getElementById('strength-inputs').classList.toggle('hidden', e.target.value !== 'Strength');
+    });
+
+    setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
+        if (!userId) return;
+        const type = document.getElementById('workout-type-select').value;
+        const duration = parseInt(document.getElementById('workout-duration-input').value);
+        const notes = document.getElementById('workout-notes-input').value;
+        const manualCalories = document.getElementById('workout-calories-input').value;
+        let workoutData = { type, duration, notes, timestamp: serverTimestamp() };
+        if (type === 'Strength') {
+            workoutData.exerciseName = document.getElementById('exercise-name-input').value;
+            workoutData.weight = parseInt(document.getElementById('exercise-weight-input').value);
+            workoutData.reps = parseInt(document.getElementById('exercise-reps-input').value);
+        }
+        if (type && duration) {
+            workoutData.caloriesBurned = manualCalories ? parseInt(manualCalories) : getWorkoutCalories(type, duration);
+            try {
+                await addDoc(collection(db, "users", userId, "workouts"), workoutData);
+                document.getElementById('workout-modal').style.display = 'none';
+                ['workout-duration-input', 'workout-calories-input', 'workout-notes-input', 'exercise-name-input', 'exercise-weight-input', 'exercise-reps-input'].forEach(id => document.getElementById(id).value = '');
+            } catch (error) { console.error("Error adding workout:", error); }
+        }
+    });
+
+    setupModal(['add-meal-btn', 'add-meal-page-btn'], 'meal-modal', 'close-meal-modal-btn', 'save-meal-btn', async () => {
+        if (!userId) return;
+        const name = document.getElementById('meal-name-input').value;
+        const calories = document.getElementById('meal-calories-input').value;
+        const protein = document.getElementById('meal-protein-input').value;
+        const carbs = document.getElementById('meal-carbs-input').value;
+        const fat = document.getElementById('meal-fat-input').value;
+        if (name && calories && protein && carbs && fat) {
+            try {
+                await addDoc(collection(db, "users", userId, "nutrition"), { name, calories: parseInt(calories), protein: parseInt(protein), carbs: parseInt(carbs), fat: parseInt(fat), timestamp: serverTimestamp() });
+                ['meal-name-input', 'meal-calories-input', 'meal-protein-input', 'meal-carbs-input', 'meal-fat-input'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('meal-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding meal:", error); }
+        }
+    });
+
+    setupModal(['add-water-btn'], 'water-modal', 'close-water-modal-btn', 'save-water-btn', async () => {
+        if (!userId) return;
+        const amount = document.getElementById('water-amount-input').value;
+        if (amount) {
+            try {
+                await addDoc(collection(db, "users", userId, "water"), { amount: parseInt(amount), timestamp: serverTimestamp() });
+                document.getElementById('water-amount-input').value = '';
+                document.getElementById('water-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding water:", error); }
+        }
+    });
+
+    setupModal(['log-steps-btn'], 'steps-modal', 'close-steps-modal-btn', 'save-steps-btn', async () => {
+        if (!userId) return;
+        const amount = document.getElementById('steps-amount-input').value;
+        if (amount) {
+            try {
+                await addDoc(collection(db, "users", userId, "steps"), { amount: parseInt(amount), timestamp: serverTimestamp() });
+                document.getElementById('steps-amount-input').value = '';
+                document.getElementById('steps-modal').style.display = 'none';
+            } catch (error) { console.error("Error adding steps:", error); }
+        }
+    });
+
+    document.getElementById('log-weight-btn')?.addEventListener('click', async () => {
+        if (!userId) return;
+        const weight = document.getElementById('weight-input').value;
+        if (weight) {
+            try {
+                await addDoc(collection(db, "users", userId, "progress"), { weight: parseFloat(weight), timestamp: serverTimestamp() });
+                document.getElementById('weight-input').value = '';
+            } catch (error) { console.error("Error logging weight:", error); }
+        }
+    });
+
+    document.getElementById('log-bodyfat-btn')?.addEventListener('click', async () => {
+        if (!userId) return;
+        const bodyfat = document.getElementById('bodyfat-input').value;
+        if (bodyfat) {
+            try {
+                await addDoc(collection(db, "users", userId, "progress"), { bodyfat: parseFloat(bodyfat), timestamp: serverTimestamp() });
+                document.getElementById('bodyfat-input').value = '';
+            } catch (error) { console.error("Error logging body fat:", error); }
+        }
+    });
+
+    document.getElementById('save-settings-btn').addEventListener('click', async () => {
+        if (!userId) return;
+        const profileData = {
+            weight: parseFloat(document.getElementById('user-weight-input').value) || userProfileData.weight,
+            profilePicUrl: document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl,
+            bio: document.getElementById('profile-bio-input').value,
+            fitnessLevel: document.getElementById('fitness-level').value,
+            age: parseInt(document.getElementById('user-age-input').value),
+            height: parseInt(document.getElementById('user-height-input').value),
+            gender: document.getElementById('user-gender-select').value
+        };
+        try {
+            await setDoc(doc(db, "users", userId, "profile", "data"), profileData, { merge: true });
+            alert("Settings saved!");
+        } catch (error) { console.error("Error saving settings:", error); }
+    });
 });
