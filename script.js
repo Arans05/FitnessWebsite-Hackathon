@@ -192,12 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Helper Functions ---
-    const isToday = (date) => {
-        const today = new Date();
-        return date.getDate() === today.getDate() &&
-               date.getMonth() === today.getMonth() &&
-               date.getFullYear() === today.getFullYear();
-    };
+    const toDateString = (date) => date.toISOString().split('T')[0];
+    const isToday = (date) => toDateString(date) === toDateString(new Date());
 
     // --- Rendering Functions ---
     function renderWorkouts(workouts) {
@@ -209,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCalories = workouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
 
         document.getElementById('total-workouts').textContent = totalWorkouts;
-        document.getElementById('total-time').textContent = `${totalTime} min`;
+        document.getElementById('total-time').textContent = totalTime;
         document.getElementById('total-calories-burned').textContent = totalCalories;
 
         workoutListEl.innerHTML = workouts.length === 0 
