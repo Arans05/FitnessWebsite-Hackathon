@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userId = null;
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
     let weightChart, bodyfatChart, macroChart;
-    let dailyCalories = { meals: 0, steps: 0 };
+    let dailyCalories = { meals: 0, steps: 0, workouts: 0 };
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -166,12 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const workoutListEl = document.getElementById('workout-list');
         if (!workoutListEl) return;
         workoutListEl.innerHTML = workouts.length === 0 
-            ? `<tr><td colspan="4" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` 
+            ? `<tr><td colspan="5" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` 
             : workouts.map(w => `
                 <tr class="border-b border-gray-700 hover:bg-gray-700/50">
                     <td class="p-4">${w.timestamp ? new Date(w.timestamp.seconds * 1000).toLocaleDateString() : 'Pending...'}</td>
                     <td class="p-4">${w.type || 'N/A'}</td>
                     <td class="p-4">${w.duration || 'N/A'} min</td>
+                    <td class="p-4">${w.caloriesBurned || 'N/A'}</td>
                     <td class="p-4">${w.notes || ''}</td>
                 </tr>`).join('');
     }
@@ -260,10 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
             statusEl.textContent = 'No';
         }
         calculateStreak(workouts);
+        updateDashboardCaloriesFromWorkouts(workouts);
     }
 
-    function updateTotalCalories() {
-        const total = Math.round(dailyCalories.meals + dailyCalories.steps);
+    function updateTotalCaloriesBurned() {
+        const total = Math.round(dailyCalories.workouts + dailyCalories.steps);
         const caloriesEl = document.getElementById('calories-burned');
         if (caloriesEl) {
             caloriesEl.textContent = total;
@@ -274,8 +276,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCalories = meals
             .filter(m => m.timestamp && new Date(m.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
             .reduce((sum, m) => sum + (m.calories || 0), 0);
-        dailyCalories.meals = totalCalories;
-        updateTotalCalories();
+        const caloriesConsumedEl = document.getElementById('calories-consumed');
+        if(caloriesConsumedEl) caloriesConsumedEl.textContent = totalCalories;
+    }
+
+    function updateDashboardCaloriesFromWorkouts(workouts) {
+        const todayWorkouts = workouts.filter(w => w.timestamp && new Date(w.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
+        const totalCalories = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
+        dailyCalories.workouts = totalCalories;
+        updateTotalCaloriesBurned();
     }
 
     function updateWaterIntake(logs) {
@@ -295,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         stepsEl.textContent = totalSteps;
         dailyCalories.steps = totalSteps * 0.04; // Approx. 0.04 calories per step
-        updateTotalCalories();
+        updateTotalCaloriesBurned();
     }
 
     function setMotivationalQuote() {
@@ -479,17 +488,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
     }
 
+    function getWorkoutCalories(type, duration) {
+        const caloriesPerMinute = {
+            'Cardio': 10,
+            'Strength': 5,
+            'Yoga': 3,
+            'Running': 12,
+            'Walking': 4,
+            'Jogging': 8,
+            'Swimming': 9,
+        };
+        return (caloriesPerMinute[type] || 5) * duration;
+    }
+
     setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
         if (!userId) return;
         const type = document.getElementById('workout-type-select').value;
-        const duration = document.getElementById('workout-duration-input').value;
+        const duration = parseInt(document.getElementById('workout-duration-input').value);
         const notes = document.getElementById('workout-notes-input').value;
+        const manualCalories = document.getElementById('workout-calories-input').value;
 
         if (type && duration) {
+            const caloriesBurned = manualCalories ? parseInt(manualCalories) : getWorkoutCalories(type, duration);
             try {
-                await addDoc(collection(db, "users", userId, "workouts"), { type, duration: parseInt(duration), notes, timestamp: serverTimestamp() });
+                await addDoc(collection(db, "users", userId, "workouts"), { type, duration, notes, caloriesBurned, timestamp: serverTimestamp() });
                 document.getElementById('workout-type-select').selectedIndex = 0;
                 document.getElementById('workout-duration-input').value = '';
+                document.getElementById('workout-calories-input').value = '';
                 document.getElementById('workout-notes-input').value = '';
                 document.getElementById('workout-modal').style.display = 'none';
             } catch (error) { console.error("Error adding workout:", error); }
