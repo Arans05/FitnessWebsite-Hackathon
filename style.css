@@ -1,43 +1,124 @@
-/* style.css */
+/* style.css - Step 1: Foundation Styles */
+
+/* 1. FONT & ROOT VARIABLES (LIGHT MODE DEFAULT)
+/* =============================================== */
+:root {
+    --font-sans: 'Inter', sans-serif;
+
+    /* Light Theme Colors */
+    --color-bg: #f1f5f9; /* slate-100 */
+    --color-bg-secondary: #ffffff; /* white */
+    --color-text: #0f172a; /* slate-900 */
+    --color-text-secondary: #64748b; /* slate-500 */
+    --color-border: #e2e8f0; /* slate-200 */
+
+    --color-primary: #3b82f6; /* blue-500 */
+    --color-primary-hover: #2563eb; /* blue-600 */
+    --color-success: #22c55e; /* green-500 */
+    --color-success-hover: #16a34a; /* green-600 */
+    --color-danger: #ef4444; /* red-500 */
+}
+
+/* 2. DARK MODE OVERRIDES
+/* =============================================== */
+html.dark {
+    /* Dark Theme Colors */
+    --color-bg: #111827; /* gray-900 */
+    --color-bg-secondary: #1f2937; /* gray-800 */
+    --color-text: #f3f4f6; /* gray-100 */
+    --color-text-secondary: #9ca3af; /* gray-400 */
+    --color-border: #374151; /* gray-700 */
+}
+
+
+/* 3. GLOBAL STYLES
+/* =============================================== */
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #111827; /* A default dark background */
-    color: #e5e7eb;
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Hides all main views (login vs app) by default */
-.view-container {
+/* Hide views and pages by default (same as before) */
+.view-container, .page-content {
     display: none;
 }
-
-/* Shows the active view */
-.view-container.active {
-    display: flex;
+.view-container.active, .page-content.active {
+    display: block; /* Use block instead of flex for simplicity here */
 }
-
-/* Hides all content pages within the app by default */
-.page-content {
-    display: none;
+#login-container.active {
+    display: flex; /* Keep flex for login centering */
 }
-
-/* Shows the active page */
-.page-content.active {
+#app-container.active {
     display: block;
-    animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Simple fade-in animation for page transitions */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+
+/* 4. NEW COMPONENT STYLES
+/* =============================================== */
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem; /* rounded-lg */
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+}
+.btn-success {
+    background-color: var(--color-success);
+    color: white;
+}
+.btn-success:hover {
+    background-color: var(--color-success-hover);
 }
 
-/* Styling for the active navigation link */
+/* Form Inputs */
+.form-input {
+    width: 100%;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--color-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+.dark .form-input {
+    background-color: var(--color-bg-secondary); /* Darker inputs in dark mode */
+}
+
+/* Cards & Containers */
+.card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Active Nav Link Style */
 .nav-link.active {
-    background-color: #1f2937;
-    color: #ffffff;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-weight: 600;
 }
