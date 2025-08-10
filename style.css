@@ -1,7 +1,12 @@
 body {
+    @apply bg-white text-gray-900;
     font-family: 'Inter', sans-serif;
+}
+
+.dark body {
     @apply bg-[#0f172a] text-white;
 }
+
 .view-container, .page-content {
     display: none;
 }
@@ -23,4 +28,3 @@ body {
 .progress-bar {
     @apply h-full rounded-full transition-all duration-500 ease-out;
 }
-
