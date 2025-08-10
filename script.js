@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAchievements(profileData.achievements || []);
             renderPersonalBests(profileData.personalBests || {});
             document.getElementById('user-weight-input').value = profileData.weight || '';
+            updateStreakDisplay(profileData.streak || 0);
         });
 
         const leaderboardQuery = query(collection(db, "profiles"));
@@ -173,12 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Helper Functions ---
-    const isToday = (date) => {
-        const today = new Date();
-        return date.getDate() === today.getDate() &&
-               date.getMonth() === today.getMonth() &&
-               date.getFullYear() === today.getFullYear();
-    };
+    const toDateString = (date) => date.toISOString().split('T')[0];
+    const isToday = (date) => toDateString(date) === toDateString(new Date());
 
     // --- Rendering Functions ---
     function renderWorkouts(workouts) {
@@ -334,15 +331,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Gamification ---
-    function calculateStreak(workouts) {
+    async function calculateStreak(workouts) {
         const validWorkouts = workouts.filter(w => w.timestamp && w.timestamp.seconds);
         if (validWorkouts.length === 0) {
-            updateStreakDisplay(0);
+            await updateStreakInFirebase(0);
             return;
         }
 
-        const toDateString = (date) => date.toISOString().split('T')[0];
-    
         const workoutDays = [...new Set(validWorkouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))]
             .sort((a, b) => b.localeCompare(a));
 
@@ -365,7 +360,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        updateStreakDisplay(streak);
+        await updateStreakInFirebase(streak);
+    }
+
+    async function updateStreakInFirebase(streak) {
+        if (!userId) return;
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        await setDoc(profileRef, { streak }, { merge: true });
     }
 
     function updateStreakDisplay(streak) {
@@ -386,11 +387,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newAchievements = [];
 
-        // First Workout
         if (data.workouts.length >= 1 && !earnedAchievements.includes('FIRST_WORKOUT')) {
             newAchievements.push('FIRST_WORKOUT');
         }
-        // Five Workouts
         if (data.workouts.length >= 5 && !earnedAchievements.includes('FIVE_WORKOUTS')) {
             newAchievements.push('FIVE_WORKOUTS');
         }
