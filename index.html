@@ -226,13 +226,13 @@
             </div>
             <div id="nutrition-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Nutrition Log</h2>
-                <div class="mb-6">
+                <div class="mb-6 flex space-x-4">
                     <button id="add-meal-page-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">
                         Log New Meal
                     </button>
                 </div>
-                <div class="grid gap-6 md:grid-cols-2">
-                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6 lg:col-span-2">
                         <h3 class="text-2xl font-semibold mb-4">Today's Meals</h3>
                         <ul id="meal-list" class="space-y-4"></ul>
                     </div>
@@ -240,6 +240,15 @@
                         <h3 class="text-2xl font-semibold mb-4">Today's Summary</h3>
                         <canvas id="macro-chart" class="w-full h-80"></canvas>
                     </div>
+                </div>
+                <div class="rounded-xl border bg-gray-800 text-white shadow p-6 mt-6">
+                    <h3 class="text-2xl font-semibold mb-4">Meal Plans by Goal</h3>
+                    <select id="meal-plan-select" class="w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mb-4">
+                        <option>Weight Loss</option>
+                        <option>Muscle Gain</option>
+                        <option>Maintenance</option>
+                    </select>
+                    <div id="meal-plan-display"></div>
                 </div>
             </div>
             <div id="profile-content" class="page-content">
@@ -304,7 +313,7 @@
                         </div>
                         <div>
                             <label for="fitness-level" class="block text-sm font-medium text-gray-400">Fitness Level</label>
-                            <select id="fitness-level" class="mt-1 flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                            <select id="fitness-level" class="mt-1 flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
                                 <option>Beginner</option>
                                 <option>Intermediate</option>
                                 <option>Advanced</option>
