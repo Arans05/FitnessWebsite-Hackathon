@@ -125,7 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const workoutsQuery = query(collection(db, "users", userId, "workouts"));
         unsubscribeWorkouts = onSnapshot(workoutsQuery, (snapshot) => {
-            const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            const workouts = snapshot.docs
+                .filter(doc => !doc.metadata.hasPendingWrites && doc.data().timestamp)
+                .map(doc => ({ id: doc.id, ...doc.data() }))
                 .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             renderWorkouts(workouts);
             updateDashboardWorkouts(workouts);
@@ -203,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCalories = workouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
 
         document.getElementById('total-workouts').textContent = totalWorkouts;
-        document.getElementById('total-time').textContent = `${totalTime} min`;
+        document.getElementById('total-time').textContent = totalTime;
         document.getElementById('total-calories-burned').textContent = totalCalories;
 
         workoutListEl.innerHTML = workouts.length === 0 
