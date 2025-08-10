@@ -243,7 +243,7 @@
                 </div>
                 <div class="rounded-xl border bg-gray-800 text-white shadow p-6 mt-6">
                     <h3 class="text-2xl font-semibold mb-4">Meal Plans by Goal</h3>
-                    <select id="meal-plan-select" class="w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mb-4">
+                    <select id="meal-plan-select" class="w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 mb-4">
                         <option>Weight Loss</option>
                         <option>Muscle Gain</option>
                         <option>Maintenance</option>
@@ -278,7 +278,13 @@
             </div>
             <div id="community-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Community</h2>
-                <div class="grid gap-6 md:grid-cols-2">
+                <div class="mb-4 border-b border-gray-700">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button id="leaderboard-tab-workouts" class="border-blue-500 text-blue-400 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Workouts</button>
+                        <button id="leaderboard-tab-steps" class="border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-300 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Steps</button>
+                    </nav>
+                </div>
+                <div id="leaderboard-workouts-content">
                     <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
                         <h3 class="text-2xl font-semibold mb-4">Workout Leaderboard</h3>
                         <table class="w-full text-sm text-left">
@@ -289,19 +295,23 @@
                                     <th scope="col" class="px-6 py-3">Workouts</th>
                                 </tr>
                             </thead>
-                            <tbody id="leaderboard-body"></tbody>
+                            <tbody id="leaderboard-body-workouts"></tbody>
                         </table>
                     </div>
+                </div>
+                <div id="leaderboard-steps-content" style="display: none;">
                     <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
-                        <h3 class="text-2xl font-semibold mb-4">Weekly Challenge</h3>
-                        <div id="challenge-display" class="text-center">
-                            <h4 class="text-xl font-bold text-yellow-400">Cardio King</h4>
-                            <p class="text-gray-400 mb-4">Log 120 minutes of cardio this week.</p>
-                            <div class="w-full bg-gray-700 rounded-full h-4 mb-2">
-                                <div id="challenge-progress-bar" class="bg-green-500 h-4 rounded-full" style="width: 0%"></div>
-                            </div>
-                            <p id="challenge-progress-text" class="text-sm">0 / 120 minutes</p>
-                        </div>
+                        <h3 class="text-2xl font-semibold mb-4">Steps Leaderboard</h3>
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Rank</th>
+                                    <th scope="col" class="px-6 py-3">User</th>
+                                    <th scope="col" class="px-6 py-3">Total Steps</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body-steps"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -329,6 +339,21 @@
                         <div>
                             <label for="user-weight-input" class="block text-sm font-medium text-gray-400">Your Weight (lbs)</label>
                             <input type="number" id="user-weight-input" class="mt-1 flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                        </div>
+                         <div>
+                            <label for="user-height-input" class="block text-sm font-medium text-gray-400">Your Height (cm)</label>
+                            <input type="number" id="user-height-input" class="mt-1 flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                        </div>
+                         <div>
+                            <label for="user-age-input" class="block text-sm font-medium text-gray-400">Your Age</label>
+                            <input type="number" id="user-age-input" class="mt-1 flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                        </div>
+                         <div>
+                            <label for="user-gender-select" class="block text-sm font-medium text-gray-400">Your Gender</label>
+                            <select id="user-gender-select" class="mt-1 flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                                <option>Male</option>
+                                <option>Female</option>
+                            </select>
                         </div>
                         <button id="save-settings-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Save Settings</button>
                     </div>
@@ -371,7 +396,7 @@
         <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log New Meal</h3>
-                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
                 <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
@@ -430,6 +455,15 @@
             <button id="close-profile-pic-modal-btn" class="absolute top-0 right-0 m-4 p-1 rounded-full text-white bg-black/50 hover:bg-black/75">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
+        </div>
+    </div>
+    <div id="user-profile-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold" id="modal-profile-username"></h3>
+                <button id="close-user-profile-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div id="modal-profile-content"></div>
         </div>
     </div>
     
