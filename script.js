@@ -571,4 +571,3 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { console.error("Error logging body fat:", error); }
         }
     });
-});
