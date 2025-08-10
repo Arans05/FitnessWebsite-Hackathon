@@ -138,6 +138,10 @@
                 <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Calories Consumed</p>
+                        <p class="text-2xl font-bold"><span id="calories-consumed">0</span></p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Calories Burned</p>
                         <p class="text-2xl font-bold"><span id="calories-burned">0</span></p>
                     </div>
@@ -146,18 +150,14 @@
                         <p class="text-2xl font-bold"><span id="streak-display">0</span> Days</p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Workout Today</p>
-                        <p class="text-2xl font-bold" id="workout-status">No</p>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Water Intake</p>
                         <p class="text-2xl font-bold"><span id="water-intake">0</span> / 2000 ml</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold mb-2">Next Scheduled Workout</h3>
-                        <p class="text-gray-400">Tomorrow, 8:00 AM - Cardio</p>
+                        <h3 class="text-xl font-semibold mb-2">Steps Today</h3>
+                        <p class="text-2xl font-bold" id="steps-taken">0</p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <h3 class="text-xl font-semibold mb-2">Motivational Quote</h3>
@@ -189,6 +189,7 @@
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Date</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Workout</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Duration</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Calories Burned</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Notes</th>
                                 </tr>
                             </thead>
@@ -304,6 +305,7 @@
                     <option>Swimming</option>
                 </select>
                 <input type="number" id="workout-duration-input" placeholder="Duration (minutes)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
+                <input type="number" id="workout-calories-input" placeholder="Calories Burned (optional)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
                 <textarea id="workout-notes-input" placeholder="Notes (e.g., 3 sets of 10 reps)" class="flex h-20 w-full rounded-md border border-gray-700 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"></textarea>
                 <button id="save-workout-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Workout</button>
             </div>
