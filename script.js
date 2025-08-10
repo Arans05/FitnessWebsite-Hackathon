@@ -189,14 +189,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI Update & Rendering Functions ---
     
     function updateProfileUI(profile) {
-        document.getElementById('welcome-message').textContent = `Welcome, ${profile.username}!`;
-        document.getElementById('profile-username').textContent = profile.username;
+        if (!profile) return;
+        document.getElementById('welcome-message').textContent = `Welcome, ${profile.username || 'User'}!`;
+        document.getElementById('profile-username').textContent = profile.username || 'User';
         document.getElementById('profile-fitness-level').textContent = profile.fitnessLevel || 'N/A';
         document.getElementById('profile-bio').textContent = profile.bio || 'No bio set.';
         document.getElementById('profile-streak-display').textContent = profile.streak || 0;
         
         const profilePics = [document.getElementById('profile-pic-nav'), document.getElementById('profile-pic-main')];
-        profilePics.forEach(el => el.src = profile.profilePicUrl || `https://placehold.co/96x96/1e293b/FFF?text=${profile.username.charAt(0).toUpperCase()}`);
+        profilePics.forEach(el => {
+            if(el) el.src = profile.profilePicUrl || `https://placehold.co/96x96/1e293b/FFF?text=${(profile.username || 'U').charAt(0).toUpperCase()}`;
+        });
 
         // Settings page
         document.getElementById('profile-bio-input').value = profile.bio || '';
@@ -231,8 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderMeals(meals) {
         const mealListEl = document.getElementById('meal-list');
+        if (!mealListEl) return;
         const today = new Date().toDateString();
-        const todayMeals = meals.filter(m => new Date(m.timestamp.seconds * 1000).toDateString() === today);
+        const todayMeals = meals.filter(m => m.timestamp && new Date(m.timestamp.seconds * 1000).toDateString() === today);
 
         mealListEl.innerHTML = todayMeals.length === 0
             ? `<li class="text-center p-8 text-gray-500">No meals logged today.</li>`
@@ -248,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const stepsLeaderboardBody = document.getElementById('leaderboard-body-steps');
 
         const renderTable = (bodyEl, data, key, unit) => {
+            if (!bodyEl) return;
             const sortedData = [...data].sort((a, b) => (b[key] || 0) - (a[key] || 0));
             bodyEl.innerHTML = sortedData.slice(0, 10).map((p, index) => `
                 <tr class="border-b border-gray-800">
@@ -300,7 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Charting Functions ---
     function createOrUpdateChart(id, type, data, options) {
-        const ctx = document.getElementById(id).getContext('2d');
+        const ctx = document.getElementById(id)?.getContext('2d');
+        if (!ctx) return;
         if (charts[id]) {
             charts[id].data = data;
             charts[id].options = options;
@@ -317,12 +323,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         createOrUpdateChart('weight-chart', 'line', {
             labels: weightData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()),
-            datasets: [{ data: weightData.map(d => d.weight), borderColor: '#3b82f6', tension: 0.2 }]
+            datasets: [{ data: weightData.map(d => d.weight), borderColor: '#3b82f6', tension: 0.2, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
         }, chartOptions);
 
         createOrUpdateChart('bodyfat-chart', 'line', {
             labels: bodyfatData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()),
-            datasets: [{ data: bodyfatData.map(d => d.bodyfat), borderColor: '#16a34a', tension: 0.2 }]
+            datasets: [{ data: bodyfatData.map(d => d.bodyfat), borderColor: '#16a34a', tension: 0.2, fill: true, backgroundColor: 'rgba(22, 163, 74, 0.1)' }]
         }, chartOptions);
     }
 
@@ -342,18 +348,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 backgroundColor: ['#3b82f6', '#16a34a', '#ef4444'],
                 borderWidth: 0
             }]
-        }, { plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } } });
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } } });
     }
 
     function renderWeeklyActivityChart(workouts) {
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const weeklyData = Array(7).fill(0);
         const today = new Date();
-        const startOfWeek = today.getDate() - today.getDay();
+        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
         
         workouts.forEach(w => {
+            if (!w.timestamp) return;
             const workoutDate = new Date(w.timestamp.seconds * 1000);
-            if (workoutDate >= new Date(today.setDate(startOfWeek))) {
+            if (workoutDate >= startOfWeek) {
                 weeklyData[workoutDate.getDay()] += w.duration || 0;
             }
         });
@@ -363,7 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 label: 'Minutes',
                 data: weeklyData,
-                backgroundColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: '#3b82f6',
+                borderWidth: 1,
                 borderRadius: 4
             }]
         }, { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#9ca3af' } }, x: { ticks: { color: '#9ca3af' } } } });
@@ -371,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Gamification ---
     async function calculateStreak(workouts) {
-        if (workouts.length === 0) return;
+        if (!userId || workouts.length === 0) return;
         const workoutDays = [...new Set(workouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))].sort((a,b) => b.localeCompare(a));
         
         let streak = 0;
@@ -383,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < workoutDays.length - 1; i++) {
                 const currentDay = new Date(workoutDays[i]);
                 const prevDay = new Date(workoutDays[i+1]);
-                if ((currentDay - prevDay) / 86400000 === 1) {
+                if ((currentDay.getTime() - prevDay.getTime()) / 86400000 === 1) {
                     streak++;
                 } else {
                     break;
@@ -394,32 +403,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Modal Handling ---
-    function setupModal(openBtnIds, modalId, closeBtnId, saveBtnId, saveAction, resetAction) {
+    function setupModal(openBtnIds, modalId, closeBtnId, formId, saveAction) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
+        const form = document.getElementById(formId);
 
         const openModal = () => modal.style.display = 'flex';
         const closeModal = () => {
             modal.style.display = 'none';
-            if(resetAction) resetAction();
+            if(form) form.reset();
         };
 
         openBtnIds.forEach(id => document.getElementById(id)?.addEventListener('click', openModal));
         document.getElementById(closeBtnId)?.addEventListener('click', closeModal);
-        if(saveBtnId) document.getElementById(saveBtnId)?.addEventListener('click', async () => {
-            await saveAction();
-            closeModal();
-        });
+        
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveAction();
+                closeModal();
+            });
+        }
     }
     
     // Workout Modal
-    setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', 
+    setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'workout-form', 
         async () => {
             const type = document.getElementById('workout-type-select').value;
             const duration = parseInt(document.getElementById('workout-duration-input').value);
             const manualCalories = document.getElementById('workout-calories-input').value;
             
-            if (!type || !duration) return;
+            if (!userId || !type || !duration) return;
 
             const caloriesBurned = manualCalories ? parseInt(manualCalories) : Math.round(( ( { 'Cardio': 7, 'Strength': 4, 'Yoga': 2.5, 'Running': 11, 'Walking': 3.5, 'Jogging': 7, 'Swimming': 8 }[type] || 5 ) * 3.5 * (userProfileData.weight / 2.2)) / 200 * duration);
             
@@ -435,18 +449,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 workoutData.reps = parseInt(document.getElementById('exercise-reps-input').value);
             }
             await addDoc(collection(db, "users", userId, "workouts"), workoutData);
-        },
-        () => { // Reset form
-            document.getElementById('workout-modal').querySelector('form')?.reset();
-            document.getElementById('strength-inputs').classList.add('hidden');
         }
     );
-    document.getElementById('workout-type-select').addEventListener('change', (e) => {
+    document.getElementById('workout-type-select')?.addEventListener('change', (e) => {
         document.getElementById('strength-inputs').classList.toggle('hidden', e.target.value !== 'Strength');
     });
 
+    // Meal Modal
+    setupModal(['add-meal-btn', 'add-meal-page-btn'], 'meal-modal', 'close-meal-modal-btn', 'meal-form',
+        async () => {
+            const name = document.getElementById('meal-name-input').value;
+            const calories = parseInt(document.getElementById('meal-calories-input').value);
+            const protein = parseInt(document.getElementById('meal-protein-input').value);
+            const carbs = parseInt(document.getElementById('meal-carbs-input').value);
+            const fat = parseInt(document.getElementById('meal-fat-input').value);
+
+            if(!userId || !name || !calories) return;
+
+            await addDoc(collection(db, "users", userId, "nutrition"), {
+                name, calories, protein, carbs, fat,
+                timestamp: serverTimestamp()
+            });
+        }
+    );
+
+    // Water Modal
+    setupModal(['add-water-btn'], 'water-modal', 'close-water-modal-btn', 'water-form',
+        async () => {
+            const amount = parseInt(document.getElementById('water-amount-input').value);
+            if(!userId || !amount) return;
+            await addDoc(collection(db, "users", userId, "water"), { amount, timestamp: serverTimestamp() });
+        }
+    );
+    
+    // Steps Modal
+    setupModal(['log-steps-btn'], 'steps-modal', 'close-steps-modal-btn', 'steps-form',
+        async () => {
+            const amount = parseInt(document.getElementById('steps-amount-input').value);
+            if(!userId || !amount) return;
+            await addDoc(collection(db, "users", userId, "steps"), { amount, timestamp: serverTimestamp() });
+        }
+    );
+
     // --- Other Event Listeners ---
     document.getElementById('save-settings-btn').addEventListener('click', async () => {
+        if (!userId) return;
         const profileData = {
             bio: document.getElementById('profile-bio-input').value,
             fitnessLevel: document.getElementById('fitness-level').value,
@@ -461,12 +508,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('log-weight-btn').addEventListener('click', () => {
         const weight = parseFloat(document.getElementById('weight-input').value);
-        if(weight) addDoc(collection(db, "users", userId, "progress"), { weight, timestamp: serverTimestamp() });
+        if(userId && weight) addDoc(collection(db, "users", userId, "progress"), { weight, timestamp: serverTimestamp() });
     });
     
     document.getElementById('log-bodyfat-btn').addEventListener('click', () => {
         const bodyfat = parseFloat(document.getElementById('bodyfat-input').value);
-        if(bodyfat) addDoc(collection(db, "users", userId, "progress"), { bodyfat, timestamp: serverTimestamp() });
+        if(userId && bodyfat) addDoc(collection(db, "users", userId, "progress"), { bodyfat, timestamp: serverTimestamp() });
     });
 
     // Leaderboard Tabs
@@ -475,13 +522,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const workoutContent = document.getElementById('leaderboard-workouts-content');
     const stepsContent = document.getElementById('leaderboard-steps-content');
 
-    workoutTab.addEventListener('click', () => {
+    workoutTab?.addEventListener('click', () => {
         workoutTab.classList.add('active');
         stepsTab.classList.remove('active');
         workoutContent.style.display = 'block';
         stepsContent.style.display = 'none';
     });
-    stepsTab.addEventListener('click', () => {
+    stepsTab?.addEventListener('click', () => {
         stepsTab.classList.add('active');
         workoutTab.classList.remove('active');
         stepsContent.style.display = 'block';
@@ -498,6 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Success isn't always about greatness. It's about consistency.",
             "Your body can stand almost anything. It’s your mind that you have to convince."
         ];
-        document.getElementById('motivational-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+        const quoteEl = document.getElementById('motivational-quote');
+        if (quoteEl) quoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
     }
 });
