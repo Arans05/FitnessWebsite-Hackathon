@@ -161,6 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Helper Functions ---
+    const isToday = (date) => {
+        const today = new Date();
+        return date.getDate() === today.getDate() &&
+               date.getMonth() === today.getMonth() &&
+               date.getFullYear() === today.getFullYear();
+    };
+
     // --- Rendering Functions ---
     function renderWorkouts(workouts) {
         const workoutListEl = document.getElementById('workout-list');
@@ -180,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderMeals(meals) {
         const mealListEl = document.getElementById('meal-list');
         if (!mealListEl) return;
-        const todayMeals = meals.filter(m => m.timestamp && new Date(m.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+        const todayMeals = meals.filter(m => m.timestamp && isToday(new Date(m.timestamp.seconds * 1000)))
             .sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
         mealListEl.innerHTML = todayMeals.length === 0
@@ -218,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderMacroChart(meals) {
-        const todayMeals = meals.filter(m => m.timestamp && new Date(m.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
+        const todayMeals = meals.filter(m => m.timestamp && isToday(new Date(m.timestamp.seconds * 1000)));
         const totalProtein = todayMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
         const totalCarbs = todayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
         const totalFat = todayMeals.reduce((sum, m) => sum + (m.fat || 0), 0);
@@ -253,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDashboardWorkouts(workouts) {
         const statusEl = document.getElementById('workout-status');
         if (!statusEl) return;
-        const todayWorkouts = workouts.filter(w => w.timestamp && new Date(w.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
+        const todayWorkouts = workouts.filter(w => w.timestamp && isToday(new Date(w.timestamp.seconds * 1000)));
         if (todayWorkouts.length > 0) {
             const totalDuration = todayWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
             statusEl.textContent = `Yes (${totalDuration} min)`;
@@ -274,14 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateDashboardCaloriesFromMeals(meals) {
         const totalCalories = meals
-            .filter(m => m.timestamp && new Date(m.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+            .filter(m => m.timestamp && isToday(new Date(m.timestamp.seconds * 1000)))
             .reduce((sum, m) => sum + (m.calories || 0), 0);
         const caloriesConsumedEl = document.getElementById('calories-consumed');
         if(caloriesConsumedEl) caloriesConsumedEl.textContent = totalCalories;
     }
 
     function updateDashboardCaloriesFromWorkouts(workouts) {
-        const todayWorkouts = workouts.filter(w => w.timestamp && new Date(w.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
+        const todayWorkouts = workouts.filter(w => w.timestamp && isToday(new Date(w.timestamp.seconds * 1000)));
         const totalCalories = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
         dailyCaloriesBurned.workouts = totalCalories;
         updateTotalCaloriesBurned();
@@ -289,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateWaterIntake(logs) {
         const total = logs
-            .filter(l => l.timestamp && new Date(l.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+            .filter(l => l.timestamp && isToday(new Date(l.timestamp.seconds * 1000)))
             .reduce((sum, l) => sum + (l.amount || 0), 0);
         document.getElementById('water-intake').textContent = `${total} / 2000 ml`;
     }
@@ -299,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!stepsEl) return;
         
         const totalSteps = steps
-            .filter(s => s.timestamp && new Date(s.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString())
+            .filter(s => s.timestamp && isToday(new Date(s.timestamp.seconds * 1000)))
             .reduce((sum, s) => sum + (s.amount || 0), 0);
         
         stepsEl.textContent = totalSteps;
@@ -324,14 +332,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const toDateString = (date) => date.toISOString().split('T')[0];
     
-        const workoutDates = [...new Set(validWorkouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))]
+        const workoutDays = [...new Set(validWorkouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))]
             .sort((a, b) => b.localeCompare(a));
 
         let streak = 0;
         const todayStr = toDateString(new Date());
         const yesterdayStr = toDateString(new Date(Date.now() - 86400000));
 
-        if (workoutDates[0] === todayStr || workoutDates[0] === yesterdayStr) {
+        if (workoutDays[0] === todayStr || workoutDays[0] === yesterdayStr) {
             streak = 1;
             for (let i = 0; i < workoutDates.length - 1; i++) {
                 const currentDay = new Date(workoutDates[i]);
