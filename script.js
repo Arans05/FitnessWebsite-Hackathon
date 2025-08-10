@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
     let weightChart, bodyfatChart, macroChart;
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
-    let userWeight = 150; // Default weight
+    let userProfileData = { weight: 150 }; // Default weight
     let customWorkoutExercises = [];
 
     // --- Page Navigation ---
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const profileSnap = await getDoc(doc(db, "profiles", userId));
             const profileData = profileSnap.data() || {};
             const username = profileData.username || user.email;
-            userWeight = profileData.weight || 150;
+            userProfileData = { ...userProfileData, ...profileData };
 
             if (userDisplayMobile) userDisplayMobile.textContent = username;
             if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
@@ -165,6 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('profile-pic-url').value = profileData.profilePicUrl || '';
             document.getElementById('profile-bio').value = profileData.bio || '';
             document.getElementById('fitness-level').value = profileData.fitnessLevel || 'Beginner';
+            document.getElementById('user-age-input').value = profileData.age || '';
+            document.getElementById('user-height-input').value = profileData.height || '';
+            document.getElementById('user-gender-select').value = profileData.gender || 'Male';
             document.getElementById('profile-pic-nav').src = profileData.profilePicUrl || 'https://placehold.co/32x32/0f172a/FFF?text=U';
             document.getElementById('profile-pic-nav-mobile').src = profileData.profilePicUrl || 'https://placehold.co/40x40/0f172a/FFF?text=U';
             document.getElementById('profile-pic-main').src = profileData.profilePicUrl || 'https://placehold.co/96x96/0f172a/FFF?text=U';
@@ -553,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getWorkoutCalories(type, duration) {
         const metValues = { 'Cardio': 7, 'Strength': 4, 'Yoga': 2.5, 'Running': 11, 'Walking': 3.5, 'Jogging': 7, 'Swimming': 8 };
         const met = metValues[type] || 5;
-        return Math.round((met * 3.5 * (userWeight / 2.2)) / 200 * duration);
+        return Math.round((met * 3.5 * (userProfileData.weight / 2.2)) / 200 * duration);
     }
 
     document.getElementById('workout-type-select').addEventListener('change', (e) => {
@@ -672,16 +675,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const profilePicUrl = document.getElementById('profile-pic-url').value;
         const bio = document.getElementById('profile-bio').value;
         const fitnessLevel = document.getElementById('fitness-level').value;
+        const age = document.getElementById('user-age-input').value;
+        const height = document.getElementById('user-height-input').value;
+        const gender = document.getElementById('user-gender-select').value;
 
         try {
             const profileRef = doc(db, "users", userId, "profile", "data");
             await setDoc(profileRef, { 
-                weight: parseFloat(newWeight) || userWeight,
+                weight: parseFloat(newWeight) || userProfileData.weight,
                 profilePicUrl,
                 bio,
-                fitnessLevel
+                fitnessLevel,
+                age: parseInt(age),
+                height: parseInt(height),
+                gender
             }, { merge: true });
-            userWeight = parseFloat(newWeight) || userWeight;
+            userProfileData.weight = parseFloat(newWeight) || userProfileData.weight;
             alert("Settings saved!");
         } catch (error) {
             console.error("Error saving settings:", error);
@@ -731,5 +740,55 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('close-profile-pic-modal-btn').addEventListener('click', () => {
         document.getElementById('profile-pic-modal').style.display = 'none';
+    });
+    
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('theme-icon-dark').classList.toggle('hidden', !isDark);
+        document.getElementById('theme-icon-light').classList.toggle('hidden', isDark);
+    });
+
+    if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon-dark').classList.add('hidden');
+        document.getElementById('theme-icon-light').classList.remove('hidden');
+    }
+
+    document.getElementById('meal-plan-select').addEventListener('change', async (e) => {
+        const goal = e.target.value;
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        const profileSnap = await getDoc(profileRef);
+        const profileData = profileSnap.data();
+
+        if (profileData && profileData.weight && profileData.height && profileData.age && profileData.gender) {
+            const bmr = profileData.gender === 'Male'
+                ? 88.362 + (13.397 * (profileData.weight / 2.2)) + (4.799 * profileData.height) - (5.677 * profileData.age)
+                : 447.593 + (9.247 * (profileData.weight / 2.2)) + (3.098 * profileData.height) - (4.330 * profileData.age);
+            
+            const tdee = bmr * 1.55; // Assuming moderate activity level
+
+            let targetCalories;
+            let proteinTarget;
+
+            if (goal === 'Weight Loss') {
+                targetCalories = tdee - 500;
+            } else if (goal === 'Muscle Gain') {
+                targetCalories = tdee + 300;
+                proteinTarget = Math.round((profileData.weight / 2.2) * 1.6);
+            } else {
+                targetCalories = tdee;
+            }
+
+            let planHtml = `<p class="text-lg">Your target is <span class="font-bold text-green-400">${Math.round(targetCalories)} calories</span> per day.</p>`;
+            if (proteinTarget) {
+                planHtml += `<p class="text-lg">Aim for <span class="font-bold text-blue-400">${proteinTarget}g of protein</span> per day.</p>`;
+            }
+            document.getElementById('meal-plan-display').innerHTML = planHtml;
+
+        } else {
+            document.getElementById('meal-plan-display').innerHTML = `<p class="text-yellow-400">Please complete your profile in Settings to get personalized meal plans.</p>`;
+        }
     });
 });
