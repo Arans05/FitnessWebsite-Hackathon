@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAchievements(profileData.achievements || []);
             renderPersonalBests(profileData.personalBests || {});
             document.getElementById('user-weight-input').value = profileData.weight || '';
-            document.getElementById('profile-pic-url').value = profileData.profilePicUrl || '';
             document.getElementById('profile-bio').value = profileData.bio || '';
             document.getElementById('fitness-level').value = profileData.fitnessLevel || 'Beginner';
             document.getElementById('user-age-input').value = profileData.age || '';
@@ -672,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('save-settings-btn').addEventListener('click', async () => {
         if (!userId) return;
         const newWeight = document.getElementById('user-weight-input').value;
-        const profilePicUrl = document.getElementById('profile-pic-url').value;
+        const profilePicUrl = document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl;
         const bio = document.getElementById('profile-bio').value;
         const fitnessLevel = document.getElementById('fitness-level').value;
         const age = document.getElementById('user-age-input').value;
@@ -791,4 +790,30 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('meal-plan-display').innerHTML = `<p class="text-yellow-400">Please complete your profile in Settings to get personalized meal plans.</p>`;
         }
     });
+
+    const avatarSelection = document.getElementById('avatar-selection');
+    const avatars = [
+        'https://placehold.co/96x96/FF5733/FFFFFF?text=A',
+        'https://placehold.co/96x96/33FF57/FFFFFF?text=B',
+        'https://placehold.co/96x96/3357FF/FFFFFF?text=C',
+        'https://placehold.co/96x96/FF33A1/FFFFFF?text=D',
+    ];
+
+    avatars.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.dataset.url = url;
+        img.className = 'h-16 w-16 rounded-full cursor-pointer';
+        avatarSelection.appendChild(img);
+    });
+
+    avatarSelection.addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG') {
+            // Remove selection from others
+            avatarSelection.querySelectorAll('img').forEach(img => img.classList.remove('avatar-selected'));
+            // Add selection to clicked
+            e.target.classList.add('avatar-selected');
+        }
+    });
 });
+
