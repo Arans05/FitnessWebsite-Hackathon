@@ -185,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         unsubscribeSteps = onSnapshot(stepsQuery, (snapshot) => {
             const steps = snapshot.docs.map(doc => doc.data());
             updateDashboardSteps(steps);
+            updateStepsLeaderboard(steps);
         });
     }
 
@@ -196,6 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderWorkouts(workouts) {
         const workoutListEl = document.getElementById('workout-list');
         if (!workoutListEl) return;
+        
+        const totalWorkouts = workouts.length;
+        const totalTime = workouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+        const totalCalories = workouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
+
+        document.getElementById('total-workouts').textContent = totalWorkouts;
+        document.getElementById('total-time').textContent = `${totalTime} min`;
+        document.getElementById('total-calories-burned').textContent = totalCalories;
+
         workoutListEl.innerHTML = workouts.length === 0 
             ? `<tr><td colspan="5" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` 
             : workouts.map(w => `
@@ -269,16 +279,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderLeaderboard(profiles) {
-        const leaderboardBody = document.getElementById('leaderboard-body-workouts');
-        if (!leaderboardBody) return;
-        const sortedProfiles = profiles.sort((a, b) => (b.workoutCount || 0) - (a.workoutCount || 0));
-        leaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
-            <tr class="bg-gray-800 border-b border-gray-700">
-                <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
-                <td class="px-6 py-4 cursor-pointer hover:underline" data-userid="${p.id}">${p.username || p.email}</td>
-                <td class="px-6 py-4">${p.workoutCount || 0}</td>
-            </tr>
-        `).join('');
+        const workoutLeaderboardBody = document.getElementById('leaderboard-body-workouts');
+        const stepsLeaderboardBody = document.getElementById('leaderboard-body-steps');
+
+        if (workoutLeaderboardBody) {
+            const sortedProfiles = [...profiles].sort((a, b) => (b.workoutCount || 0) - (a.workoutCount || 0));
+            workoutLeaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
+                <tr class="bg-gray-800 border-b border-gray-700">
+                    <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
+                    <td class="px-6 py-4 cursor-pointer hover:underline" data-userid="${p.id}">${p.username || p.email}</td>
+                    <td class="px-6 py-4">${p.workoutCount || 0}</td>
+                </tr>
+            `).join('');
+        }
+        
+        if (stepsLeaderboardBody) {
+            const sortedProfiles = [...profiles].sort((a, b) => (b.totalSteps || 0) - (a.totalSteps || 0));
+            stepsLeaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
+                <tr class="bg-gray-800 border-b border-gray-700">
+                    <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
+                    <td class="px-6 py-4 cursor-pointer hover:underline" data-userid="${p.id}">${p.username || p.email}</td>
+                    <td class="px-6 py-4">${p.totalSteps || 0}</td>
+                </tr>
+            `).join('');
+        }
     }
 
     function updateDashboardWorkouts(workouts) {
@@ -436,6 +460,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const profileSnap = await getDoc(profileRef);
         const username = profileSnap.data()?.username || auth.currentUser.email;
         await setDoc(profileRef, { username, workoutCount }, { merge: true });
+    }
+    
+    async function updateStepsLeaderboard(steps) {
+        if (!userId) return;
+        const totalSteps = steps.reduce((sum, s) => sum + (s.amount || 0), 0);
+        const profileRef = doc(db, "profiles", userId);
+        await setDoc(profileRef, { totalSteps }, { merge: true });
     }
     
     function updateChallengeProgress(workouts) {
@@ -814,5 +845,40 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add selection to clicked
             e.target.classList.add('avatar-selected');
         }
+    });
+
+    document.getElementById('leaderboard-tab-workouts').addEventListener('click', () => {
+        document.getElementById('leaderboard-workouts-content').style.display = 'block';
+        document.getElementById('leaderboard-steps-content').style.display = 'none';
+        document.getElementById('leaderboard-tab-workouts').classList.add('border-blue-500', 'text-blue-400');
+        document.getElementById('leaderboard-tab-steps').classList.remove('border-blue-500', 'text-blue-400');
+    });
+
+    document.getElementById('leaderboard-tab-steps').addEventListener('click', () => {
+        document.getElementById('leaderboard-workouts-content').style.display = 'none';
+        document.getElementById('leaderboard-steps-content').style.display = 'block';
+        document.getElementById('leaderboard-tab-steps').classList.add('border-blue-500', 'text-blue-400');
+        document.getElementById('leaderboard-tab-workouts').classList.remove('border-blue-500', 'text-blue-400');
+    });
+
+    document.getElementById('leaderboard-body-workouts').addEventListener('click', async (e) => {
+        if (e.target.dataset.userid) {
+            const targetUserId = e.target.dataset.userid;
+            const profileSnap = await getDoc(doc(db, "profiles", targetUserId));
+            const profileData = profileSnap.data();
+            const userProfileSnap = await getDoc(doc(db, "users", targetUserId, "profile", "data"));
+            const userProfileData = userProfileSnap.data();
+
+            document.getElementById('modal-profile-username').textContent = profileData.username;
+            document.getElementById('modal-profile-content').innerHTML = `
+                <img src="${userProfileData.profilePicUrl || 'https://placehold.co/96x96/0f172a/FFF?text=U'}" class="h-24 w-24 rounded-full mx-auto mb-4">
+                <p class="text-center">${userProfileData.bio || ''}</p>
+            `;
+            document.getElementById('user-profile-modal').style.display = 'flex';
+        }
+    });
+
+    document.getElementById('close-user-profile-modal-btn').addEventListener('click', () => {
+        document.getElementById('user-profile-modal').style.display = 'none';
     });
 });
