@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userId = null;
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
     let weightChart, bodyfatChart, macroChart;
-    let dailyCalories = { meals: 0, steps: 0, workouts: 0 };
+    let dailyCaloriesBurned = { workouts: 0, steps: 0 };
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTotalCaloriesBurned() {
-        const total = Math.round(dailyCalories.workouts + dailyCalories.steps);
+        const total = Math.round(dailyCaloriesBurned.workouts + dailyCaloriesBurned.steps);
         const caloriesEl = document.getElementById('calories-burned');
         if (caloriesEl) {
             caloriesEl.textContent = total;
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDashboardCaloriesFromWorkouts(workouts) {
         const todayWorkouts = workouts.filter(w => w.timestamp && new Date(w.timestamp.seconds * 1000).toLocaleDateString() === new Date().toLocaleDateString());
         const totalCalories = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
-        dailyCalories.workouts = totalCalories;
+        dailyCaloriesBurned.workouts = totalCalories;
         updateTotalCaloriesBurned();
     }
 
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .reduce((sum, s) => sum + (s.amount || 0), 0);
         
         stepsEl.textContent = totalSteps;
-        dailyCalories.steps = totalSteps * 0.04; // Approx. 0.04 calories per step
+        dailyCaloriesBurned.steps = totalSteps * 0.04; // Approx. 0.04 calories per step
         updateTotalCaloriesBurned();
     }
 
@@ -322,29 +322,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const workoutDates = [...new Set(validWorkouts.map(w => new Date(w.timestamp.seconds * 1000).toLocaleDateString()))]
-            .map(dateStr => new Date(dateStr))
-            .sort((a, b) => b - a);
+        const toDateString = (date) => date.toISOString().split('T')[0];
+    
+        const workoutDates = [...new Set(validWorkouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))]
+            .sort((a, b) => b.localeCompare(a));
 
         let streak = 0;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const todayStr = toDateString(new Date());
+        const yesterdayStr = toDateString(new Date(Date.now() - 86400000));
 
-        const lastWorkoutDay = new Date(workoutDates[0]);
-        lastWorkoutDay.setHours(0, 0, 0, 0);
-
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
-
-        if (lastWorkoutDay.getTime() === today.getTime() || lastWorkoutDay.getTime() === yesterday.getTime()) {
+        if (workoutDates[0] === todayStr || workoutDates[0] === yesterdayStr) {
             streak = 1;
-            for (let i = 1; i < workoutDates.length; i++) {
-                const currentDay = new Date(workoutDates[i-1]);
-                const prevDay = new Date(workoutDates[i]);
+            for (let i = 0; i < workoutDates.length - 1; i++) {
+                const currentDay = new Date(workoutDates[i]);
+                const prevDay = new Date(workoutDates[i+1]);
                 const expectedPrevDay = new Date(currentDay);
                 expectedPrevDay.setDate(currentDay.getDate() - 1);
 
-                if (prevDay.toLocaleDateString() === expectedPrevDay.toLocaleDateString()) {
+                if (toDateString(prevDay) === toDateString(expectedPrevDay)) {
                     streak++;
                 } else {
                     break;
