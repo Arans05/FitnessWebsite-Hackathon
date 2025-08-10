@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mealModal = document.getElementById('meal-modal');
     const waterModal = document.getElementById('water-modal');
     const stepsModal = document.getElementById('steps-modal');
+    const customWorkoutModal = document.getElementById('custom-workout-modal');
 
     const pages = ['dashboard', 'workouts', 'progress', 'nutrition', 'profile', 'community', 'settings'];
     let userId = null;
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let weightChart, bodyfatChart, macroChart;
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
     let userWeight = 150; // Default weight
+    let customWorkoutExercises = [];
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -80,6 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         showPage('settings');
         profileDropdown.classList.add('hidden');
+    });
+     document.getElementById('mobile-nav-settings-dropdown').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('settings');
+        mobileMenu.classList.add('hidden');
     });
 
     // --- Authentication ---
@@ -157,6 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAchievements(profileData.achievements || []);
             renderPersonalBests(profileData.personalBests || {});
             document.getElementById('user-weight-input').value = profileData.weight || '';
+            document.getElementById('profile-pic-url').value = profileData.profilePicUrl || '';
+            document.getElementById('profile-bio').value = profileData.bio || '';
+            document.getElementById('fitness-level').value = profileData.fitnessLevel || 'Beginner';
+            document.getElementById('profile-pic-nav').src = profileData.profilePicUrl || 'https://placehold.co/32x32/0f172a/FFF?text=U';
+            document.getElementById('profile-pic-nav-mobile').src = profileData.profilePicUrl || 'https://placehold.co/40x40/0f172a/FFF?text=U';
             updateStreakDisplay(profileData.streak || 0);
         });
 
@@ -656,15 +668,56 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('save-settings-btn').addEventListener('click', async () => {
         if (!userId) return;
         const newWeight = document.getElementById('user-weight-input').value;
-        if (newWeight) {
+        const profilePicUrl = document.getElementById('profile-pic-url').value;
+        const bio = document.getElementById('profile-bio').value;
+        const fitnessLevel = document.getElementById('fitness-level').value;
+
+        try {
+            const profileRef = doc(db, "users", userId, "profile", "data");
+            await setDoc(profileRef, { 
+                weight: parseFloat(newWeight) || userWeight,
+                profilePicUrl,
+                bio,
+                fitnessLevel
+            }, { merge: true });
+            userWeight = parseFloat(newWeight) || userWeight;
+            alert("Settings saved!");
+        } catch (error) {
+            console.error("Error saving settings:", error);
+        }
+    });
+
+    setupModal(['create-plan-btn'], 'custom-workout-modal', 'close-custom-workout-modal-btn', 'save-plan-btn', async () => {
+        if (!userId) return;
+        const planName = document.getElementById('plan-name-input').value;
+        if (planName && customWorkoutExercises.length > 0) {
             try {
-                const profileRef = doc(db, "users", userId, "profile", "data");
-                await setDoc(profileRef, { weight: parseFloat(newWeight) }, { merge: true });
-                userWeight = parseFloat(newWeight);
-                alert("Settings saved!");
+                await addDoc(collection(db, "users", userId, "customWorkouts"), {
+                    name: planName,
+                    exercises: customWorkoutExercises,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('plan-name-input').value = '';
+                customWorkoutExercises = [];
+                document.getElementById('custom-exercise-list').innerHTML = '';
+                document.getElementById('custom-workout-modal').style.display = 'none';
             } catch (error) {
-                console.error("Error saving settings:", error);
+                console.error("Error saving custom workout plan:", error);
             }
+        }
+    });
+
+    document.getElementById('add-exercise-btn').addEventListener('click', () => {
+        const exerciseInput = document.getElementById('custom-exercise-input');
+        const exerciseName = exerciseInput.value.trim();
+        if (exerciseName) {
+            customWorkoutExercises.push(exerciseName);
+            const list = document.getElementById('custom-exercise-list');
+            const listItem = document.createElement('li');
+            listItem.textContent = exerciseName;
+            listItem.className = 'bg-gray-700 p-2 rounded-md';
+            list.appendChild(listItem);
+            exerciseInput.value = '';
         }
     });
 });
