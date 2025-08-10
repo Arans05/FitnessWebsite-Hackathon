@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const workoutsQuery = query(collection(db, "users", userId, "workouts"));
         unsubscribeWorkouts = onSnapshot(workoutsQuery, (snapshot) => {
             const workouts = snapshot.docs
-                .filter(doc => !doc.metadata.hasPendingWrites && doc.data().timestamp)
+                .filter(doc => doc.data().timestamp) // Ensure timestamp exists before processing
                 .map(doc => ({ id: doc.id, ...doc.data() }))
                 .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             renderWorkouts(workouts);
@@ -192,8 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Helper Functions ---
-    const toDateString = (date) => date.toISOString().split('T')[0];
-    const isToday = (date) => toDateString(date) === toDateString(new Date());
+    const isToday = (date) => {
+        const today = new Date();
+        return date.getDate() === today.getDate() &&
+               date.getMonth() === today.getMonth() &&
+               date.getFullYear() === today.getFullYear();
+    };
 
     // --- Rendering Functions ---
     function renderWorkouts(workouts) {
@@ -205,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCalories = workouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
 
         document.getElementById('total-workouts').textContent = totalWorkouts;
-        document.getElementById('total-time').textContent = totalTime;
+        document.getElementById('total-time').textContent = `${totalTime} min`;
         document.getElementById('total-calories-burned').textContent = totalCalories;
 
         workoutListEl.innerHTML = workouts.length === 0 
@@ -383,8 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .sort((a, b) => b.localeCompare(a));
 
         let streak = 0;
-        const todayStr = toDateString(new Date());
-        const yesterdayStr = toDateString(new Date(Date.now() - 86400000));
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const todayStr = toDateString(today);
+        const yesterdayStr = toDateString(yesterday);
 
         if (workoutDays[0] === todayStr || workoutDays[0] === yesterdayStr) {
             streak = 1;
