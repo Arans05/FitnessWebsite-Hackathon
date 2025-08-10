@@ -34,26 +34,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const waterModal = document.getElementById('water-modal');
     const stepsModal = document.getElementById('steps-modal');
 
-    const pages = ['dashboard', 'workouts', 'progress', 'nutrition', 'profile', 'community'];
+    const pages = ['dashboard', 'workouts', 'progress', 'nutrition', 'profile', 'community', 'settings'];
     let userId = null;
     let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
     let weightChart, bodyfatChart, macroChart;
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
+    let userWeight = 150; // Default weight
 
     // --- Page Navigation ---
     function showPage(pageId) {
         pages.forEach(page => {
             document.getElementById(`${page}-content`).classList.remove('active');
-            document.getElementById(`nav-${page}`).classList.remove('active');
+            document.getElementById(`nav-${page}`)?.classList.remove('active');
             document.getElementById(`mobile-nav-${page}`)?.classList.remove('active');
         });
         document.getElementById(`${pageId}-content`).classList.add('active');
-        document.getElementById(`nav-${pageId}`).classList.add('active');
+        document.getElementById(`nav-${pageId}`)?.classList.add('active');
         document.getElementById(`mobile-nav-${pageId}`)?.classList.add('active');
     }
 
     pages.forEach(pageId => {
-        document.getElementById(`nav-${pageId}`).addEventListener('click', (e) => {
+        document.getElementById(`nav-${pageId}`)?.addEventListener('click', (e) => {
             e.preventDefault();
             showPage(pageId);
         });
@@ -75,13 +76,20 @@ document.addEventListener('DOMContentLoaded', () => {
         showPage('profile');
         profileDropdown.classList.add('hidden');
     });
+    document.getElementById('nav-settings-dropdown').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('settings');
+        profileDropdown.classList.add('hidden');
+    });
 
     // --- Authentication ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
             const profileSnap = await getDoc(doc(db, "profiles", userId));
-            const username = profileSnap.data()?.username || user.email;
+            const profileData = profileSnap.data() || {};
+            const username = profileData.username || user.email;
+            userWeight = profileData.weight || 150;
 
             if (userDisplay) userDisplay.textContent = username;
             if (userDisplayMobile) userDisplayMobile.textContent = username;
@@ -119,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkAchievements({ workouts });
             updateLeaderboard(workouts.length);
             updateChallengeProgress(workouts);
+            updatePersonalBests(workouts);
         });
 
         const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
@@ -142,10 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
             renderProgressCharts(progressData);
         });
 
-        const profileDoc = doc(db, "users", userId, "profile", "data");
-        unsubscribeProfile = onSnapshot(profileDoc, (snapshot) => {
+        const profileDocRef = doc(db, "users", userId, "profile", "data");
+        unsubscribeProfile = onSnapshot(profileDocRef, (snapshot) => {
             const profileData = snapshot.data() || {};
             renderAchievements(profileData.achievements || []);
+            renderPersonalBests(profileData.personalBests || {});
+            document.getElementById('user-weight-input').value = profileData.weight || '';
         });
 
         const leaderboardQuery = query(collection(db, "profiles"));
@@ -160,14 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDashboardSteps(steps);
         });
     }
-
-    // --- Helper Functions ---
-    const isToday = (date) => {
-        const today = new Date();
-        return date.getDate() === today.getDate() &&
-               date.getMonth() === today.getMonth() &&
-               date.getFullYear() === today.getFullYear();
-    };
 
     // --- Rendering Functions ---
     function renderWorkouts(workouts) {
@@ -341,9 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (workoutDays[0] === todayStr || workoutDays[0] === yesterdayStr) {
             streak = 1;
-            for (let i = 0; i < workoutDates.length - 1; i++) {
-                const currentDay = new Date(workoutDates[i]);
-                const prevDay = new Date(workoutDates[i+1]);
+            for (let i = 0; i < workoutDays.length - 1; i++) {
+                const currentDay = new Date(workoutDays[i]);
+                const prevDay = new Date(workoutDays[i+1]);
                 const expectedPrevDay = new Date(currentDay);
                 expectedPrevDay.setDate(currentDay.getDate() - 1);
 
@@ -428,6 +431,42 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('challenge-progress-text').textContent = `${thisWeekCardio} / ${challengeGoal} minutes`;
     }
 
+    async function updatePersonalBests(workouts) {
+        if (!userId) return;
+        const strengthWorkouts = workouts.filter(w => w.type === 'Strength' && w.exerciseName && w.weight && w.reps);
+        if (strengthWorkouts.length === 0) return;
+
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        const profileSnap = await getDoc(profileRef);
+        const currentBests = profileSnap.data()?.personalBests || {};
+
+        let updated = false;
+        strengthWorkouts.forEach(workout => {
+            const exercise = workout.exerciseName.toLowerCase();
+            const weight = workout.weight;
+            if (!currentBests[exercise] || weight > currentBests[exercise].weight) {
+                currentBests[exercise] = { weight: weight, reps: workout.reps, date: new Date(workout.timestamp.seconds * 1000).toLocaleDateString() };
+                updated = true;
+            }
+        });
+
+        if (updated) {
+            await setDoc(profileRef, { personalBests: currentBests }, { merge: true });
+        }
+    }
+
+    function renderPersonalBests(bests) {
+        const container = document.getElementById('personal-bests-display');
+        if (!container) return;
+        const bestsHtml = Object.entries(bests).map(([exercise, data]) => `
+            <div class="p-2 bg-gray-700 rounded-md">
+                <p class="font-bold capitalize">${exercise}</p>
+                <p>${data.weight} lbs x ${data.reps} reps <span class="text-gray-400 text-sm">(${data.date})</span></p>
+            </div>
+        `).join('');
+        container.innerHTML = bestsHtml || `<p class="text-gray-500">No personal bests yet. Log a strength workout!</p>`;
+    }
+
 
     // --- UI Event Listeners ---
     document.getElementById('user-menu-button').addEventListener('click', () => {
@@ -492,17 +531,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getWorkoutCalories(type, duration) {
-        const caloriesPerMinute = {
-            'Cardio': 10,
-            'Strength': 5,
-            'Yoga': 3,
-            'Running': 12,
-            'Walking': 4,
-            'Jogging': 8,
-            'Swimming': 9,
-        };
-        return (caloriesPerMinute[type] || 5) * duration;
+        const metValues = { 'Cardio': 7, 'Strength': 4, 'Yoga': 2.5, 'Running': 11, 'Walking': 3.5, 'Jogging': 7, 'Swimming': 8 };
+        const met = metValues[type] || 5;
+        return Math.round((met * 3.5 * (userWeight / 2.2)) / 200 * duration);
     }
+
+    document.getElementById('workout-type-select').addEventListener('change', (e) => {
+        document.getElementById('strength-inputs').classList.toggle('hidden', e.target.value !== 'Strength');
+    });
 
     setupModal(['log-workout-btn', 'add-workout-page-btn'], 'workout-modal', 'close-workout-modal-btn', 'save-workout-btn', async () => {
         if (!userId) return;
@@ -510,16 +546,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = parseInt(document.getElementById('workout-duration-input').value);
         const notes = document.getElementById('workout-notes-input').value;
         const manualCalories = document.getElementById('workout-calories-input').value;
+        const heartRate = document.getElementById('heart-rate-input').value;
+        
+        let workoutData = { type, duration, notes, timestamp: serverTimestamp() };
+        if (heartRate) workoutData.heartRate = parseInt(heartRate);
+
+        if (type === 'Strength') {
+            workoutData.exerciseName = document.getElementById('exercise-name-input').value;
+            workoutData.weight = parseInt(document.getElementById('exercise-weight-input').value);
+            workoutData.reps = parseInt(document.getElementById('exercise-reps-input').value);
+        }
 
         if (type && duration) {
-            const caloriesBurned = manualCalories ? parseInt(manualCalories) : getWorkoutCalories(type, duration);
+            workoutData.caloriesBurned = manualCalories ? parseInt(manualCalories) : getWorkoutCalories(type, duration);
             try {
-                await addDoc(collection(db, "users", userId, "workouts"), { type, duration, notes, caloriesBurned, timestamp: serverTimestamp() });
-                document.getElementById('workout-type-select').selectedIndex = 0;
-                document.getElementById('workout-duration-input').value = '';
-                document.getElementById('workout-calories-input').value = '';
-                document.getElementById('workout-notes-input').value = '';
+                await addDoc(collection(db, "users", userId, "workouts"), workoutData);
                 document.getElementById('workout-modal').style.display = 'none';
+                // Reset form
+                document.getElementById('workout-type-select').selectedIndex = 0;
+                document.getElementById('strength-inputs').classList.add('hidden');
+                ['workout-duration-input', 'workout-calories-input', 'workout-notes-input', 'heart-rate-input', 'exercise-name-input', 'exercise-weight-input', 'exercise-reps-input'].forEach(id => document.getElementById(id).value = '');
             } catch (error) { console.error("Error adding workout:", error); }
         }
     });
@@ -597,6 +643,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 await addDoc(collection(db, "users", userId, "progress"), { bodyfat: parseFloat(bodyfat), timestamp: serverTimestamp() });
                 document.getElementById('bodyfat-input').value = '';
             } catch (error) { console.error("Error logging body fat:", error); }
+        }
+    });
+
+    document.getElementById('save-settings-btn').addEventListener('click', async () => {
+        if (!userId) return;
+        const newWeight = document.getElementById('user-weight-input').value;
+        if (newWeight) {
+            try {
+                const profileRef = doc(db, "users", userId, "profile", "data");
+                await setDoc(profileRef, { weight: parseFloat(newWeight) }, { merge: true });
+                userWeight = parseFloat(newWeight);
+                alert("Settings saved!");
+            } catch (error) {
+                console.error("Error saving settings:", error);
+            }
         }
     });
 });
