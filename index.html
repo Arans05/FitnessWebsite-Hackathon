@@ -71,7 +71,7 @@
                                 <div>
                                     <button type="button" class="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
                                         <span class="sr-only">Open user menu</span>
-                                        <img class="h-8 w-8 rounded-full" id="profile-pic-nav" src="https://placehold.co/32x32/0f172a/FFF?text=U" alt="">
+                                        <img class="h-8 w-8 rounded-full" id="profile-pic-nav" src="https://placehold.co/32x32/0f172a/FFF?text=U" alt="" onerror="this.onerror=null;this.src='https://placehold.co/32x32/0f172a/FFF?text=U';">
                                     </button>
                                 </div>
                                 <div id="profile-dropdown" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
@@ -109,7 +109,7 @@
                 <div class="border-t border-gray-700 pt-4 pb-3">
                     <div class="flex items-center px-5">
                         <div class="flex-shrink-0">
-                            <img class="h-10 w-10 rounded-full" id="profile-pic-nav-mobile" src="https://placehold.co/40x40/0f172a/FFF?text=U" alt="">
+                            <img class="h-10 w-10 rounded-full" id="profile-pic-nav-mobile" src="https://placehold.co/40x40/0f172a/FFF?text=U" alt="" onerror="this.onerror=null;this.src='https://placehold.co/40x40/0f172a/FFF?text=U';">
                         </div>
                         <div class="ml-3">
                             <div id="user-display-mobile" class="text-base font-medium leading-none text-white"></div>
@@ -252,7 +252,14 @@
                 </div>
             </div>
             <div id="profile-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Your Profile</h2>
+                <div class="flex items-center space-x-6 mb-6">
+                    <img id="profile-pic-main" class="h-24 w-24 rounded-full cursor-pointer" src="https://placehold.co/96x96/0f172a/FFF?text=U" alt="" onerror="this.onerror=null;this.src='https://placehold.co/96x96/0f172a/FFF?text=U';">
+                    <div>
+                        <h2 class="text-3xl font-bold" id="profile-username"></h2>
+                        <p class="text-gray-400" id="profile-fitness-level"></p>
+                    </div>
+                </div>
+                <p class="text-gray-300 mb-6" id="profile-bio"></p>
                 <div class="grid gap-6 md:grid-cols-2">
                     <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
                         <h3 class="text-2xl font-semibold mb-4">Workout Streak</h3>
@@ -364,7 +371,7 @@
         <div class="relative z-50 w-full max-w-lg p-6 bg-[#1e293b] rounded-lg shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-semibold">Log New Meal</h3>
-                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+                <button id="close-meal-modal-btn" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="flex flex-col space-y-4">
                 <input type="text" id="meal-name-input" placeholder="Meal Name (e.g., Lunch)" class="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500">
@@ -415,6 +422,14 @@
                 <ul id="custom-exercise-list" class="space-y-2"></ul>
                 <button id="save-plan-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Save Plan</button>
             </div>
+        </div>
+    </div>
+    <div id="profile-pic-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="relative z-50 p-4">
+            <img id="profile-pic-modal-img" class="max-w-full max-h-full" src="" alt="Profile Picture">
+            <button id="close-profile-pic-modal-btn" class="absolute top-0 right-0 m-4 p-1 rounded-full text-white bg-black/50 hover:bg-black/75">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
         </div>
     </div>
     
