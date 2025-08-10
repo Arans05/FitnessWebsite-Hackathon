@@ -269,13 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderLeaderboard(profiles) {
-        const leaderboardBody = document.getElementById('leaderboard-body');
+        const leaderboardBody = document.getElementById('leaderboard-body-workouts');
         if (!leaderboardBody) return;
         const sortedProfiles = profiles.sort((a, b) => (b.workoutCount || 0) - (a.workoutCount || 0));
         leaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
             <tr class="bg-gray-800 border-b border-gray-700">
                 <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
-                <td class="px-6 py-4">${p.username || p.email}</td>
+                <td class="px-6 py-4 cursor-pointer hover:underline" data-userid="${p.id}">${p.username || p.email}</td>
                 <td class="px-6 py-4">${p.workoutCount || 0}</td>
             </tr>
         `).join('');
@@ -816,4 +816,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
