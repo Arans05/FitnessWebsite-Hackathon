@@ -891,4 +891,3 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('user-profile-modal').style.display = 'none';
     });
 });
-
