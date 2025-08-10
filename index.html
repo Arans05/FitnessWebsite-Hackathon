@@ -134,14 +134,22 @@
         <main class="flex-grow p-8">
             <div id="dashboard-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Calories Consumed</p>
                         <p class="text-2xl font-bold"><span id="calories-consumed">0</span></p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Calories Burned</p>
-                        <p class="text-2xl font-bold"><span id="calories-burned">0</span></p>
+                        <p class="text-sm text-gray-400">Calories Burned (Workouts)</p>
+                        <p class="text-2xl font-bold"><span id="calories-burned-workouts">0</span></p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Calories Burned (Steps)</p>
+                        <p class="text-2xl font-bold"><span id="calories-burned-steps">0</span></p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-400">Total Calories Burned</p>
+                        <p class="text-2xl font-bold"><span id="total-calories-burned-dash">0</span></p>
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Current Streak</p>
@@ -185,7 +193,7 @@
                     </div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md">
                         <p class="text-sm text-gray-400">Total Calories Burned</p>
-                        <p class="text-2xl font-bold"><span id="total-calories-burned">0</span></p>
+                        <p class="text-2xl font-bold"><span id="total-calories-burned-workouts">0</span></p>
                     </div>
                 </div>
                 <div class="mb-6 flex space-x-4">
