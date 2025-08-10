@@ -3,13 +3,13 @@ import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWith
 import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
-    authDomain: "fitnessapp-721d9.firebaseapp.com",
-    projectId: "fitnessapp-721d9",
-    storageBucket: "fitnessapp-721d9.appspot.com",
-    messagingSenderId: "339656705043",
-    appId: "1:339656705043:web:b5dbd141d09398014a2be6",
-    measurementId: "G-XFQYPFN6GR"
+  apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
+  authDomain: "fitnessapp-721d9.firebaseapp.com",
+  projectId: "fitnessapp-721d9",
+  storageBucket: "fitnessapp-721d9.appspot.com",
+  messagingSenderId: "339656705043",
+  appId: "1:339656705043:web:b5dbd141d09398014a2be6",
+  measurementId: "G-XFQYPFN6GR"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -17,33 +17,6 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Theme Management ---
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeIconDark = document.getElementById('theme-icon-dark');
-    const themeIconLight = document.getElementById('theme-icon-light');
-
-    const applyTheme = (theme) => {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            themeIconDark.classList.remove('hidden');
-            themeIconLight.classList.add('hidden');
-        } else {
-            document.documentElement.classList.remove('dark');
-            themeIconDark.classList.add('hidden');
-            themeIconLight.classList.remove('hidden');
-        }
-    };
-
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    applyTheme(savedTheme);
-
-    themeToggle.addEventListener('click', () => {
-        const isDark = document.documentElement.classList.toggle('dark');
-        const newTheme = isDark ? 'dark' : 'light';
-        localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
-    });
-
     // --- DOM Elements ---
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
@@ -63,179 +36,166 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pages = ['dashboard', 'workouts', 'progress', 'nutrition', 'profile', 'community', 'settings'];
     let userId = null;
-    let unsubscribers = [];
-    let charts = {};
+    let unsubscribeWorkouts, unsubscribeNutrition, unsubscribeWater, unsubscribeProgress, unsubscribeProfile, unsubscribeLeaderboard, unsubscribeSteps;
+    let weightChart, bodyfatChart, macroChart;
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
-    let userProfileData = { weight: 150 };
+    let userProfileData = { weight: 150 }; // Default weight
     let customWorkoutExercises = [];
 
     // --- Page Navigation ---
     function showPage(pageId) {
         pages.forEach(page => {
             document.getElementById(`${page}-content`)?.classList.remove('active');
-            document.querySelectorAll(`.nav-link[id*="${page}"]`).forEach(el => el.classList.remove('active'));
+            document.getElementById(`nav-${page}`)?.classList.remove('active');
+            document.getElementById(`mobile-nav-${page}`)?.classList.remove('active');
         });
         document.getElementById(`${pageId}-content`)?.classList.add('active');
-        document.querySelectorAll(`.nav-link[id*="${pageId}"]`).forEach(el => el.classList.add('active'));
+        document.getElementById(`nav-${pageId}`)?.classList.add('active');
+        document.getElementById(`mobile-nav-${pageId}`)?.classList.add('active');
     }
 
     pages.forEach(pageId => {
-        document.getElementById(`nav-${pageId}`)?.addEventListener('click', (e) => { e.preventDefault(); showPage(pageId); });
-        document.getElementById(`mobile-nav-${pageId}`)?.addEventListener('click', (e) => { e.preventDefault(); showPage(pageId); mobileMenu.classList.add('hidden'); });
+        document.getElementById(`nav-${pageId}`)?.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage(pageId);
+        });
+        document.getElementById(`mobile-nav-${pageId}`)?.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage(pageId);
+            mobileMenu.classList.add('hidden');
+            mobileMenuOpenIcon.classList.remove('hidden');
+            mobileMenuCloseIcon.classList.add('hidden');
+        });
     });
-    
-    // --- Other UI Listeners ---
-    document.getElementById('nav-logo').addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
-    document.getElementById('nav-profile-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('profile'); profileDropdown.classList.add('hidden'); });
-    document.getElementById('nav-settings-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('settings'); profileDropdown.classList.add('hidden'); });
-    document.getElementById('mobile-nav-profile-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('profile'); mobileMenu.classList.add('hidden'); });
-    document.getElementById('mobile-nav-settings-dropdown').addEventListener('click', (e) => { e.preventDefault(); showPage('settings'); mobileMenu.classList.add('hidden'); });
-    document.getElementById('user-menu-button').addEventListener('click', () => profileDropdown.classList.toggle('hidden'));
-    mobileMenuButton.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-        mobileMenuOpenIcon.classList.toggle('hidden');
-        mobileMenuCloseIcon.classList.toggle('hidden');
-    });
-    document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
-    document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
 
+    document.getElementById('nav-logo').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('dashboard');
+    });
+    document.getElementById('nav-profile-dropdown').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('profile');
+        profileDropdown.classList.add('hidden');
+    });
+    document.getElementById('nav-settings-dropdown').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('settings');
+        profileDropdown.classList.add('hidden');
+    });
+     document.getElementById('mobile-nav-settings-dropdown').addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage('settings');
+        mobileMenu.classList.add('hidden');
+    });
 
     // --- Authentication ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userId = user.uid;
+            const profileSnap = await getDoc(doc(db, "profiles", userId));
+            const profileData = profileSnap.data() || {};
+            const username = profileData.username || user.email;
+            userProfileData = { ...userProfileData, ...profileData };
+
+            if (userDisplayMobile) userDisplayMobile.textContent = username;
+            if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
+            
             loginContainer.classList.remove('active');
             appContainer.classList.add('active');
-            await setupListeners(userId);
             showPage('dashboard');
+            setMotivationalQuote();
+            setupListeners();
         } else {
             userId = null;
             appContainer.classList.remove('active');
             loginContainer.classList.add('active');
-            unsubscribers.forEach(unsub => unsub());
-            unsubscribers = [];
+            if (unsubscribeWorkouts) unsubscribeWorkouts();
+            if (unsubscribeNutrition) unsubscribeNutrition();
+            if (unsubscribeWater) unsubscribeWater();
+            if (unsubscribeProgress) unsubscribeProgress();
+            if (unsubscribeProfile) unsubscribeProfile();
+            if (unsubscribeLeaderboard) unsubscribeLeaderboard();
+            if (unsubscribeSteps) unsubscribeSteps();
         }
     });
 
-    const handleAuthAction = async (action, email, password, errorEl, username) => {
-        errorEl.textContent = '';
-        try {
-            const userCredential = await action(auth, email, password);
-            if (action === createUserWithEmailAndPassword) {
-                const userId = userCredential.user.uid;
-                await setDoc(doc(db, "profiles", userId), { username, email, workoutCount: 0, totalSteps: 0 });
-                await setDoc(doc(db, "users", userId, "profile", "data"), {
-                    username, email,
-                    weight: 0, height: 0, age: 0,
-                    gender: 'Male', bio: '', fitnessLevel: 'Beginner',
-                    streak: 0, achievements: [], personalBests: {},
-                    profilePicUrl: `https://placehold.co/96x96/1e293b/FFF?text=${username.charAt(0).toUpperCase()}`
-                });
-            }
-        } catch (error) {
-            errorEl.textContent = error.message.replace('Firebase: ', '');
-        }
-    };
-
-    document.getElementById('login-btn').addEventListener('click', () => {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        handleAuthAction(signInWithEmailAndPassword, email, password, document.getElementById('login-error'));
-    });
-
-    document.getElementById('signup-btn').addEventListener('click', () => {
-        const username = document.getElementById('signup-username').value;
-        const email = document.getElementById('signup-email').value;
-        const password = document.getElementById('signup-password').value;
-        const errorEl = document.getElementById('signup-error');
-        if (!username) { errorEl.textContent = "Please enter a username."; return; }
-        handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl, username);
-    });
-
-    document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
-    document.getElementById('sign-out-btn-mobile').addEventListener('click', () => signOut(auth));
-
-    // --- Firestore Listeners Setup ---
-    async function setupListeners(uid) {
-        unsubscribers.forEach(unsub => unsub());
-        unsubscribers = [];
-        const addListener = (q, callback) => unsubscribers.push(onSnapshot(q, callback));
+    // --- Firestore Listeners ---
+    function setupListeners() {
+        if (!userId) return;
         
-        const profileSnap = await getDoc(doc(db, "profiles", uid));
-        const profileData = profileSnap.data() || {};
-        const username = profileData.username || auth.currentUser.email;
-        if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
-        if (userDisplayMobile) userDisplayMobile.textContent = username;
-
-        addListener(doc(db, "users", uid, "profile", "data"), snapshot => {
-            userProfileData = snapshot.data() || { weight: 150 };
-            updateProfileUI(userProfileData);
-        });
-
-        addListener(query(collection(db, "users", uid, "workouts")), snapshot => {
-            const workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(w => w.timestamp).sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+        const workoutsQuery = query(collection(db, "users", userId, "workouts"));
+        unsubscribeWorkouts = onSnapshot(workoutsQuery, (snapshot) => {
+            const workouts = snapshot.docs
+                .filter(doc => doc.data().timestamp) // Ensure timestamp exists before processing
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             renderWorkouts(workouts);
             updateDashboardWorkouts(workouts);
-            calculateStreak(workouts);
             checkAchievements({ workouts });
             updateLeaderboard(workouts.length);
+            updateChallengeProgress(workouts);
             updatePersonalBests(workouts);
         });
-        
-        addListener(query(collection(db, "users", uid, "steps")), snapshot => {
-            const steps = snapshot.docs.map(doc => doc.data());
-            updateDashboardSteps(steps);
-            updateStepsLeaderboard(steps);
-        });
-        
-        addListener(query(collection(db, "users", uid, "nutrition")), snapshot => {
-            const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const nutritionQuery = query(collection(db, "users", userId, "nutrition"));
+        unsubscribeNutrition = onSnapshot(nutritionQuery, (snapshot) => {
+            const meals = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
             renderMeals(meals);
             updateDashboardCaloriesFromMeals(meals);
             renderMacroChart(meals);
         });
 
-        addListener(query(collection(db, "users", uid, "water")), snapshot => {
+        const waterQuery = query(collection(db, "users", userId, "water"));
+        unsubscribeWater = onSnapshot(waterQuery, (snapshot) => {
             const waterLogs = snapshot.docs.map(doc => doc.data());
             updateWaterIntake(waterLogs);
         });
 
-        addListener(query(collection(db, "users", uid, "progress")), snapshot => {
-            const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(d => d.timestamp).sort((a, b) => a.timestamp.seconds - b.timestamp.seconds);
+        const progressQuery = query(collection(db, "users", userId, "progress"));
+        unsubscribeProgress = onSnapshot(progressQuery, (snapshot) => {
+            const progressData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
             renderProgressCharts(progressData);
         });
-        
-        addListener(query(collection(db, "profiles")), snapshot => {
+
+        const profileDocRef = doc(db, "users", userId, "profile", "data");
+        unsubscribeProfile = onSnapshot(profileDocRef, (snapshot) => {
+            const profileData = snapshot.data() || {};
+            renderAchievements(profileData.achievements || []);
+            renderPersonalBests(profileData.personalBests || {});
+            document.getElementById('user-weight-input').value = profileData.weight || '';
+            document.getElementById('profile-bio').value = profileData.bio || '';
+            document.getElementById('fitness-level').value = profileData.fitnessLevel || 'Beginner';
+            document.getElementById('user-age-input').value = profileData.age || '';
+            document.getElementById('user-height-input').value = profileData.height || '';
+            document.getElementById('user-gender-select').value = profileData.gender || 'Male';
+            document.getElementById('profile-pic-nav').src = profileData.profilePicUrl || 'https://placehold.co/32x32/0f172a/FFF?text=U';
+            document.getElementById('profile-pic-nav-mobile').src = profileData.profilePicUrl || 'https://placehold.co/40x40/0f172a/FFF?text=U';
+            document.getElementById('profile-pic-main').src = profileData.profilePicUrl || 'https://placehold.co/96x96/0f172a/FFF?text=U';
+            document.getElementById('profile-username').textContent = profileData.username || auth.currentUser.email;
+            document.getElementById('profile-fitness-level').textContent = profileData.fitnessLevel || 'Beginner';
+            updateStreakDisplay(profileData.streak || 0);
+        });
+
+        const leaderboardQuery = query(collection(db, "profiles"));
+        unsubscribeLeaderboard = onSnapshot(leaderboardQuery, (snapshot) => {
             const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderLeaderboard(profiles);
+        });
+
+        const stepsQuery = query(collection(db, "users", userId, "steps"));
+        unsubscribeSteps = onSnapshot(stepsQuery, (snapshot) => {
+            const steps = snapshot.docs.map(doc => doc.data());
+            updateDashboardSteps(steps);
+            updateStepsLeaderboard(steps);
         });
     }
 
     // --- Helper Functions ---
     const toDateString = (date) => date.toISOString().split('T')[0];
-    const isToday = (date) => toDateString(new Date(date.seconds * 1000)) === toDateString(new Date());
+    const isToday = (date) => toDateString(date) === toDateString(new Date());
 
-    // --- UI Update & Rendering Functions ---
-    function updateProfileUI(profile) {
-        if (!profile) return;
-        document.getElementById('profile-username').textContent = profile.username || 'User';
-        document.getElementById('profile-fitness-level').textContent = profile.fitnessLevel || 'N/A';
-        document.getElementById('profile-bio').textContent = profile.bio || 'No bio set.';
-        document.getElementById('profile-streak-display').textContent = profile.streak || 0;
-        
-        const profilePics = [document.getElementById('profile-pic-nav'), document.getElementById('profile-pic-main'), document.getElementById('profile-pic-nav-mobile')];
-        profilePics.forEach(el => {
-            if(el) el.src = profile.profilePicUrl || `https://placehold.co/96x96/1e293b/FFF?text=${(profile.username || 'U').charAt(0).toUpperCase()}`;
-        });
-
-        document.getElementById('profile-bio-input').value = profile.bio || '';
-        document.getElementById('fitness-level').value = profile.fitnessLevel || 'Beginner';
-        document.getElementById('user-gender-select').value = profile.gender || 'Male';
-        document.getElementById('user-weight-input').value = profile.weight || '';
-        document.getElementById('user-height-input').value = profile.height || '';
-        document.getElementById('user-age-input').value = profile.age || '';
-    }
-
+    // --- Rendering Functions ---
     function renderWorkouts(workouts) {
         const workoutListEl = document.getElementById('workout-list');
         if (!workoutListEl) return;
@@ -252,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<tr><td colspan="5" class="text-center p-4 text-gray-500">No workouts logged yet.</td></tr>` 
             : workouts.map(w => `
                 <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-                    <td class="p-4">${new Date(w.timestamp.seconds * 1000).toLocaleDateString()}</td>
+                    <td class="p-4">${w.timestamp ? new Date(w.timestamp.seconds * 1000).toLocaleDateString() : 'Pending...'}</td>
                     <td class="p-4">${w.type || 'N/A'}</td>
                     <td class="p-4">${w.duration || 'N/A'} min</td>
                     <td class="p-4">${w.caloriesBurned || 'N/A'}</td>
@@ -263,7 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderMeals(meals) {
         const mealListEl = document.getElementById('meal-list');
         if (!mealListEl) return;
-        const todayMeals = meals.filter(m => m.timestamp && isToday(m.timestamp)).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+        const todayMeals = meals.filter(m => m.timestamp && isToday(new Date(m.timestamp.seconds * 1000)))
+            .sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
         mealListEl.innerHTML = todayMeals.length === 0
             ? `<li class="text-gray-500">No meals logged today.</li>`
@@ -273,102 +234,137 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-sm text-gray-400">${m.calories} kcal - P:${m.protein}g, C:${m.carbs}g, F:${m.fat}g</p>
                 </li>`).join('');
     }
-    
+
     function renderProgressCharts(progressData) {
-        const weightData = progressData.filter(d => d.weight);
-        const bodyfatData = progressData.filter(d => d.bodyfat);
-        const chartOptions = { plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#9ca3af' } }, x: { ticks: { color: '#9ca3af' } } } };
+        const weightData = progressData.filter(d => d.weight).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+        const bodyfatData = progressData.filter(d => d.bodyfat).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
-        const createOrUpdateChart = (id, data, labels, borderColor) => {
-            const ctx = document.getElementById(id)?.getContext('2d');
-            if(!ctx) return;
-            if (charts[id]) {
-                charts[id].data.labels = labels;
-                charts[id].data.datasets[0].data = data;
-                charts[id].update();
-            } else {
-                charts[id] = new Chart(ctx, {
-                    type: 'line',
-                    data: { labels, datasets: [{ data, borderColor, tension: 0.1 }] },
-                    options: chartOptions
-                });
-            }
-        };
+        const weightLabels = weightData.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString());
+        const weightValues = weightData.map(d => d.weight);
 
-        createOrUpdateChart('weight-chart', weightData.map(d => d.weight), weightData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()), '#3b82f6');
-        createOrUpdateChart('bodyfat-chart', bodyfatData.map(d => d.bodyfat), bodyfatData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()), '#ef4444');
+        const bodyfatLabels = bodyfatData.map(d => new Date(d.timestamp?.seconds * 1000).toLocaleDateString());
+        const bodyfatValues = bodyfatData.map(d => d.bodyfat);
+
+        if (weightChart) weightChart.destroy();
+        const weightCtx = document.getElementById('weight-chart').getContext('2d');
+        weightChart = new Chart(weightCtx, {
+            type: 'line',
+            data: { labels: weightLabels, datasets: [{ label: 'Weight (lbs)', data: weightValues, borderColor: 'rgb(59, 130, 246)', tension: 0.1 }] }
+        });
+
+        if (bodyfatChart) bodyfatChart.destroy();
+        const bodyfatCtx = document.getElementById('bodyfat-chart').getContext('2d');
+        bodyfatChart = new Chart(bodyfatCtx, {
+            type: 'line',
+            data: { labels: bodyfatLabels, datasets: [{ label: 'Body Fat %', data: bodyfatValues, borderColor: 'rgb(239, 68, 68)', tension: 0.1 }] }
+        });
     }
-
+    
     function renderMacroChart(meals) {
-        const todayMeals = meals.filter(m => m.timestamp && isToday(m.timestamp));
-        const macros = todayMeals.reduce((acc, meal) => {
-            acc.protein += meal.protein || 0;
-            acc.carbs += meal.carbs || 0;
-            acc.fat += meal.fat || 0;
-            return acc;
-        }, { protein: 0, carbs: 0, fat: 0 });
+        const todayMeals = meals.filter(m => m.timestamp && isToday(new Date(m.timestamp.seconds * 1000)));
+        const totalProtein = todayMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
+        const totalCarbs = todayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
+        const totalFat = todayMeals.reduce((sum, m) => sum + (m.fat || 0), 0);
 
-        const ctx = document.getElementById('macro-chart')?.getContext('2d');
-        if(!ctx) return;
-        if (charts.macro) {
-            charts.macro.data.datasets[0].data = [macros.protein, macros.carbs, macros.fat];
-            charts.macro.update();
-        } else {
-            charts.macro = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Protein (g)', 'Carbs (g)', 'Fat (g)'],
-                    datasets: [{
-                        data: [macros.protein, macros.carbs, macros.fat],
-                        backgroundColor: ['#3b82f6', '#16a34a', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                }
-            });
-        }
+        if (macroChart) macroChart.destroy();
+        const macroCtx = document.getElementById('macro-chart').getContext('2d');
+        macroChart = new Chart(macroCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Protein (g)', 'Carbs (g)', 'Fat (g)'],
+                datasets: [{
+                    data: [totalProtein, totalCarbs, totalFat],
+                    backgroundColor: ['rgb(59, 130, 246)', 'rgb(239, 68, 68)', 'rgb(251, 191, 36)'],
+                }]
+            }
+        });
     }
 
     function renderLeaderboard(profiles) {
-        const workoutBody = document.getElementById('leaderboard-body-workouts');
-        const stepsBody = document.getElementById('leaderboard-body-steps');
-        const renderTable = (bodyEl, data, key) => {
-            if (!bodyEl) return;
-            const sorted = [...data].sort((a, b) => (b[key] || 0) - (a[key] || 0));
-            bodyEl.innerHTML = sorted.map((p, i) => `<tr><td class="px-6 py-4">${i+1}</td><td class="px-6 py-4">${p.username}</td><td class="px-6 py-4">${p[key] || 0}</td></tr>`).join('');
-        };
-        renderTable(workoutBody, profiles, 'workoutCount');
-        renderTable(stepsBody, profiles, 'totalSteps');
+        const workoutLeaderboardBody = document.getElementById('leaderboard-body-workouts');
+        const stepsLeaderboardBody = document.getElementById('leaderboard-body-steps');
+
+        if (workoutLeaderboardBody) {
+            const sortedProfiles = [...profiles].sort((a, b) => (b.workoutCount || 0) - (a.workoutCount || 0));
+            workoutLeaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
+                <tr class="bg-gray-800 border-b border-gray-700">
+                    <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
+                    <td class="px-6 py-4 cursor-pointer hover:underline" data-userid="${p.id}">${p.username || p.email}</td>
+                    <td class="px-6 py-4">${p.workoutCount || 0}</td>
+                </tr>
+            `).join('');
+        }
+        
+        if (stepsLeaderboardBody) {
+            const sortedProfiles = [...profiles].sort((a, b) => (b.totalSteps || 0) - (a.totalSteps || 0));
+            stepsLeaderboardBody.innerHTML = sortedProfiles.map((p, index) => `
+                <tr class="bg-gray-800 border-b border-gray-700">
+                    <td class="px-6 py-4 font-medium whitespace-nowrap">${index + 1}</td>
+                    <td class="px-6 py-4 cursor-pointer hover:underline" data-userid="${p.id}">${p.username || p.email}</td>
+                    <td class="px-6 py-4">${p.totalSteps || 0}</td>
+                </tr>
+            `).join('');
+        }
     }
 
     function updateDashboardWorkouts(workouts) {
-        const todayWorkouts = workouts.filter(w => w.timestamp && isToday(w.timestamp));
-        dailyCaloriesBurned.workouts = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
-        document.getElementById('calories-burned-workouts').textContent = Math.round(dailyCaloriesBurned.workouts);
-        updateTotalCaloriesBurned();
-    }
-
-    function updateDashboardSteps(steps) {
-        const todaySteps = steps.filter(s => s.timestamp && isToday(s.timestamp));
-        const totalSteps = todaySteps.reduce((sum, s) => sum + (s.amount || 0), 0);
-        document.getElementById('steps-taken').textContent = totalSteps;
-        dailyCaloriesBurned.steps = totalSteps * 0.04;
-        document.getElementById('calories-burned-steps').textContent = Math.round(dailyCaloriesBurned.steps);
-        updateTotalCaloriesBurned();
-    }
-
-    function updateDashboardCaloriesFromMeals(meals) {
-        const totalCalories = meals.filter(m => m.timestamp && isToday(m.timestamp)).reduce((sum, m) => sum + (m.calories || 0), 0);
-        document.getElementById('calories-consumed').textContent = totalCalories;
-    }
-
-    function updateWaterIntake(logs) {
-        const total = logs.filter(l => l.timestamp && isToday(l.timestamp)).reduce((sum, l) => sum + (l.amount || 0), 0);
-        document.getElementById('water-intake').textContent = `${total} / 2000 ml`;
+        const statusEl = document.getElementById('workout-status');
+        if (!statusEl) return;
+        const todayWorkouts = workouts.filter(w => w.timestamp && isToday(new Date(w.timestamp.seconds * 1000)));
+        if (todayWorkouts.length > 0) {
+            const totalDuration = todayWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+            statusEl.textContent = `Yes (${totalDuration} min)`;
+        } else {
+            statusEl.textContent = 'No';
+        }
+        calculateStreak(workouts);
+        updateDashboardCaloriesFromWorkouts(workouts);
     }
 
     function updateTotalCaloriesBurned() {
         const total = Math.round(dailyCaloriesBurned.workouts + dailyCaloriesBurned.steps);
-        document.getElementById('total-calories-burned-dash').textContent = total;
+        const caloriesEl = document.getElementById('total-calories-burned-dash');
+        if (caloriesEl) {
+            caloriesEl.textContent = total;
+        }
+    }
+
+    function updateDashboardCaloriesFromMeals(meals) {
+        const totalCalories = meals
+            .filter(m => m.timestamp && isToday(new Date(m.timestamp.seconds * 1000)))
+            .reduce((sum, m) => sum + (m.calories || 0), 0);
+        const caloriesConsumedEl = document.getElementById('calories-consumed');
+        if(caloriesConsumedEl) caloriesConsumedEl.textContent = totalCalories;
+    }
+
+    function updateDashboardCaloriesFromWorkouts(workouts) {
+        const todayWorkouts = workouts.filter(w => w.timestamp && isToday(new Date(w.timestamp.seconds * 1000)));
+        const totalCalories = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
+        dailyCaloriesBurned.workouts = totalCalories;
+        document.getElementById('calories-burned-workouts').textContent = Math.round(totalCalories);
+        updateTotalCaloriesBurned();
+    }
+
+    function updateWaterIntake(logs) {
+        const total = logs
+            .filter(l => l.timestamp && isToday(new Date(l.timestamp.seconds * 1000)))
+            .reduce((sum, l) => sum + (l.amount || 0), 0);
+        document.getElementById('water-intake').textContent = `${total} / 2000 ml`;
+    }
+    
+    function updateDashboardSteps(steps) {
+        const stepsEl = document.getElementById('steps-taken');
+        if (!stepsEl) return;
+        
+        const totalSteps = steps
+            .filter(s => s.timestamp && isToday(new Date(s.timestamp.seconds * 1000)))
+            .reduce((sum, s) => sum + (s.amount || 0), 0);
+        
+        stepsEl.textContent = totalSteps;
+        const caloriesFromSteps = totalSteps * 0.04;
+        dailyCaloriesBurned.steps = caloriesFromSteps;
+        document.getElementById('calories-burned-steps').textContent = Math.round(caloriesFromSteps);
+        updateTotalCaloriesBurned();
     }
 
     function setMotivationalQuote() {
@@ -380,22 +376,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Gamification ---
     async function calculateStreak(workouts) {
-        if (!userId || workouts.length === 0) return;
-        const workoutDays = [...new Set(workouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))].sort((a,b) => b.localeCompare(a));
+        const validWorkouts = workouts.filter(w => w.timestamp && w.timestamp.seconds);
+        if (validWorkouts.length === 0) {
+            await updateStreakInFirebase(0);
+            return;
+        }
+
+        const workoutDays = [...new Set(validWorkouts.map(w => toDateString(new Date(w.timestamp.seconds * 1000))))]
+            .sort((a, b) => b.localeCompare(a));
+
         let streak = 0;
-        const todayStr = toDateString(new Date());
-        const yesterdayStr = toDateString(new Date(Date.now() - 86400000));
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const todayStr = toDateString(today);
+        const yesterdayStr = toDateString(yesterday);
+
         if (workoutDays[0] === todayStr || workoutDays[0] === yesterdayStr) {
             streak = 1;
             for (let i = 0; i < workoutDays.length - 1; i++) {
                 const currentDay = new Date(workoutDays[i]);
                 const prevDay = new Date(workoutDays[i+1]);
-                if ((currentDay.getTime() - prevDay.getTime()) / 86400000 === 1) {
+                const expectedPrevDay = new Date(currentDay);
+                expectedPrevDay.setDate(currentDay.getDate() - 1);
+
+                if (toDateString(prevDay) === toDateString(expectedPrevDay)) {
                     streak++;
-                } else { break; }
+                } else {
+                    break;
+                }
             }
         }
-        await setDoc(doc(db, "users", userId, "profile", "data"), { streak }, { merge: true });
+        await updateStreakInFirebase(streak);
+    }
+
+    async function updateStreakInFirebase(streak) {
+        if (!userId) return;
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        await setDoc(profileRef, { streak }, { merge: true });
+    }
+
+    function updateStreakDisplay(streak) {
+        document.getElementById('streak-display').textContent = streak;
+        document.getElementById('profile-streak-display').textContent = streak;
     }
 
     const achievements = {
@@ -408,9 +432,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const profileRef = doc(db, "users", userId, "profile", "data");
         const profileSnap = await getDoc(profileRef);
         const earnedAchievements = profileSnap.data()?.achievements || [];
+
         const newAchievements = [];
-        if (data.workouts.length >= 1 && !earnedAchievements.includes('FIRST_WORKOUT')) newAchievements.push('FIRST_WORKOUT');
-        if (data.workouts.length >= 5 && !earnedAchievements.includes('FIVE_WORKOUTS')) newAchievements.push('FIVE_WORKOUTS');
+
+        if (data.workouts.length >= 1 && !earnedAchievements.includes('FIRST_WORKOUT')) {
+            newAchievements.push('FIRST_WORKOUT');
+        }
+        if (data.workouts.length >= 5 && !earnedAchievements.includes('FIVE_WORKOUTS')) {
+            newAchievements.push('FIVE_WORKOUTS');
+        }
+
         if (newAchievements.length > 0) {
             await setDoc(profileRef, { achievements: [...earnedAchievements, ...newAchievements] }, { merge: true });
         }
@@ -420,8 +451,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('badges-display');
         if (!container) return;
         container.innerHTML = earnedIds.length === 0
-            ? `<p class="text-gray-500 col-span-3">No achievements yet.</p>`
-            : earnedIds.map(id => `<div class="text-center" title="${achievements[id].description}"><div class="text-4xl">🏆</div><p class="text-sm font-semibold">${achievements[id].name}</p></div>`).join('');
+            ? `<p class="text-gray-500 col-span-3">No achievements yet. Keep going!</p>`
+            : earnedIds.map(id => {
+                const achievement = achievements[id];
+                return `
+                    <div class="text-center" title="${achievement.description}">
+                        <div class="text-4xl">🏆</div>
+                        <p class="text-sm font-semibold">${achievement.name}</p>
+                    </div>
+                `;
+            }).join('');
     }
 
     async function updateLeaderboard(workoutCount) {
@@ -439,6 +478,21 @@ document.addEventListener('DOMContentLoaded', () => {
         await setDoc(profileRef, { totalSteps }, { merge: true });
     }
     
+    function updateChallengeProgress(workouts) {
+        const challengeGoal = 120; // 120 minutes of cardio
+        const today = new Date();
+        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        startOfWeek.setHours(0,0,0,0);
+
+        const thisWeekCardio = workouts
+            .filter(w => w.timestamp && w.timestamp.toDate() >= startOfWeek && w.type?.toLowerCase() === 'cardio')
+            .reduce((sum, w) => sum + w.duration, 0);
+        
+        const progress = Math.min((thisWeekCardio / challengeGoal) * 100, 100);
+        document.getElementById('challenge-progress-bar').style.width = `${progress}%`;
+        document.getElementById('challenge-progress-text').textContent = `${thisWeekCardio} / ${challengeGoal} minutes`;
+    }
+
     async function updatePersonalBests(workouts) {
         if (!userId) return;
         const strengthWorkouts = workouts.filter(w => w.type === 'Strength' && w.exerciseName && w.weight && w.reps);
@@ -447,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const profileRef = doc(db, "users", userId, "profile", "data");
         const profileSnap = await getDoc(profileRef);
         const currentBests = profileSnap.data()?.personalBests || {};
+
         let updated = false;
         strengthWorkouts.forEach(workout => {
             const exercise = workout.exerciseName.toLowerCase();
@@ -456,6 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updated = true;
             }
         });
+
         if (updated) {
             await setDoc(profileRef, { personalBests: currentBests }, { merge: true });
         }
@@ -464,15 +520,74 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPersonalBests(bests) {
         const container = document.getElementById('personal-bests-display');
         if (!container) return;
-        const bestsHtml = Object.entries(bests).map(([exercise, data]) => `<div class="p-2 bg-gray-700 rounded-md"><p class="font-bold capitalize">${exercise}</p><p>${data.weight} lbs x ${data.reps} reps <span class="text-gray-400 text-sm">(${data.date})</span></p></div>`).join('');
-        container.innerHTML = bestsHtml || `<p class="text-gray-500">No personal bests yet.</p>`;
+        const bestsHtml = Object.entries(bests).map(([exercise, data]) => `
+            <div class="p-2 bg-gray-700 rounded-md">
+                <p class="font-bold capitalize">${exercise}</p>
+                <p>${data.weight} lbs x ${data.reps} reps <span class="text-gray-400 text-sm">(${data.date})</span></p>
+            </div>
+        `).join('');
+        container.innerHTML = bestsHtml || `<p class="text-gray-500">No personal bests yet. Log a strength workout!</p>`;
     }
-    
+
+
+    // --- UI Event Listeners ---
+    document.getElementById('user-menu-button').addEventListener('click', () => {
+        profileDropdown.classList.toggle('hidden');
+    });
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        mobileMenuOpenIcon.classList.toggle('hidden');
+        mobileMenuCloseIcon.classList.toggle('hidden');
+    });
+
+    document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
+    document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
+
+    const handleAuthAction = async (action, email, password, errorEl, username) => {
+        errorEl.textContent = '';
+        try {
+            const userCredential = await action(auth, email, password);
+            if (action === createUserWithEmailAndPassword) {
+                const userId = userCredential.user.uid;
+                await setDoc(doc(db, "profiles", userId), { username, email, workoutCount: 0 });
+            }
+        } catch (error) { 
+            errorEl.textContent = error.message; 
+        }
+    };
+
+    document.getElementById('login-btn').addEventListener('click', () => {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorEl = document.getElementById('login-error');
+        handleAuthAction(signInWithEmailAndPassword, email, password, errorEl);
+    });
+
+    document.getElementById('signup-btn').addEventListener('click', () => {
+        const username = document.getElementById('signup-username').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const errorEl = document.getElementById('signup-error');
+        if (!username) {
+            errorEl.textContent = "Please enter a username.";
+            return;
+        }
+        handleAuthAction(createUserWithEmailAndPassword, email, password, errorEl, username);
+    });
+
+    document.getElementById('sign-out-btn').addEventListener('click', () => signOut(auth));
+    document.getElementById('sign-out-btn-mobile').addEventListener('click', () => signOut(auth));
+
     // --- Modal Handling ---
     function setupModal(openBtnIds, modalId, closeBtnId, saveBtnId, saveAction) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
-        openBtnIds.forEach(id => document.getElementById(id)?.addEventListener('click', () => modal.style.display = 'flex'));
+
+        openBtnIds.forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => modal.style.display = 'flex');
+        });
+
         document.getElementById(closeBtnId)?.addEventListener('click', () => modal.style.display = 'none');
         document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
     }
@@ -493,18 +608,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = parseInt(document.getElementById('workout-duration-input').value);
         const notes = document.getElementById('workout-notes-input').value;
         const manualCalories = document.getElementById('workout-calories-input').value;
+        const heartRate = document.getElementById('heart-rate-input').value;
+        
         let workoutData = { type, duration, notes, timestamp: serverTimestamp() };
+        if (heartRate) workoutData.heartRate = parseInt(heartRate);
+
         if (type === 'Strength') {
             workoutData.exerciseName = document.getElementById('exercise-name-input').value;
             workoutData.weight = parseInt(document.getElementById('exercise-weight-input').value);
             workoutData.reps = parseInt(document.getElementById('exercise-reps-input').value);
         }
+
         if (type && duration) {
             workoutData.caloriesBurned = manualCalories ? parseInt(manualCalories) : getWorkoutCalories(type, duration);
             try {
                 await addDoc(collection(db, "users", userId, "workouts"), workoutData);
                 document.getElementById('workout-modal').style.display = 'none';
-                ['workout-duration-input', 'workout-calories-input', 'workout-notes-input', 'exercise-name-input', 'exercise-weight-input', 'exercise-reps-input'].forEach(id => document.getElementById(id).value = '');
+                // Reset form
+                document.getElementById('workout-type-select').selectedIndex = 0;
+                document.getElementById('strength-inputs').classList.add('hidden');
+                ['workout-duration-input', 'workout-calories-input', 'workout-notes-input', 'heart-rate-input', 'exercise-name-input', 'exercise-weight-input', 'exercise-reps-input'].forEach(id => document.getElementById(id).value = '');
             } catch (error) { console.error("Error adding workout:", error); }
         }
     });
@@ -516,10 +639,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const protein = document.getElementById('meal-protein-input').value;
         const carbs = document.getElementById('meal-carbs-input').value;
         const fat = document.getElementById('meal-fat-input').value;
+
         if (name && calories && protein && carbs && fat) {
             try {
-                await addDoc(collection(db, "users", userId, "nutrition"), { name, calories: parseInt(calories), protein: parseInt(protein), carbs: parseInt(carbs), fat: parseInt(fat), timestamp: serverTimestamp() });
-                ['meal-name-input', 'meal-calories-input', 'meal-protein-input', 'meal-carbs-input', 'meal-fat-input'].forEach(id => document.getElementById(id).value = '');
+                await addDoc(collection(db, "users", userId, "nutrition"), { 
+                    name, 
+                    calories: parseInt(calories), 
+                    protein: parseInt(protein),
+                    carbs: parseInt(carbs),
+                    fat: parseInt(fat),
+                    timestamp: serverTimestamp() 
+                });
+                document.getElementById('meal-name-input').value = '';
+                document.getElementById('meal-calories-input').value = '';
+                document.getElementById('meal-protein-input').value = '';
+                document.getElementById('meal-carbs-input').value = '';
+                document.getElementById('meal-fat-input').value = '';
                 document.getElementById('meal-modal').style.display = 'none';
             } catch (error) { console.error("Error adding meal:", error); }
         }
@@ -528,6 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModal(['add-water-btn'], 'water-modal', 'close-water-modal-btn', 'save-water-btn', async () => {
         if (!userId) return;
         const amount = document.getElementById('water-amount-input').value;
+
         if (amount) {
             try {
                 await addDoc(collection(db, "users", userId, "water"), { amount: parseInt(amount), timestamp: serverTimestamp() });
@@ -540,6 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModal(['log-steps-btn'], 'steps-modal', 'close-steps-modal-btn', 'save-steps-btn', async () => {
         if (!userId) return;
         const amount = document.getElementById('steps-amount-input').value;
+
         if (amount) {
             try {
                 await addDoc(collection(db, "users", userId, "steps"), { amount: parseInt(amount), timestamp: serverTimestamp() });
@@ -573,18 +710,184 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('save-settings-btn').addEventListener('click', async () => {
         if (!userId) return;
-        const profileData = {
-            weight: parseFloat(document.getElementById('user-weight-input').value) || userProfileData.weight,
-            profilePicUrl: document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl,
-            bio: document.getElementById('profile-bio-input').value,
-            fitnessLevel: document.getElementById('fitness-level').value,
-            age: parseInt(document.getElementById('user-age-input').value),
-            height: parseInt(document.getElementById('user-height-input').value),
-            gender: document.getElementById('user-gender-select').value
-        };
+        const newWeight = document.getElementById('user-weight-input').value;
+        const profilePicUrl = document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl;
+        const bio = document.getElementById('profile-bio').value;
+        const fitnessLevel = document.getElementById('fitness-level').value;
+        const age = document.getElementById('user-age-input').value;
+        const height = document.getElementById('user-height-input').value;
+        const gender = document.getElementById('user-gender-select').value;
+
         try {
-            await setDoc(doc(db, "users", userId, "profile", "data"), profileData, { merge: true });
+            const profileRef = doc(db, "users", userId, "profile", "data");
+            await setDoc(profileRef, { 
+                weight: parseFloat(newWeight) || userProfileData.weight,
+                profilePicUrl,
+                bio,
+                fitnessLevel,
+                age: parseInt(age),
+                height: parseInt(height),
+                gender
+            }, { merge: true });
+            userProfileData.weight = parseFloat(newWeight) || userProfileData.weight;
             alert("Settings saved!");
-        } catch (error) { console.error("Error saving settings:", error); }
+        } catch (error) {
+            console.error("Error saving settings:", error);
+        }
+    });
+
+    setupModal(['create-plan-btn'], 'custom-workout-modal', 'close-custom-workout-modal-btn', 'save-plan-btn', async () => {
+        if (!userId) return;
+        const planName = document.getElementById('plan-name-input').value;
+        if (planName && customWorkoutExercises.length > 0) {
+            try {
+                await addDoc(collection(db, "users", userId, "customWorkouts"), {
+                    name: planName,
+                    exercises: customWorkoutExercises,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('plan-name-input').value = '';
+                customWorkoutExercises = [];
+                document.getElementById('custom-exercise-list').innerHTML = '';
+                document.getElementById('custom-workout-modal').style.display = 'none';
+            } catch (error) {
+                console.error("Error saving custom workout plan:", error);
+            }
+        }
+    });
+
+    document.getElementById('add-exercise-btn').addEventListener('click', () => {
+        const exerciseInput = document.getElementById('custom-exercise-input');
+        const exerciseName = exerciseInput.value.trim();
+        if (exerciseName) {
+            customWorkoutExercises.push(exerciseName);
+            const list = document.getElementById('custom-exercise-list');
+            const listItem = document.createElement('li');
+            listItem.textContent = exerciseName;
+            listItem.className = 'bg-gray-700 p-2 rounded-md';
+            list.appendChild(listItem);
+            exerciseInput.value = '';
+        }
+    });
+    
+    document.getElementById('profile-pic-main').addEventListener('click', () => {
+        const modal = document.getElementById('profile-pic-modal');
+        const modalImg = document.getElementById('profile-pic-modal-img');
+        modalImg.src = document.getElementById('profile-pic-main').src;
+        modal.style.display = 'flex';
+    });
+    
+    document.getElementById('close-profile-pic-modal-btn').addEventListener('click', () => {
+        document.getElementById('profile-pic-modal').style.display = 'none';
+    });
+    
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('theme-icon-dark').classList.toggle('hidden', !isDark);
+        document.getElementById('theme-icon-light').classList.toggle('hidden', isDark);
+    });
+
+    if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon-dark').classList.add('hidden');
+        document.getElementById('theme-icon-light').classList.remove('hidden');
+    }
+
+    document.getElementById('meal-plan-select').addEventListener('change', async (e) => {
+        const goal = e.target.value;
+        const profileRef = doc(db, "users", userId, "profile", "data");
+        const profileSnap = await getDoc(profileRef);
+        const profileData = profileSnap.data();
+
+        if (profileData && profileData.weight && profileData.height && profileData.age && profileData.gender) {
+            const bmr = profileData.gender === 'Male'
+                ? 88.362 + (13.397 * (profileData.weight / 2.2)) + (4.799 * profileData.height) - (5.677 * profileData.age)
+                : 447.593 + (9.247 * (profileData.weight / 2.2)) + (3.098 * profileData.height) - (4.330 * profileData.age);
+            
+            const tdee = bmr * 1.55; // Assuming moderate activity level
+
+            let targetCalories;
+            let proteinTarget;
+
+            if (goal === 'Weight Loss') {
+                targetCalories = tdee - 500;
+            } else if (goal === 'Muscle Gain') {
+                targetCalories = tdee + 300;
+                proteinTarget = Math.round((profileData.weight / 2.2) * 1.6);
+            } else {
+                targetCalories = tdee;
+            }
+
+            let planHtml = `<p class="text-lg">Your target is <span class="font-bold text-green-400">${Math.round(targetCalories)} calories</span> per day.</p>`;
+            if (proteinTarget) {
+                planHtml += `<p class="text-lg">Aim for <span class="font-bold text-blue-400">${proteinTarget}g of protein</span> per day.</p>`;
+            }
+            document.getElementById('meal-plan-display').innerHTML = planHtml;
+
+        } else {
+            document.getElementById('meal-plan-display').innerHTML = `<p class="text-yellow-400">Please complete your profile in Settings to get personalized meal plans.</p>`;
+        }
+    });
+
+    const avatarSelection = document.getElementById('avatar-selection');
+    const avatars = [
+        'https://placehold.co/96x96/FF5733/FFFFFF?text=A',
+        'https://placehold.co/96x96/33FF57/FFFFFF?text=B',
+        'https://placehold.co/96x96/3357FF/FFFFFF?text=C',
+        'https://placehold.co/96x96/FF33A1/FFFFFF?text=D',
+    ];
+
+    avatars.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.dataset.url = url;
+        img.className = 'h-16 w-16 rounded-full cursor-pointer';
+        avatarSelection.appendChild(img);
+    });
+
+    avatarSelection.addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG') {
+            // Remove selection from others
+            avatarSelection.querySelectorAll('img').forEach(img => img.classList.remove('avatar-selected'));
+            // Add selection to clicked
+            e.target.classList.add('avatar-selected');
+        }
+    });
+
+    document.getElementById('leaderboard-tab-workouts').addEventListener('click', () => {
+        document.getElementById('leaderboard-workouts-content').style.display = 'block';
+        document.getElementById('leaderboard-steps-content').style.display = 'none';
+        document.getElementById('leaderboard-tab-workouts').classList.add('border-blue-500', 'text-blue-400');
+        document.getElementById('leaderboard-tab-steps').classList.remove('border-blue-500', 'text-blue-400');
+    });
+
+    document.getElementById('leaderboard-tab-steps').addEventListener('click', () => {
+        document.getElementById('leaderboard-workouts-content').style.display = 'none';
+        document.getElementById('leaderboard-steps-content').style.display = 'block';
+        document.getElementById('leaderboard-tab-steps').classList.add('border-blue-500', 'text-blue-400');
+        document.getElementById('leaderboard-tab-workouts').classList.remove('border-blue-500', 'text-blue-400');
+    });
+
+    document.getElementById('leaderboard-body-workouts').addEventListener('click', async (e) => {
+        if (e.target.dataset.userid) {
+            const targetUserId = e.target.dataset.userid;
+            const profileSnap = await getDoc(doc(db, "profiles", targetUserId));
+            const profileData = profileSnap.data();
+            const userProfileSnap = await getDoc(doc(db, "users", targetUserId, "profile", "data"));
+            const userProfileData = userProfileSnap.data();
+
+            document.getElementById('modal-profile-username').textContent = profileData.username;
+            document.getElementById('modal-profile-content').innerHTML = `
+                <img src="${userProfileData.profilePicUrl || 'https://placehold.co/96x96/0f172a/FFF?text=U'}" class="h-24 w-24 rounded-full mx-auto mb-4">
+                <p class="text-center">${userProfileData.bio || ''}</p>
+            `;
+            document.getElementById('user-profile-modal').style.display = 'flex';
+        }
+    });
+
+    document.getElementById('close-user-profile-modal-btn').addEventListener('click', () => {
+        document.getElementById('user-profile-modal').style.display = 'none';
     });
 });
