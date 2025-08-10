@@ -134,49 +134,33 @@
         <main class="flex-grow p-8">
             <div id="dashboard-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="stat-card bg-gray-800 p-6 rounded-lg shadow-lg">
                         <p class="text-sm text-gray-400">Calories Consumed</p>
-                        <p class="text-2xl font-bold"><span id="calories-consumed">0</span></p>
+                        <p class="text-3xl font-bold"><span id="calories-consumed">0</span></p>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Calories Burned (Workouts)</p>
-                        <p class="text-2xl font-bold"><span id="calories-burned-workouts">0</span></p>
+                    <div class="stat-card bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <p class="text-sm text-gray-400">Calories Burned</p>
+                        <p class="text-3xl font-bold"><span id="calories-burned">0</span></p>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Calories Burned (Steps)</p>
-                        <p class="text-2xl font-bold"><span id="calories-burned-steps">0</span></p>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Total Calories Burned</p>
-                        <p class="text-2xl font-bold"><span id="total-calories-burned-dash">0</span></p>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+                    <div class="stat-card bg-gray-800 p-6 rounded-lg shadow-lg">
                         <p class="text-sm text-gray-400">Current Streak</p>
-                        <p class="text-2xl font-bold"><span id="streak-display">0</span> Days</p>
-                    </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-sm text-gray-400">Water Intake</p>
-                        <p class="text-2xl font-bold"><span id="water-intake">0</span> / 2000 ml</p>
+                        <p class="text-3xl font-bold"><span id="streak-display">0</span> Days</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold mb-2">Steps Today</h3>
-                        <p class="text-2xl font-bold" id="steps-taken">0</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Weekly Activity</h3>
+                        <canvas id="weekly-activity-chart"></canvas>
                     </div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold mb-2">Motivational Quote</h3>
-                        <p class="italic text-gray-300" id="motivational-quote"></p>
-                    </div>
-                </div>
-                 <div class="mb-8">
-                    <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
-                    <div class="flex flex-wrap gap-4">
-                        <button id="log-workout-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Log Workout</button>
-                        <button id="add-meal-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Add Meal</button>
-                        <button id="add-water-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Add Water</button>
-                        <button id="log-steps-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-10 px-4 py-2">Log Steps</button>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
+                        <div class="flex flex-col space-y-4">
+                            <button id="log-workout-btn" class="quick-action-btn">Log Workout</button>
+                            <button id="add-meal-btn" class="quick-action-btn">Add Meal</button>
+                            <button id="add-water-btn" class="quick-action-btn">Add Water</button>
+                            <button id="log-steps-btn" class="quick-action-btn">Log Steps</button>
+                        </div>
                     </div>
                 </div>
             </div>
