@@ -166,6 +166,36 @@
                     </div>
                 </div>
             </div>
+            <div id="progress-content" class="page-content">
+                <h2 class="text-3xl font-bold mb-6">Progress Tracker</h2>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="card p-6"><h3 class="text-2xl font-semibold mb-2">Weight Progress</h3><div class="pt-0"><canvas id="weight-chart" class="w-full h-80"></canvas></div><div class="flex items-center pt-6 space-x-2"><input type="number" id="weight-input" placeholder="Enter weight (lbs)" class="form-input flex-grow"><button id="log-weight-btn" class="btn btn-primary">Log Weight</button></div></div>
+                    <div class="card p-6"><h3 class="text-2xl font-semibold mb-2">Body Fat % Progress</h3><div class="pt-0"><canvas id="bodyfat-chart" class="w-full h-80"></canvas></div><div class="flex items-center pt-6 space-x-2"><input type="number" id="bodyfat-input" placeholder="Enter body fat %" class="form-input flex-grow"><button id="log-bodyfat-btn" class="btn btn-primary">Log Body Fat</button></div></div>
+                </div>
+            </div>
+            <div id="nutrition-content" class="page-content">
+                <h2 class="text-3xl font-bold mb-6">Nutrition Log</h2>
+                <div class="mb-6 flex space-x-4"><button id="add-meal-page-btn" class="btn btn-primary">Log New Meal</button></div>
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="card p-6 lg:col-span-2"><h3 class="text-2xl font-semibold mb-4">Today's Meals</h3><ul id="meal-list" class="space-y-4"></ul></div>
+                    <div class="card p-6"><h3 class="text-2xl font-semibold mb-4">Today's Summary</h3><canvas id="macro-chart" class="w-full h-80"></canvas></div>
+                </div>
+            </div>
+            <div id="community-content" class="page-content">
+                <h2 class="text-3xl font-bold mb-6">Community</h2>
+                <div class="mb-4 border-b"><nav class="-mb-px flex space-x-8"><button id="leaderboard-tab-workouts" class="border-blue-500 text-blue-400 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Workouts</button><button id="leaderboard-tab-steps" class="border-transparent whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Steps</button></nav></div>
+                <div id="leaderboard-workouts-content"><div class="card p-6"><h3 class="text-2xl font-semibold mb-4">Workout Leaderboard</h3><table class="w-full text-sm text-left"><thead><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Workouts</th></tr></thead><tbody id="leaderboard-body-workouts"></tbody></table></div></div>
+                <div id="leaderboard-steps-content" style="display: none;"><div class="card p-6"><h3 class="text-2xl font-semibold mb-4">Steps Leaderboard</h3><table class="w-full text-sm text-left"><thead><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Total Steps</th></tr></thead><tbody id="leaderboard-body-steps"></tbody></table></div></div>
+            </div>
+            <div id="profile-content" class="page-content">
+                <div class="flex items-center space-x-6 mb-6"><img id="profile-pic-main" class="h-24 w-24 rounded-full cursor-pointer" src="https://placehold.co/96x96/0f172a/FFF?text=U" alt=""><div<h2 class="text-3xl font-bold" id="profile-username"></h2><p id="profile-fitness-level"></p></div></div>
+                <p class="mb-6" id="profile-bio"></p>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="card p-6"><h3 class="text-2xl font-semibold mb-4">Workout Streak</h3><p class="text-6xl font-bold text-center text-yellow-400"><span id="profile-streak-display">0</span></p><p class="text-center">Days</p></div>
+                    <div class="card p-6"><h3 class="text-2xl font-semibold mb-4">Achievements</h3><div id="badges-display" class="grid grid-cols-3 gap-4"></div></div>
+                </div>
+                 <div class="card p-6 mt-6"><h3 class="text-2xl font-semibold mb-4">Personal Bests</h3><div id="personal-bests-display" class="space-y-2"></div></div>
+            </div>
             <div id="settings-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Settings</h2>
                 <div class="card p-6 max-w-lg mx-auto">
@@ -182,11 +212,10 @@
                     </div>
                 </div>
             </div>
-            <!-- All other page content divs like progress, nutrition, etc. -->
         </main>
     </div>
 
-    <!-- Modals (structure is the same, but inputs will inherit new styles) -->
+    <!-- Modals -->
     <div id="workout-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
         <div class="card relative z-50 w-full max-w-lg p-6">
             <div class="flex items-center justify-between mb-4">
@@ -209,7 +238,46 @@
             </div>
         </div>
     </div>
-    <!-- All other modals -->
+    <div id="meal-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="card relative z-50 w-full max-w-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log New Meal</h3>
+                <button id="close-meal-modal-btn" class="p-1 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="text" id="meal-name-input" placeholder="Meal Name" class="form-input">
+                <input type="number" id="meal-calories-input" placeholder="Calories" class="form-input">
+                <input type="number" id="meal-protein-input" placeholder="Protein (g)" class="form-input">
+                <input type="number" id="meal-carbs-input" placeholder="Carbs (g)" class="form-input">
+                <input type="number" id="meal-fat-input" placeholder="Fat (g)" class="form-input">
+                <button id="save-meal-btn" class="btn btn-primary">Save Meal</button>
+            </div>
+        </div>
+    </div>
+    <div id="water-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="card relative z-50 w-full max-w-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log Water</h3>
+                <button id="close-water-modal-btn" class="p-1 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="number" id="water-amount-input" placeholder="Amount (ml)" class="form-input">
+                <button id="save-water-btn" class="btn btn-primary">Save Water</button>
+            </div>
+        </div>
+    </div>
+    <div id="steps-modal" class="fixed inset-0 z-50 bg-black/80 flex justify-center items-center" style="display: none;">
+        <div class="card relative z-50 w-full max-w-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold">Log Steps</h3>
+                <button id="close-steps-modal-btn" class="p-1 rounded-md"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <input type="number" id="steps-amount-input" placeholder="Number of steps" class="form-input">
+                <button id="save-steps-btn" class="btn btn-primary">Save Steps</button>
+            </div>
+        </div>
+    </div>
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
