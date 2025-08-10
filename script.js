@@ -44,11 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Page Navigation ---
     function showPage(pageId) {
         pages.forEach(page => {
-            document.getElementById(`${page}-content`).classList.remove('active');
+            document.getElementById(`${page}-content`)?.classList.remove('active');
             document.getElementById(`nav-${page}`)?.classList.remove('active');
             document.getElementById(`mobile-nav-${page}`)?.classList.remove('active');
         });
-        document.getElementById(`${pageId}-content`).classList.add('active');
+        document.getElementById(`${pageId}-content`)?.classList.add('active');
         document.getElementById(`nav-${pageId}`)?.classList.add('active');
         document.getElementById(`mobile-nav-${pageId}`)?.classList.add('active');
     }
@@ -171,6 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDashboardSteps(steps);
         });
     }
+
+    // --- Helper Functions ---
+    const isToday = (date) => {
+        const today = new Date();
+        return date.getDate() === today.getDate() &&
+               date.getMonth() === today.getMonth() &&
+               date.getFullYear() === today.getFullYear();
+    };
 
     // --- Rendering Functions ---
     function renderWorkouts(workouts) {
