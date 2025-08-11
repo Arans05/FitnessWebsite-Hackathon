@@ -196,8 +196,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
         if (userDisplayMobile) userDisplayMobile.textContent = username;
 
+        const defaultProfile = {
+            weight: 0, height: 0, age: 0,
+            gender: 'Male', bio: '', fitnessLevel: 'Beginner',
+            streak: 0, achievements: [], personalBests: {},
+            profilePicUrl: ''
+        };
+
         addListener(doc(db, "users", uid, "profile", "data"), snapshot => {
-            userProfileData = snapshot.data() || { weight: 150 };
+            userProfileData = { ...defaultProfile, ...snapshot.data() };
             updateProfileUI(userProfileData);
             updateNutritionGoals(); // Update nutrition goals when profile changes
         });
@@ -276,12 +283,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Pre-fill settings form
-        document.getElementById('profile-bio-input').value = profile.bio || '';
-        document.getElementById('fitness-level').value = profile.fitnessLevel || 'Beginner';
-        document.getElementById('user-gender-select').value = profile.gender || 'Male';
-        document.getElementById('user-weight-input').value = profile.weight || '';
-        document.getElementById('user-height-input').value = profile.height || '';
-        document.getElementById('user-age-input').value = profile.age || '';
+        document.getElementById('profile-bio-input').value = profile.bio ?? '';
+        document.getElementById('fitness-level').value = profile.fitnessLevel ?? 'Beginner';
+        document.getElementById('user-gender-select').value = profile.gender ?? 'Male';
+        document.getElementById('user-weight-input').value = profile.weight ?? '';
+        document.getElementById('user-height-input').value = profile.height ?? '';
+        document.getElementById('user-age-input').value = profile.age ?? '';
     }
 
     function renderWorkouts(workouts) {
@@ -734,7 +741,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userId) return;
 
         const parseNumericInput = (elementId, parseFunc, fallbackValue) => {
-            const value = parseFunc(document.getElementById(elementId).value);
+            const valueString = document.getElementById(elementId).value;
+            if (valueString.trim() === '') return fallbackValue;
+            const value = parseFunc(valueString);
             return !isNaN(value) ? value : fallbackValue;
         };
 
@@ -751,9 +760,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await setDoc(doc(db, "users", userId, "profile", "data"), newProfileData, { merge: true });
             
-            // Immediately update local state to reflect changes for instant UI updates
             userProfileData = { ...userProfileData, ...newProfileData }; 
-            updateNutritionGoals(); // Force refresh of nutrition goals with the new data
+            updateNutritionGoals(); 
             
             showNotification("Settings saved!");
         } catch (error) { 
