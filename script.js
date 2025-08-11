@@ -1,5 +1,3 @@
-
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -66,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let charts = {};
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
     let userProfileData = { weight: 150 };
+    let customWorkoutExercises = [];
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -200,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addListener(doc(db, "users", uid, "profile", "data"), snapshot => {
             userProfileData = snapshot.data() || { weight: 150 };
             updateProfileUI(userProfileData);
+            updateNutritionGoals(); // Update nutrition goals when profile changes
         });
 
         addListener(query(collection(db, "users", uid, "workouts")), snapshot => {
@@ -235,6 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
             renderProgressCharts(progressData);
         });
         
+        addListener(query(collection(db, "users", uid, "workout_plans")), snapshot => {
+            const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderWorkoutPlans(plans);
+        });
+
         addListener(query(collection(db, "profiles")), snapshot => {
             const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderLeaderboard(profiles);
@@ -253,12 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profile-bio').textContent = profile.bio || 'No bio set.';
         document.getElementById('profile-streak-display').textContent = profile.streak || 0;
         
-        // =========================================================================
-        // === BUG FIX: Call rendering functions for profile page components ===
-        // =========================================================================
         renderAchievements(profile.achievements || []);
         renderPersonalBests(profile.personalBests || {});
-        // =========================================================================
 
         const profilePics = [document.getElementById('profile-pic-nav'), document.getElementById('profile-pic-main'), document.getElementById('profile-pic-nav-mobile')];
         profilePics.forEach(el => {
@@ -296,6 +297,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="p-4">${w.caloriesBurned || 'N/A'}</td>
                     <td class="p-4">${w.notes || ''}</td>
                 </tr>`).join('');
+    }
+    
+    function renderWorkoutPlans(plans) {
+        const plansListEl = document.getElementById('custom-plans-list');
+        if (!plansListEl) return;
+        plansListEl.innerHTML = plans.length === 0
+            ? `<p class="text-gray-500">No custom plans created yet.</p>`
+            : plans.map(plan => `
+                <div class="plan-card">
+                    <h4 class="font-bold text-lg">${plan.name}</h4>
+                    <ul class="list-disc list-inside mt-2">
+                        ${plan.exercises.map(ex => `<li>${ex.name}: ${ex.sets} sets of ${ex.reps} reps</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
     }
 
     function renderMeals(meals) {
@@ -415,6 +431,46 @@ document.addEventListener('DOMContentLoaded', () => {
             motivationalQuoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
         }
     }
+    
+    // --- Nutrition Goal Calculation ---
+    function updateNutritionGoals() {
+        const { weight, height, age, gender, fitnessLevel } = userProfileData;
+        const contentEl = document.getElementById('nutrition-goals-content');
+        if (!contentEl) return;
+
+        if (!weight || !height || !age || !gender || !fitnessLevel) {
+            contentEl.innerHTML = `<p class="text-gray-400 col-span-2">Please complete your profile in Settings to calculate your nutrition goals.</p>`;
+            return;
+        }
+
+        const weightKg = weight / 2.20462;
+        
+        // Mifflin-St Jeor Equation for BMR
+        let bmr = (10 * weightKg) + (6.25 * height) - (5 * age);
+        bmr += (gender === 'Male' ? 5 : -161);
+        
+        // TDEE calculation
+        const activityFactors = { 'Beginner': 1.375, 'Intermediate': 1.55, 'Advanced': 1.725 };
+        const tdee = bmr * (activityFactors[fitnessLevel] || 1.2);
+
+        // Goal Calculations
+        const loseWeightCalories = Math.round(tdee - 400);
+        const gainMuscleCalories = Math.round(tdee + 400);
+        const proteinIntake = Math.round(weightKg * 1.8); // 1.8g per kg of bodyweight
+
+        contentEl.innerHTML = `
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <h4 class="font-bold text-lg text-green-400">Gain Muscle</h4>
+                <p class="mt-2">Calories: <span class="font-bold text-xl">${gainMuscleCalories}</span> kcal/day</p>
+                <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <h4 class="font-bold text-lg text-red-400">Lose Weight</h4>
+                <p class="mt-2">Calories: <span class="font-bold text-xl">${loseWeightCalories}</span> kcal/day</p>
+                <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
+            </div>
+        `;
+    }
 
     // --- Gamification ---
     async function calculateStreak(workouts) {
@@ -517,7 +573,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         openBtnIds.forEach(id => document.getElementById(id)?.addEventListener('click', () => modal.style.display = 'flex'));
         document.getElementById(closeBtnId)?.addEventListener('click', closeModal);
-        document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
+        if (saveBtnId && saveAction) {
+            document.getElementById(saveBtnId).addEventListener('click', saveAction);
+        }
 
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -599,6 +657,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Custom Plan Modal
+    setupModal(['create-plan-btn'], 'plan-modal', 'close-plan-modal-btn');
+
+    document.getElementById('add-exercise-to-plan-btn').addEventListener('click', () => {
+        const name = document.getElementById('plan-exercise-name-input').value;
+        const sets = document.getElementById('plan-exercise-sets-input').value;
+        const reps = document.getElementById('plan-exercise-reps-input').value;
+        
+        if (name && sets && reps) {
+            customWorkoutExercises.push({ name, sets, reps });
+            renderPlanExercises();
+            document.getElementById('plan-exercise-name-input').value = '';
+            document.getElementById('plan-exercise-sets-input').value = '';
+            document.getElementById('plan-exercise-reps-input').value = '';
+        }
+    });
+
+    function renderPlanExercises() {
+        const listEl = document.getElementById('plan-exercises-list');
+        listEl.innerHTML = customWorkoutExercises.map(ex => `<li>${ex.name}: ${ex.sets}x${ex.reps}</li>`).join('');
+    }
+
+    document.getElementById('save-plan-btn').addEventListener('click', async () => {
+        const planName = document.getElementById('plan-name-input').value;
+        if (planName && customWorkoutExercises.length > 0) {
+            try {
+                await addDoc(collection(db, "users", userId, "workout_plans"), {
+                    name: planName,
+                    exercises: customWorkoutExercises,
+                    createdAt: serverTimestamp()
+                });
+                document.getElementById('plan-modal').style.display = 'none';
+                document.getElementById('plan-name-input').value = '';
+                customWorkoutExercises = [];
+                renderPlanExercises();
+            } catch (error) {
+                console.error("Error saving plan:", error);
+            }
+        }
+    });
+
+
     document.getElementById('log-weight-btn')?.addEventListener('click', async () => {
         if (!userId) return;
         const weight = document.getElementById('weight-input').value;
@@ -638,3 +738,4 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error("Error saving settings:", error); }
     });
 });
+
