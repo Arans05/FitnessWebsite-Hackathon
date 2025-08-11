@@ -228,9 +228,11 @@
     <div id="steps-modal" class="modal-backdrop"><div class="card relative z-50 w-full max-w-lg"><div class="modal-header"><h3 class="text-xl font-semibold">Log Steps</h3><button id="close-steps-modal-btn" class="modal-close-btn"><i class="fas fa-times"></i></button></div><div class="p-6 flex flex-col space-y-4"><input type="number" id="steps-amount-input" placeholder="Number of steps" class="form-input"><button id="save-steps-btn" class="btn btn-primary">Save Steps</button></div></div></div>
     <div id="plan-modal" class="modal-backdrop"><div class="card relative z-50 w-full max-w-lg"><div class="modal-header"><h3 class="text-xl font-semibold">Create Custom Plan</h3><button id="close-plan-modal-btn" class="modal-close-btn"><i class="fas fa-times"></i></button></div><div class="p-6 flex flex-col space-y-4"><input type="text" id="plan-name-input" placeholder="Plan Name" class="form-input"><div class="p-4 border border-gray-700 rounded-lg space-y-3"><h4 class="font-semibold">Add Exercise</h4><input type="text" id="plan-exercise-name-input" placeholder="Exercise Name" class="form-input"><input type="number" id="plan-exercise-sets-input" placeholder="Sets" class="form-input"><input type="number" id="plan-exercise-reps-input" placeholder="Reps" class="form-input"><button id="add-exercise-to-plan-btn" class="btn btn-secondary w-full">Add Exercise to Plan</button></div><div class="space-y-2"><h4 class="font-semibold">Current Plan Exercises:</h4><ul id="plan-exercises-list" class="list-disc list-inside"></ul></div><button id="save-plan-btn" class="btn btn-primary">Save Plan</button></div></div></div>
 
+    <!-- Notification Banner -->
+    <div id="notification" class="notification"></div>
+
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" type="module"></script>
 </body>
 </html>
-
