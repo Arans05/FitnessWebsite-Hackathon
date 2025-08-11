@@ -732,19 +732,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('save-settings-btn').addEventListener('click', async () => {
         if (!userId) return;
+
+        const parseNumericInput = (elementId, parseFunc, fallbackValue) => {
+            const value = parseFunc(document.getElementById(elementId).value);
+            return !isNaN(value) ? value : fallbackValue;
+        };
+
         const newProfileData = {
-            weight: parseFloat(document.getElementById('user-weight-input').value) || userProfileData.weight,
+            weight: parseNumericInput('user-weight-input', parseFloat, userProfileData.weight),
+            height: parseNumericInput('user-height-input', parseInt, userProfileData.height),
+            age: parseNumericInput('user-age-input', parseInt, userProfileData.age),
             profilePicUrl: document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl,
             bio: document.getElementById('profile-bio-input').value,
             fitnessLevel: document.getElementById('fitness-level').value,
-            age: parseInt(document.getElementById('user-age-input').value) || userProfileData.age,
-            height: parseInt(document.getElementById('user-height-input').value) || userProfileData.height,
             gender: document.getElementById('user-gender-select').value
         };
+
         try {
             await setDoc(doc(db, "users", userId, "profile", "data"), newProfileData, { merge: true });
-            userProfileData = { ...userProfileData, ...newProfileData }; // Immediately update local state
-            updateNutritionGoals(); // Force refresh of nutrition goals
+            
+            // Immediately update local state to reflect changes for instant UI updates
+            userProfileData = { ...userProfileData, ...newProfileData }; 
+            updateNutritionGoals(); // Force refresh of nutrition goals with the new data
+            
             showNotification("Settings saved!");
         } catch (error) { 
             console.error("Error saving settings:", error);
