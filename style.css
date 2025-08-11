@@ -17,6 +17,8 @@
     --color-success: #22c55e; /* green-500 */
     --color-success-hover: #16a34a; /* green-600 */
     --color-danger: #ef4444; /* red-500 */
+    --color-secondary: #64748b; /* slate-500 */
+    --color-secondary-hover: #475569; /* slate-600 */
 }
 
 /* 2. DARK MODE OVERRIDES
@@ -77,6 +79,9 @@ body {
 .btn-primary:hover { background-color: var(--color-primary-hover); }
 .btn-success { background-color: var(--color-success); color: white; }
 .btn-success:hover { background-color: var(--color-success-hover); }
+.btn-secondary { background-color: var(--color-secondary); color: white; }
+.btn-secondary:hover { background-color: var(--color-secondary-hover); }
+
 
 /* Form Inputs */
 .form-input {
@@ -222,6 +227,14 @@ table tbody tr:hover {
 }
 .modal-close-btn:hover {
     color: var(--color-text);
+}
+
+/* 8. Custom Workout Plan Styles */
+.plan-card {
+    background-color: var(--color-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--color-success);
 }
 
 /* Animations */
