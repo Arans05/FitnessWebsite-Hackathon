@@ -19,8 +19,11 @@
     <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 view-container active">
         <div class="w-full max-w-md">
             <div class="flex justify-center items-center mb-8">
-                <svg class="h-12 w-12 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.57,14.86H19.53V9.14h1.04A1.43,1.43,0,0,0,22,7.71V6.29a1.43,1.43,0,0,0-1.43-1.43H19.53V4.43a1.43,1.43,0,0,0-1.43-1.43H16.67a1.43,1.43,0,0,0-1.43,1.43V4.86H8.76V4.43A1.43,1.43,0,0,0,7.33,3H5.9A1.43,1.43,0,0,0,4.47,4.43V4.86H3.43A1.43,1.43,0,0,0,2,6.29V7.71A1.43,1.43,0,0,0,3.43,9.14h1.04v5.72H3.43A1.43,1.43,0,0,0,2,16.29v1.42a1.43,1.43,0,0,0,1.43,1.43H4.47v.43A1.43,1.43,0,0,0,5.9,21H7.33a1.43,1.43,0,0,0,1.43-1.43V19.14h6.51v.43a1.43,1.43,0,0,0,1.43,1.43h1.43a1.43,1.43,0,0,0,1.43-1.43v-.43h1.04A1.43,1.43,0,0,0,22,17.71V16.29A1.43,1.43,0,0,0,20.57,14.86Z"/>
+                <svg class="h-12 w-12 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4v16h16"/>
+                    <path d="M4 12h12"/>
+                    <path d="M10 12l4 4"/>
+                    <path d="M10 12l4-4"/>
                 </svg>
                 <h1 class="text-4xl font-bold text-center text-white ml-2">FitTrack</h1>
             </div>
@@ -54,8 +57,11 @@
                 <div class="flex h-20 items-center justify-between">
                     <div class="flex items-center">
                         <a href="#" id="nav-logo" class="flex items-center space-x-2">
-                           <svg class="h-8 w-8 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20.57,14.86H19.53V9.14h1.04A1.43,1.43,0,0,0,22,7.71V6.29a1.43,1.43,0,0,0-1.43-1.43H19.53V4.43a1.43,1.43,0,0,0-1.43-1.43H16.67a1.43,1.43,0,0,0-1.43,1.43V4.86H8.76V4.43A1.43,1.43,0,0,0,7.33,3H5.9A1.43,1.43,0,0,0,4.47,4.43V4.86H3.43A1.43,1.43,0,0,0,2,6.29V7.71A1.43,1.43,0,0,0,3.43,9.14h1.04v5.72H3.43A1.43,1.43,0,0,0,2,16.29v1.42a1.43,1.43,0,0,0,1.43,1.43H4.47v.43A1.43,1.43,0,0,0,5.9,21H7.33a1.43,1.43,0,0,0,1.43-1.43V19.14h6.51v.43a1.43,1.43,0,0,0,1.43,1.43h1.43a1.43,1.43,0,0,0,1.43-1.43v-.43h1.04A1.43,1.43,0,0,0,22,17.71V16.29A1.43,1.43,0,0,0,20.57,14.86Z"/>
+                           <svg class="h-10 w-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4v16h16"/>
+                                <path d="M4 12h12"/>
+                                <path d="M10 12l4 4"/>
+                                <path d="M10 12l4-4"/>
                             </svg>
                             <span class="text-white font-bold text-2xl">FitTrack</span>
                         </a>
@@ -201,19 +207,21 @@
                 </div>
             </div>
             <div id="nutrition-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Nutrition</h2>
-                <div class="mb-6 flex space-x-4"><button id="add-meal-page-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Log New Meal</button></div>
-                <div class="grid gap-6 md:grid-cols-1 lg:grid-cols-3 mb-8">
-                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6 lg:col-span-2">
+                <h2 class="welcome-title">Nutrition Hub</h2>
+                <div class="mb-8 flex space-x-4">
+                    <button id="add-meal-page-btn" class="action-btn primary-btn"><i class="fas fa-plus mr-2"></i>Log New Meal</button>
+                </div>
+                <div class="grid gap-8 md:grid-cols-1 lg:grid-cols-3 mb-8">
+                    <div class="content-box lg:col-span-2">
                         <h3 class="text-2xl font-semibold mb-4">Today's Meals</h3>
                         <ul id="meal-list" class="space-y-4"></ul>
                     </div>
-                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                    <div class="content-box">
                         <h3 class="text-2xl font-semibold mb-4">Today's Macros</h3>
-                        <canvas id="macro-chart" class="w-full h-80"></canvas>
+                        <div class="chart-container"><canvas id="macro-chart"></canvas></div>
                     </div>
                 </div>
-                <div id="nutrition-goals" class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                <div class="content-box">
                     <h3 class="text-2xl font-semibold mb-4">Nutrition Goals</h3>
                     <div id="nutrition-goals-content" class="grid gap-6 md:grid-cols-2">
                         <!-- Content generated by JS -->
