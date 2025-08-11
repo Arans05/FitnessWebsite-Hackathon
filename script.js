@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let unsubscribers = [];
     let charts = {};
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
-    let userProfileData = { weight: 150 };
+    let userProfileData = {};
     let customWorkoutExercises = [];
 
     // --- Page Navigation ---
@@ -451,41 +451,60 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Nutrition Goal Calculation ---
     function updateNutritionGoals() {
         const { weight, height, age, gender, fitnessLevel } = userProfileData;
-        const contentEl = document.getElementById('nutrition-goals-content');
-        if (!contentEl) return;
+        const goalsContainer = document.getElementById('nutrition-goals-content');
+        const goalsPrompt = document.getElementById('nutrition-goals-prompt');
+        const weightLossSelect = document.getElementById('weight-loss-rate');
 
-        if (!weight || !height || !age || !gender || !fitnessLevel) {
-            contentEl.innerHTML = `<p class="text-gray-400 col-span-2">Please complete your profile in Settings to calculate your nutrition goals.</p>`;
+        if (!goalsContainer || !goalsPrompt || !weightLossSelect) return;
+
+        const isProfileComplete = weight && height && age && gender && fitnessLevel;
+
+        if (!isProfileComplete) {
+            goalsContainer.style.display = 'none';
+            goalsPrompt.style.display = 'block';
             return;
         }
 
+        goalsContainer.style.display = 'grid';
+        goalsPrompt.style.display = 'none';
+
         const weightKg = weight / 2.20462;
         
-        // Mifflin-St Jeor Equation for BMR
         let bmr = (10 * weightKg) + (6.25 * height) - (5 * age);
         bmr += (gender === 'Male' ? 5 : -161);
         
-        // TDEE calculation
         const activityFactors = { 'Beginner': 1.375, 'Intermediate': 1.55, 'Advanced': 1.725 };
         const tdee = bmr * (activityFactors[fitnessLevel] || 1.2);
 
-        // Goal Calculations
-        const loseWeightCalories = Math.round(tdee - 400);
         const gainMuscleCalories = Math.round(tdee + 400);
-        const proteinIntake = Math.round(weightKg * 1.8); // 1.8g per kg of bodyweight
-
-        contentEl.innerHTML = `
-            <div class="bg-gray-700 p-4 rounded-lg">
+        const proteinForMuscle = Math.round(weightKg * 1.8);
+        const gainMuscleCard = document.getElementById('gain-muscle-card');
+        if (gainMuscleCard) {
+            gainMuscleCard.innerHTML = `
                 <h4 class="font-bold text-lg text-green-400">Gain Muscle</h4>
                 <p class="mt-2">Calories: <span class="font-bold text-xl">${gainMuscleCalories}</span> kcal/day</p>
-                <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
-            </div>
-            <div class="bg-gray-700 p-4 rounded-lg">
-                <h4 class="font-bold text-lg text-red-400">Lose Weight</h4>
-                <p class="mt-2">Calories: <span class="font-bold text-xl">${loseWeightCalories}</span> kcal/day</p>
-                <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
-            </div>
-        `;
+                <p>Protein: <span class="font-bold text-xl">${proteinForMuscle}</span> g/day</p>
+            `;
+        }
+
+        const updateWeightLossGoal = () => {
+            const weeklyLossKg = parseFloat(weightLossSelect.value);
+            const dailyDeficit = (weeklyLossKg * 7700) / 7;
+            const loseWeightCalories = Math.round(tdee - dailyDeficit);
+            const proteinForLoss = Math.round(weightKg * 1.8);
+            
+            const loseWeightDetails = document.getElementById('lose-weight-details');
+            if (loseWeightDetails) {
+                loseWeightDetails.innerHTML = `
+                    <p>Calories: <span class="font-bold text-xl">${loseWeightCalories}</span> kcal/day</p>
+                    <p>Protein: <span class="font-bold text-xl">${proteinForLoss}</span> g/day</p>
+                `;
+            }
+        };
+        
+        updateWeightLossGoal();
+        weightLossSelect.removeEventListener('change', updateWeightLossGoal);
+        weightLossSelect.addEventListener('change', updateWeightLossGoal);
     }
 
     // --- Gamification ---
@@ -538,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userId) return;
         const profileRef = doc(db, "profiles", userId);
         const profileSnap = await getDoc(profileRef);
-        if (!profileSnap.exists()) return; // Don't try to update a profile that doesn't exist
+        if (!profileSnap.exists()) return;
         const username = profileSnap.data()?.username || auth.currentUser.email;
         await setDoc(profileRef, { username, workoutCount }, { merge: true });
     }
@@ -602,8 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getWorkoutCalories(type, duration) {
         const metValues = { 'Cardio': 7, 'Strength': 4, 'Yoga': 2.5, 'Running': 11, 'Walking': 3.5, 'Jogging': 7, 'Swimming': 8 };
-        const met = metValues[type] || 5; // Default MET value
-        const weightInKg = (userProfileData.weight || 150) / 2.2; // Use profile weight, default to 150lbs
+        const met = metValues[type] || 5;
+        const weightInKg = (userProfileData.weight || 150) / 2.2;
         return Math.round((met * 3.5 * weightInKg) / 200 * duration);
     }
 
@@ -742,9 +761,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const parseNumericInput = (elementId, parseFunc, fallbackValue) => {
             const valueString = document.getElementById(elementId).value;
-            if (valueString.trim() === '') return fallbackValue;
+            const safeFallback = fallbackValue ?? 0;
+            if (valueString.trim() === '') return safeFallback;
             const value = parseFunc(valueString);
-            return !isNaN(value) ? value : fallbackValue;
+            return !isNaN(value) ? value : safeFallback;
         };
 
         const newProfileData = {
@@ -759,10 +779,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await setDoc(doc(db, "users", userId, "profile", "data"), newProfileData, { merge: true });
-            
-            userProfileData = { ...userProfileData, ...newProfileData }; 
-            updateNutritionGoals(); 
-            
             showNotification("Settings saved!");
         } catch (error) { 
             console.error("Error saving settings:", error);
