@@ -44,6 +44,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const newTheme = isDark ? 'dark' : 'light';
         localStorage.setItem('theme', newTheme);
         applyTheme(newTheme);
+
+        // Update chart colors
+        const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary');
+        Object.values(charts).forEach(chart => {
+            if (chart.options.scales) {
+                chart.options.scales.x.ticks.color = chartTextColor;
+                chart.options.scales.y.ticks.color = chartTextColor;
+            }
+            if (chart.options.plugins.legend) {
+                chart.options.plugins.legend.labels.color = chartTextColor;
+            }
+            chart.update();
+        });
     });
 
     // --- DOM Elements ---
@@ -336,18 +349,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayMeals = meals.filter(m => m.timestamp && isToday(m.timestamp)).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
         mealListEl.innerHTML = todayMeals.length === 0
-            ? `<li class="text-gray-500">No meals logged today.</li>`
+            ? `<p class="text-gray-500">No meals logged today.</p>`
             : todayMeals.map(m => `
-                <li class="p-4 rounded-md bg-gray-700">
-                    <p class="font-semibold text-white">${m.name}</p>
-                    <p class="text-sm text-gray-400">${m.calories} kcal - P:${m.protein}g, C:${m.carbs}g, F:${m.fat}g</p>
+                <li class="meal-item">
+                    <div class="meal-details">
+                        <p>${m.name}</p>
+                        <p>${m.calories} kcal</p>
+                    </div>
+                    <div class="meal-macros">
+                        <p>P: <span>${m.protein}g</span></p>
+                        <p>C: <span>${m.carbs}g</span></p>
+                        <p>F: <span>${m.fat}g</span></p>
+                    </div>
                 </li>`).join('');
     }
     
     function renderProgressCharts(progressData) {
+        const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary');
         const weightData = progressData.filter(d => d.weight);
         const bodyfatData = progressData.filter(d => d.bodyfat);
-        const chartOptions = { plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#9ca3af' } }, x: { ticks: { color: '#9ca3af' } } } };
+        const chartOptions = { 
+            plugins: { legend: { display: false } }, 
+            scales: { 
+                y: { ticks: { color: chartTextColor } }, 
+                x: { ticks: { color: chartTextColor } } 
+            } 
+        };
 
         const createOrUpdateChart = (id, data, labels, borderColor) => {
             const ctx = document.getElementById(id)?.getContext('2d');
@@ -359,17 +386,18 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 charts[id] = new Chart(ctx, {
                     type: 'line',
-                    data: { labels, datasets: [{ data, borderColor, tension: 0.1 }] },
+                    data: { labels, datasets: [{ data, borderColor, tension: 0.1, pointBackgroundColor: 'white', pointRadius: 4 }] },
                     options: chartOptions
                 });
             }
         };
 
-        createOrUpdateChart('weight-chart', weightData.map(d => d.weight), weightData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()), '#3b82f6');
-        createOrUpdateChart('bodyfat-chart', bodyfatData.map(d => d.bodyfat), bodyfatData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()), '#ef4444');
+        createOrUpdateChart('weight-chart', weightData.map(d => d.weight), weightData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()), '#a78bfa');
+        createOrUpdateChart('bodyfat-chart', bodyfatData.map(d => d.bodyfat), bodyfatData.map(d => new Date(d.timestamp.seconds * 1000).toLocaleDateString()), '#f472b6');
     }
 
     function renderMacroChart(meals) {
+        const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary');
         const todayMeals = meals.filter(m => m.timestamp && isToday(m.timestamp));
         const macros = todayMeals.reduce((acc, meal) => {
             acc.protein += meal.protein || 0;
@@ -393,6 +421,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         backgroundColor: ['#3b82f6', '#16a34a', '#ef4444'],
                         borderWidth: 0
                     }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: chartTextColor
+                            }
+                        }
+                    }
                 }
             });
         }
