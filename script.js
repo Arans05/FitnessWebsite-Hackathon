@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -728,8 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
             profilePicUrl: document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl,
             bio: document.getElementById('profile-bio-input').value,
             fitnessLevel: document.getElementById('fitness-level').value,
-            age: parseInt(document.getElementById('user-age-input').value),
-            height: parseInt(document.getElementById('user-height-input').value),
+            age: parseInt(document.getElementById('user-age-input').value) || userProfileData.age,
+            height: parseInt(document.getElementById('user-height-input').value) || userProfileData.height,
             gender: document.getElementById('user-gender-select').value
         };
         try {
