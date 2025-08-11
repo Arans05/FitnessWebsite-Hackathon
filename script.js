@@ -1,7 +1,10 @@
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+// IMPORTANT: REPLACE WITH YOUR FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyDqQGsIz-mnJiMNZmkM0gL5eOhQV6jTAh0",
     authDomain: "fitnessapp-721d9.firebaseapp.com",
@@ -11,6 +14,7 @@ const firebaseConfig = {
     appId: "1:339656705043:web:b5dbd141d09398014a2be6",
     measurementId: "G-XFQYPFN6GR"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -62,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let charts = {};
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
     let userProfileData = { weight: 150 };
-    let customWorkoutExercises = [];
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -94,6 +97,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('signup-form').style.display = 'block'; });
     document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; });
 
+    // --- Community Page Tab Listeners ---
+    const leaderboardTabWorkouts = document.getElementById('leaderboard-tab-workouts');
+    const leaderboardTabSteps = document.getElementById('leaderboard-tab-steps');
+    const leaderboardWorkoutsContent = document.getElementById('leaderboard-workouts-content');
+    const leaderboardStepsContent = document.getElementById('leaderboard-steps-content');
+
+    leaderboardTabWorkouts.addEventListener('click', () => {
+        leaderboardWorkoutsContent.style.display = 'block';
+        leaderboardStepsContent.style.display = 'none';
+        leaderboardTabWorkouts.classList.add('border-blue-500', 'text-blue-400');
+        leaderboardTabWorkouts.classList.remove('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
+        leaderboardTabSteps.classList.add('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
+        leaderboardTabSteps.classList.remove('border-blue-500', 'text-blue-400');
+    });
+
+    leaderboardTabSteps.addEventListener('click', () => {
+        leaderboardWorkoutsContent.style.display = 'none';
+        leaderboardStepsContent.style.display = 'block';
+        leaderboardTabSteps.classList.add('border-blue-500', 'text-blue-400');
+        leaderboardTabSteps.classList.remove('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
+        leaderboardTabWorkouts.classList.add('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
+        leaderboardTabWorkouts.classList.remove('border-blue-500', 'text-blue-400');
+    });
+
 
     // --- Authentication ---
     onAuthStateChanged(auth, async (user) => {
@@ -103,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appContainer.classList.add('active');
             await setupListeners(userId);
             showPage('dashboard');
+            setMotivationalQuote();
         } else {
             userId = null;
             appContainer.classList.remove('active');
@@ -118,7 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const userCredential = await action(auth, email, password);
             if (action === createUserWithEmailAndPassword) {
                 const userId = userCredential.user.uid;
-                await setDoc(doc(db, "profiles", userId), { username, email, workoutCount: 0, totalSteps: 0 });
+                // Create public profile for leaderboards
+                await setDoc(doc(db, "profiles", userId), { 
+                    username, 
+                    email, 
+                    workoutCount: 0, 
+                    totalSteps: 0 
+                });
+                // Create private, detailed user profile
                 await setDoc(doc(db, "users", userId, "profile", "data"), {
                     username, email,
                     weight: 0, height: 0, age: 0,
@@ -218,11 +253,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profile-bio').textContent = profile.bio || 'No bio set.';
         document.getElementById('profile-streak-display').textContent = profile.streak || 0;
         
+        // =========================================================================
+        // === BUG FIX: Call rendering functions for profile page components ===
+        // =========================================================================
+        renderAchievements(profile.achievements || []);
+        renderPersonalBests(profile.personalBests || {});
+        // =========================================================================
+
         const profilePics = [document.getElementById('profile-pic-nav'), document.getElementById('profile-pic-main'), document.getElementById('profile-pic-nav-mobile')];
         profilePics.forEach(el => {
             if(el) el.src = profile.profilePicUrl || `https://placehold.co/96x96/1e293b/FFF?text=${(profile.username || 'U').charAt(0).toUpperCase()}`;
         });
 
+        // Pre-fill settings form
         document.getElementById('profile-bio-input').value = profile.bio || '';
         document.getElementById('fitness-level').value = profile.fitnessLevel || 'Beginner';
         document.getElementById('user-gender-select').value = profile.gender || 'Male';
@@ -346,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const todaySteps = steps.filter(s => s.timestamp && isToday(s.timestamp));
         const totalSteps = todaySteps.reduce((sum, s) => sum + (s.amount || 0), 0);
         document.getElementById('steps-taken').textContent = totalSteps;
-        dailyCaloriesBurned.steps = totalSteps * 0.04;
+        dailyCaloriesBurned.steps = totalSteps * 0.04; // Average calorie burn per step
         document.getElementById('calories-burned-steps').textContent = Math.round(dailyCaloriesBurned.steps);
         updateTotalCaloriesBurned();
     }
@@ -423,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userId) return;
         const profileRef = doc(db, "profiles", userId);
         const profileSnap = await getDoc(profileRef);
+        if (!profileSnap.exists()) return; // Don't try to update a profile that doesn't exist
         const username = profileSnap.data()?.username || auth.currentUser.email;
         await setDoc(profileRef, { username, workoutCount }, { merge: true });
     }
@@ -431,6 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!userId) return;
         const totalSteps = steps.reduce((sum, s) => sum + (s.amount || 0), 0);
         const profileRef = doc(db, "profiles", userId);
+        if (! (await getDoc(profileRef)).exists()) return;
         await setDoc(profileRef, { totalSteps }, { merge: true });
     }
     
@@ -474,7 +519,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(closeBtnId)?.addEventListener('click', closeModal);
         document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
 
-        // Add event listener to close modal on backdrop click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal();
@@ -484,8 +528,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getWorkoutCalories(type, duration) {
         const metValues = { 'Cardio': 7, 'Strength': 4, 'Yoga': 2.5, 'Running': 11, 'Walking': 3.5, 'Jogging': 7, 'Swimming': 8 };
-        const met = metValues[type] || 5;
-        return Math.round((met * 3.5 * (userProfileData.weight / 2.2)) / 200 * duration);
+        const met = metValues[type] || 5; // Default MET value
+        const weightInKg = (userProfileData.weight || 150) / 2.2; // Use profile weight, default to 150lbs
+        return Math.round((met * 3.5 * weightInKg) / 200 * duration);
     }
 
     document.getElementById('workout-type-select').addEventListener('change', (e) => {
