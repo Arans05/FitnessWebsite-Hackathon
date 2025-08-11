@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const profileSnap = await getDoc(doc(db, "profiles", uid));
         const profileData = profileSnap.data() || {};
         const username = profileData.username || auth.currentUser.email;
-        if (welcomeMessage) welcomeMessage.textContent = `Hi ${username}, here’s your summary today.`;
+        if (welcomeMessage) welcomeMessage.innerHTML = `Welcome back, <span class="font-bold">${username}</span>!`;
         if (userDisplayMobile) userDisplayMobile.textContent = username;
 
         const defaultProfile = {
@@ -413,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDashboardWorkouts(workouts) {
         const todayWorkouts = workouts.filter(w => w.timestamp && isToday(w.timestamp));
         dailyCaloriesBurned.workouts = todayWorkouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0);
-        document.getElementById('calories-burned-workouts').textContent = Math.round(dailyCaloriesBurned.workouts);
         updateTotalCaloriesBurned();
     }
 
@@ -422,7 +421,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalSteps = todaySteps.reduce((sum, s) => sum + (s.amount || 0), 0);
         document.getElementById('steps-taken').textContent = totalSteps;
         dailyCaloriesBurned.steps = totalSteps * 0.04; // Average calorie burn per step
-        document.getElementById('calories-burned-steps').textContent = Math.round(dailyCaloriesBurned.steps);
         updateTotalCaloriesBurned();
     }
 
@@ -766,4 +764,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
