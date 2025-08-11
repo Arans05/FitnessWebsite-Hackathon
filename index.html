@@ -129,7 +129,7 @@
         <!-- Main Content Area -->
         <main class="flex-grow p-8">
             <div id="dashboard-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6" id="welcome-message"></h2>
+                <h2 class="welcome-title" id="welcome-message"></h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                     <!-- Stat Cards -->
                     <div class="stat-card calories-card"><div class="stat-icon"><i class="fas fa-utensils"></i></div><p class="stat-title">Calories Eaten</p><p class="stat-value"><span id="calories-consumed">0</span></p></div>
@@ -146,9 +146,9 @@
                         <button id="log-steps-btn" class="quick-action-btn steps-btn"><i class="fas fa-walking"></i><span>Log Steps</span></button>
                     </div>
                 </div>
-                <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
-                    <h3 class="text-2xl font-semibold mb-2">Motivational Quote</h3>
-                    <p class="italic text-gray-300" id="motivational-quote"></p>
+                <div class="quote-card">
+                    <i class="fas fa-quote-left quote-icon"></i>
+                    <p class="italic text-lg" id="motivational-quote"></p>
                 </div>
             </div>
             <div id="workouts-content" class="page-content">
@@ -241,4 +241,3 @@
     <script src="script.js" type="module"></script>
 </body>
 </html>
-
