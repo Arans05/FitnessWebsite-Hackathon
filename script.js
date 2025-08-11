@@ -433,7 +433,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateWaterIntake(logs) {
         const total = logs.filter(l => l.timestamp && isToday(l.timestamp)).reduce((sum, l) => sum + (l.amount || 0), 0);
-        document.getElementById('water-intake').textContent = `${total} / 2000 ml`;
+        const totalLiters = (total / 1000).toFixed(1);
+        document.getElementById('water-intake').textContent = `${totalLiters} / 2L`;
     }
 
     function updateTotalCaloriesBurned() {
@@ -765,3 +766,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
