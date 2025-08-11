@@ -431,7 +431,30 @@ table tbody tr:hover {
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-/* 12. Notification Banner Styles */
+/* 12. COMMUNITY PAGE STYLES */
+.leaderboard-tab {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+.leaderboard-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+.timeframe-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+.timeframe-btn.active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* 13. Notification Banner Styles */
 .notification {
     position: fixed;
     top: -100px; /* Start off-screen */
