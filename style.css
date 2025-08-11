@@ -82,6 +82,23 @@ body {
 .btn-secondary { background-color: var(--color-secondary); color: white; }
 .btn-secondary:hover { background-color: var(--color-secondary-hover); }
 
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    border: none;
+}
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.1), 0 3px 6px -2px rgba(0, 0, 0, 0.06);
+}
+.primary-btn { background-color: #4f46e5; color: white; } /* indigo-600 */
+.secondary-btn { background-color: #374151; color: white; } /* gray-700 */
+
 
 /* Form Inputs */
 .form-input {
@@ -191,9 +208,14 @@ body {
 .workouts-card { background: linear-gradient(135deg, #f97316, #fb923c); color: white; }
 .steps-card { background: linear-gradient(135deg, #22c55e, #4ade80); color: white; }
 .water-card { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; }
+.workout-total-card { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: white; }
+.workout-time-card { background: linear-gradient(135deg, #ec4899, #f472b6); color: white; }
+.workout-cals-card { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; }
 
-.calories-card .stat-title, .workouts-card .stat-title, .steps-card .stat-title, .water-card .stat-title { color: rgba(255,255,255,0.8); }
-.calories-card .stat-value, .workouts-card .stat-value, .steps-card .stat-value, .water-card .stat-value { color: white; }
+.stat-card.calories-card .stat-title, .stat-card.workouts-card .stat-title, .stat-card.steps-card .stat-title, .stat-card.water-card .stat-title,
+.stat-card.workout-total-card .stat-title, .stat-card.workout-time-card .stat-title, .stat-card.workout-cals-card .stat-title { color: rgba(255,255,255,0.8); }
+.stat-card.calories-card .stat-value, .stat-card.workouts-card .stat-value, .stat-card.steps-card .stat-value, .stat-card.water-card .stat-value,
+.stat-card.workout-total-card .stat-value, .stat-card.workout-time-card .stat-value, .stat-card.workout-cals-card .stat-value { color: white; }
 
 /* Quick Action Buttons */
 .quick-action-btn {
@@ -312,10 +334,15 @@ table tbody tr:hover {
 
 /* 9. Custom Workout Plan Styles */
 .plan-card {
-    background-color: var(--color-bg);
-    padding: 1rem;
-    border-radius: 0.5rem;
+    background-color: #272f3e;
+    padding: 1.5rem;
+    border-radius: 1rem;
     border-left: 4px solid var(--color-success);
+    transition: all 0.2s ease-in-out;
+}
+.plan-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
 /* 10. Notification Banner Styles */
