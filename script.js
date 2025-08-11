@@ -78,6 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let dailyCaloriesBurned = { workouts: 0, steps: 0 };
     let userProfileData = {};
     let customWorkoutExercises = [];
+    let allWorkouts = [];
+    let allSteps = [];
+    let allProfiles = [];
+    let currentLeaderboardType = 'workouts';
+    let currentTimeframe = 'daily';
 
     // --- Page Navigation ---
     function showPage(pageId) {
@@ -114,23 +119,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const leaderboardTabSteps = document.getElementById('leaderboard-tab-steps');
     const leaderboardWorkoutsContent = document.getElementById('leaderboard-workouts-content');
     const leaderboardStepsContent = document.getElementById('leaderboard-steps-content');
+    const timeframeButtons = document.querySelectorAll('.timeframe-btn');
 
-    leaderboardTabWorkouts.addEventListener('click', () => {
-        leaderboardWorkoutsContent.style.display = 'block';
-        leaderboardStepsContent.style.display = 'none';
-        leaderboardTabWorkouts.classList.add('border-blue-500', 'text-blue-400');
-        leaderboardTabWorkouts.classList.remove('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
-        leaderboardTabSteps.classList.add('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
-        leaderboardTabSteps.classList.remove('border-blue-500', 'text-blue-400');
-    });
+    function switchLeaderboardType(type) {
+        currentLeaderboardType = type;
+        if (type === 'workouts') {
+            leaderboardWorkoutsContent.style.display = 'block';
+            leaderboardStepsContent.style.display = 'none';
+            leaderboardTabWorkouts.classList.add('active');
+            leaderboardTabSteps.classList.remove('active');
+        } else {
+            leaderboardWorkoutsContent.style.display = 'none';
+            leaderboardStepsContent.style.display = 'block';
+            leaderboardTabSteps.classList.add('active');
+            leaderboardTabWorkouts.classList.remove('active');
+        }
+        renderLeaderboard();
+    }
 
-    leaderboardTabSteps.addEventListener('click', () => {
-        leaderboardWorkoutsContent.style.display = 'none';
-        leaderboardStepsContent.style.display = 'block';
-        leaderboardTabSteps.classList.add('border-blue-500', 'text-blue-400');
-        leaderboardTabSteps.classList.remove('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
-        leaderboardTabWorkouts.classList.add('border-transparent', 'text-gray-400', 'hover:border-gray-500', 'hover:text-gray-300');
-        leaderboardTabWorkouts.classList.remove('border-blue-500', 'text-blue-400');
+    leaderboardTabWorkouts.addEventListener('click', () => switchLeaderboardType('workouts'));
+    leaderboardTabSteps.addEventListener('click', () => switchLeaderboardType('steps'));
+
+    timeframeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            timeframeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTimeframe = btn.id.replace('timeframe-', '');
+            renderLeaderboard();
+        });
     });
 
 
@@ -260,15 +276,31 @@ document.addEventListener('DOMContentLoaded', () => {
             renderWorkoutPlans(plans);
         });
 
+        // Listen to all users' workouts and steps for leaderboards
+        addListener(query(collection(db, "workouts")), snapshot => {
+            allWorkouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            renderLeaderboard();
+        });
+
+        addListener(query(collection(db, "steps")), snapshot => {
+            allSteps = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            renderLeaderboard();
+        });
+
         addListener(query(collection(db, "profiles")), snapshot => {
-            const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderLeaderboard(profiles);
+            allProfiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderLeaderboard();
         });
     }
 
     // --- Helper Functions ---
     const toDateString = (date) => date.toISOString().split('T')[0];
     const isToday = (date) => toDateString(new Date(date.seconds * 1000)) === toDateString(new Date());
+    const isThisWeek = (date) => {
+        const today = new Date();
+        const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        return new Date(date.seconds * 1000) >= firstDayOfWeek;
+    };
     
     function showNotification(message) {
         const notification = document.getElementById('notification');
@@ -436,16 +468,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderLeaderboard(profiles) {
+    function renderLeaderboard() {
         const workoutBody = document.getElementById('leaderboard-body-workouts');
         const stepsBody = document.getElementById('leaderboard-body-steps');
+        
+        let dataToRender;
+        let key;
+
+        if (currentLeaderboardType === 'workouts') {
+            const filteredWorkouts = allWorkouts.filter(w => {
+                if (currentTimeframe === 'daily') return isToday(w.timestamp);
+                if (currentTimeframe === 'weekly') return isThisWeek(w.timestamp);
+                return true;
+            });
+            const workoutCounts = filteredWorkouts.reduce((acc, workout) => {
+                acc[workout.userId] = (acc[workout.userId] || 0) + 1;
+                return acc;
+            }, {});
+            dataToRender = allProfiles.map(p => ({ ...p, count: workoutCounts[p.id] || 0 }));
+            key = 'count';
+        } else {
+            const filteredSteps = allSteps.filter(s => {
+                if (currentTimeframe === 'daily') return isToday(s.timestamp);
+                if (currentTimeframe === 'weekly') return isThisWeek(s.timestamp);
+                return true;
+            });
+            const stepCounts = filteredSteps.reduce((acc, step) => {
+                acc[step.userId] = (acc[step.userId] || 0) + step.amount;
+                return acc;
+            }, {});
+            dataToRender = allProfiles.map(p => ({ ...p, count: stepCounts[p.id] || 0 }));
+            key = 'count';
+        }
+
         const renderTable = (bodyEl, data, key) => {
             if (!bodyEl) return;
             const sorted = [...data].sort((a, b) => (b[key] || 0) - (a[key] || 0));
             bodyEl.innerHTML = sorted.map((p, i) => `<tr><td class="px-6 py-4">${i+1}</td><td class="px-6 py-4">${p.username}</td><td class="px-6 py-4">${p[key] || 0}</td></tr>`).join('');
         };
-        renderTable(workoutBody, profiles, 'workoutCount');
-        renderTable(stepsBody, profiles, 'totalSteps');
+        
+        if (currentLeaderboardType === 'workouts') {
+            renderTable(workoutBody, dataToRender, key);
+        } else {
+            renderTable(stepsBody, dataToRender, key);
+        }
     }
 
     function updateDashboardWorkouts(workouts) {
