@@ -6,6 +6,8 @@
     <title>Fitness App</title>
     <!-- Inter Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Custom Stylesheet -->
@@ -133,7 +135,6 @@
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Calories Burned (Workouts)</p><p class="text-2xl font-bold"><span id="calories-burned-workouts">0</span></p></div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Calories Burned (Steps)</p><p class="text-2xl font-bold"><span id="calories-burned-steps">0</span></p></div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Total Calories Burned</p><p class="text-2xl font-bold"><span id="total-calories-burned-dash">0</span></p></div>
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Current Streak</p><p class="text-2xl font-bold"><span id="streak-display">0</span> Days</p></div>
                     <div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Water Intake</p><p class="text-2xl font-bold"><span id="water-intake">0</span> / 2000 ml</p></div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
@@ -167,10 +168,29 @@
                 <div id="leaderboard-steps-content" style="display: none;"><div class="rounded-xl border bg-gray-800 text-white shadow p-6"><h3 class="text-2xl font-semibold mb-4">Steps Leaderboard</h3><table class="w-full text-sm text-left"><thead class="text-xs text-gray-400 uppercase bg-gray-700"><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Total Steps</th></tr></thead><tbody id="leaderboard-body-steps"></tbody></table></div></div>
             </div>
             <div id="profile-content" class="page-content">
-                <div class="flex items-center space-x-6 mb-6"><img id="profile-pic-main" class="h-24 w-24 rounded-full cursor-pointer" src="https://placehold.co/96x96/0f172a/FFF?text=U" alt=""><div<h2 class="text-3xl font-bold" id="profile-username"></h2><p id="profile-fitness-level"></p></div></div>
+                <div class="flex items-center space-x-6 mb-6">
+                    <img id="profile-pic-main" class="h-24 w-24 rounded-full cursor-pointer" src="https://placehold.co/96x96/0f172a/FFF?text=U" alt="">
+                    <div>
+                        <h2 class="text-3xl font-bold" id="profile-username"></h2>
+                        <p id="profile-fitness-level"></p>
+                    </div>
+                </div>
                 <p class="mb-6" id="profile-bio"></p>
-                <div class="grid gap-6 md:grid-cols-2"><div class="rounded-xl border bg-gray-800 text-white shadow p-6"><h3 class="text-2xl font-semibold mb-4">Workout Streak</h3><p class="text-6xl font-bold text-center text-yellow-400"><span id="profile-streak-display">0</span></p><p class="text-center">Days</p></div><div class="rounded-xl border bg-gray-800 text-white shadow p-6"><h3 class="text-2xl font-semibold mb-4">Achievements</h3><div id="badges-display" class="grid grid-cols-3 gap-4"></div></div></div>
-                 <div class="rounded-xl border bg-gray-800 text-white shadow p-6 mt-6"><h3 class="text-2xl font-semibold mb-4">Personal Bests</h3><div id="personal-bests-display" class="space-y-2"></div></div>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Workout Streak</h3>
+                        <p class="text-6xl font-bold text-center text-yellow-400"><span id="profile-streak-display">0</span></p>
+                        <p class="text-center">Days</p>
+                    </div>
+                    <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                        <h3 class="text-2xl font-semibold mb-4">Achievements</h3>
+                        <div id="badges-display" class="grid grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+                 <div class="rounded-xl border bg-gray-800 text-white shadow p-6 mt-6">
+                    <h3 class="text-2xl font-semibold mb-4">Personal Bests</h3>
+                    <div id="personal-bests-display" class="space-y-2"></div>
+                 </div>
             </div>
             <div id="settings-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Settings</h2>
@@ -190,3 +210,4 @@
     <script src="script.js" type="module"></script>
 </body>
 </html>
+
