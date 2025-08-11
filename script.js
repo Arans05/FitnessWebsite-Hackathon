@@ -419,7 +419,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     datasets: [{
                         data: [macros.protein, macros.carbs, macros.fat],
                         backgroundColor: ['#3b82f6', '#16a34a', '#ef4444'],
-                        borderWidth: 0
+                        borderWidth: 0,
+                        hoverOffset: 8
                     }]
                 },
                 options: {
@@ -507,13 +508,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const proteinIntake = Math.round(weightKg * 1.8);
 
         contentEl.innerHTML = `
-            <div class="bg-gray-700 p-4 rounded-lg">
+            <div class="nutrition-goal-card">
                 <h4 class="font-bold text-lg text-green-400">Gain Muscle</h4>
                 <p class="mt-1 text-sm text-gray-400">Est. gain: ~0.25-0.5 kg/month</p>
                 <p class="mt-2">Calories: <span class="font-bold text-xl">${gainMuscleCalories}</span> kcal/day</p>
                 <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
             </div>
-            <div class="bg-gray-700 p-4 rounded-lg">
+            <div class="nutrition-goal-card">
                 <h4 class="font-bold text-lg text-red-400">Lose Weight</h4>
                 <p class="mt-1 text-sm text-gray-400">Est. loss: 0.5 kg/week</p>
                 <p class="mt-2">Calories: <span class="font-bold text-xl">${Math.round(tdee - 500)}</span> kcal/day</p>
