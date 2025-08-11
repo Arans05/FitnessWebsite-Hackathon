@@ -451,22 +451,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Nutrition Goal Calculation ---
     function updateNutritionGoals() {
         const { weight, height, age, gender, fitnessLevel } = userProfileData;
-        const goalsContainer = document.getElementById('nutrition-goals-content');
-        const goalsPrompt = document.getElementById('nutrition-goals-prompt');
-        const weightLossSelect = document.getElementById('weight-loss-rate');
+        const contentEl = document.getElementById('nutrition-goals-content');
+        if (!contentEl) return;
 
-        if (!goalsContainer || !goalsPrompt || !weightLossSelect) return;
-
-        const isProfileComplete = weight > 0 && height > 0 && age > 0 && gender && fitnessLevel;
-
-        if (!isProfileComplete) {
-            goalsContainer.style.display = 'none';
-            goalsPrompt.style.display = 'block';
+        if (!weight || weight <= 0 || !height || height <= 0 || !age || age <= 0 || !gender || !fitnessLevel) {
+            contentEl.innerHTML = `<p class="text-gray-400 col-span-2">Please complete your profile in Settings to calculate your nutrition goals.</p>`;
             return;
         }
-
-        goalsContainer.style.display = 'grid';
-        goalsPrompt.style.display = 'none';
 
         const weightKg = weight / 2.20462;
         
@@ -476,35 +467,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const activityFactors = { 'Beginner': 1.375, 'Intermediate': 1.55, 'Advanced': 1.725 };
         const tdee = bmr * (activityFactors[fitnessLevel] || 1.2);
 
+        const loseWeightCalories = Math.round(tdee - 400);
         const gainMuscleCalories = Math.round(tdee + 400);
-        const proteinForMuscle = Math.round(weightKg * 1.8);
-        const gainMuscleCard = document.getElementById('gain-muscle-card');
-        if (gainMuscleCard) {
-            gainMuscleCard.innerHTML = `
+        const proteinIntake = Math.round(weightKg * 1.8);
+
+        contentEl.innerHTML = `
+            <div class="bg-gray-700 p-4 rounded-lg">
                 <h4 class="font-bold text-lg text-green-400">Gain Muscle</h4>
                 <p class="mt-2">Calories: <span class="font-bold text-xl">${gainMuscleCalories}</span> kcal/day</p>
-                <p>Protein: <span class="font-bold text-xl">${proteinForMuscle}</span> g/day</p>
-            `;
-        }
-
-        const updateWeightLossGoal = () => {
-            const weeklyLossKg = parseFloat(weightLossSelect.value);
-            const dailyDeficit = (weeklyLossKg * 7700) / 7;
-            const loseWeightCalories = Math.round(tdee - dailyDeficit);
-            const proteinForLoss = Math.round(weightKg * 1.8);
-            
-            const loseWeightDetails = document.getElementById('lose-weight-details');
-            if (loseWeightDetails) {
-                loseWeightDetails.innerHTML = `
-                    <p>Calories: <span class="font-bold text-xl">${loseWeightCalories}</span> kcal/day</p>
-                    <p>Protein: <span class="font-bold text-xl">${proteinForLoss}</span> g/day</p>
-                `;
-            }
-        };
-        
-        updateWeightLossGoal();
-        weightLossSelect.removeEventListener('change', updateWeightLossGoal);
-        weightLossSelect.addEventListener('change', updateWeightLossGoal);
+                <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <h4 class="font-bold text-lg text-red-400">Lose Weight</h4>
+                <p class="mt-2">Calories: <span class="font-bold text-xl">${loseWeightCalories}</span> kcal/day</p>
+                <p>Protein: <span class="font-bold text-xl">${proteinIntake}</span> g/day</p>
+            </div>
+        `;
     }
 
     // --- Gamification ---
