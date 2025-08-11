@@ -20,8 +20,7 @@
         <div class="w-full max-w-md">
             <div class="flex justify-center items-center mb-8">
                 <svg class="h-12 w-12 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.563C9 9.254 9.254 9 9.563 9h4.874c.309 0 .563.254.563.563v4.874c0 .309-.254.563-.563.563H9.563C9.254 15 9 14.746 9 14.437V9.563z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-6-6h12" />
                 </svg>
                 <h1 class="text-4xl font-bold text-center text-white ml-2">FitTrack</h1>
             </div>
@@ -56,8 +55,7 @@
                     <div class="flex items-center">
                         <a href="#" id="nav-logo" class="flex items-center space-x-2">
                            <svg class="h-10 w-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9.563C9 9.254 9.254 9 9.563 9h4.874c.309 0 .563.254.563.563v4.874c0 .309-.254.563-.563.563H9.563C9.254 15 9 14.746 9 14.437V9.563z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-6-6h12" />
                             </svg>
                             <span class="text-white font-bold text-2xl">FitTrack</span>
                         </a>
@@ -225,10 +223,26 @@
                 </div>
             </div>
             <div id="community-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Community</h2>
-                <div class="mb-4 border-b border-gray-700"><nav class="-mb-px flex space-x-8" aria-label="Tabs"><button id="leaderboard-tab-workouts" class="border-blue-500 text-blue-400 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Workouts</button><button id="leaderboard-tab-steps" class="border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-300 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Steps</button></nav></div>
-                <div id="leaderboard-workouts-content"><div class="rounded-xl border bg-gray-800 text-white shadow p-6"><h3 class="text-2xl font-semibold mb-4">Workout Leaderboard</h3><table class="w-full text-sm text-left"><thead class="text-xs text-gray-400 uppercase bg-gray-700"><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Workouts</th></tr></thead><tbody id="leaderboard-body-workouts"></tbody></table></div></div>
-                <div id="leaderboard-steps-content" style="display: none;"><div class="rounded-xl border bg-gray-800 text-white shadow p-6"><h3 class="text-2xl font-semibold mb-4">Steps Leaderboard</h3><table class="w-full text-sm text-left"><thead class="text-xs text-gray-400 uppercase bg-gray-700"><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Total Steps</th></tr></thead><tbody id="leaderboard-body-steps"></tbody></table></div></div>
+                <h2 class="welcome-title">Community Leaderboards</h2>
+                <div class="content-box">
+                    <div class="flex border-b border-gray-700">
+                        <button id="leaderboard-tab-workouts" class="leaderboard-tab active">Workouts</button>
+                        <button id="leaderboard-tab-steps" class="leaderboard-tab">Steps</button>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-center mb-4 p-1 bg-gray-700 rounded-lg">
+                            <button id="timeframe-daily" class="timeframe-btn active">Daily</button>
+                            <button id="timeframe-weekly" class="timeframe-btn">Weekly</button>
+                            <button id="timeframe-all" class="timeframe-btn">All Time</button>
+                        </div>
+                        <div id="leaderboard-workouts-content">
+                            <table class="w-full text-sm text-left"><thead class="text-xs text-gray-400 uppercase bg-gray-700"><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Workouts</th></tr></thead><tbody id="leaderboard-body-workouts"></tbody></table>
+                        </div>
+                        <div id="leaderboard-steps-content" style="display: none;">
+                            <table class="w-full text-sm text-left"><thead class="text-xs text-gray-400 uppercase bg-gray-700"><tr><th scope="col" class="px-6 py-3">Rank</th><th scope="col" class="px-6 py-3">User</th><th scope="col" class="px-6 py-3">Total Steps</th></tr></thead><tbody id="leaderboard-body-steps"></tbody></table>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="profile-content" class="page-content">
                 <div class="flex items-center space-x-6 mb-6">
