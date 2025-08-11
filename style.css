@@ -126,6 +126,15 @@ html.dark nav {
 
 /* 5. DASHBOARD STYLES
 /* =============================================== */
+.welcome-title {
+    font-size: 2.5rem; /* 40px */
+    font-weight: 800; /* extrabold */
+    margin-bottom: 2rem;
+    background: -webkit-linear-gradient(45deg, #a5b4fc, #f9a8d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .stat-card {
     background-color: var(--color-bg-secondary);
     border-radius: 1rem;
@@ -191,6 +200,28 @@ html.dark nav {
 .meal-btn { color: #ef4444; }
 .water-btn { color: #3b82f6; }
 .steps-btn { color: #22c55e; }
+
+/* Quote Card */
+.quote-card {
+    background-color: var(--color-bg-secondary);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--color-border);
+    margin-top: 2rem;
+}
+.quote-card .quote-icon {
+    font-size: 2rem;
+    color: var(--color-primary);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+}
+.quote-card p {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem; /* text-lg */
+    line-height: 1.75;
+}
 
 
 /* 6. TABLE STYLES
@@ -297,4 +328,3 @@ table tbody tr:hover {
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
-
