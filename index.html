@@ -155,9 +155,16 @@
                 </div>
             </div>
             <div id="workouts-content" class="page-content">
-                <h2 class="text-3xl font-bold mb-6">Workouts</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"><div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Total Workouts</p><p class="text-2xl font-bold"><span id="total-workouts">0</span></p></div><div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Total Time</p><p class="text-2xl font-bold"><span id="total-time">0</span> min</p></div><div class="bg-gray-800 p-4 rounded-lg shadow-md"><p class="text-sm text-gray-400">Total Calories Burned</p><p class="text-2xl font-bold"><span id="total-calories-burned-workouts">0</span></p></div></div>
-                <div class="mb-6 flex space-x-4"><button id="add-workout-page-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2">Log New Workout</button><button id="create-plan-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors bg-green-600 text-white shadow hover:bg-green-700 h-9 px-4 py-2">Create Custom Plan</button></div>
+                <h2 class="welcome-title">My Workouts</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="stat-card workout-total-card"><div class="stat-icon"><i class="fas fa-dumbbell"></i></div><p class="stat-title">Total Workouts</p><p class="stat-value"><span id="total-workouts">0</span></p></div>
+                    <div class="stat-card workout-time-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><p class="stat-title">Total Time</p><p class="stat-value"><span id="total-time">0</span> min</p></div>
+                    <div class="stat-card workout-cals-card"><div class="stat-icon"><i class="fas fa-fire"></i></div><p class="stat-title">Calories Burned</p><p class="stat-value"><span id="total-calories-burned-workouts">0</span></p></div>
+                </div>
+                <div class="mb-8 flex space-x-4">
+                    <button id="add-workout-page-btn" class="action-btn primary-btn"><i class="fas fa-plus mr-2"></i>Log New Workout</button>
+                    <button id="create-plan-btn" class="action-btn secondary-btn"><i class="fas fa-stream mr-2"></i>Create Custom Plan</button>
+                </div>
                 <div class="rounded-xl border bg-gray-800 text-white shadow p-6 mb-8">
                     <h3 class="text-2xl font-semibold mb-4">Workout Log</h3>
                     <div class="relative w-full overflow-auto"><table class="w-full caption-bottom text-sm"><thead class="[&_tr]:border-b"><tr class="border-b transition-colors hover:bg-gray-700/50"><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Date</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Workout</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Duration</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Calories Burned</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Notes</th></tr></thead><tbody id="workout-list"></tbody></table></div>
