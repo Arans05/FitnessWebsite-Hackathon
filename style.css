@@ -110,21 +110,41 @@ body {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Navigation */
-nav {
-    background-color: var(--color-bg-secondary);
-    border-bottom: 1px solid var(--color-border);
+/* 5. NAVIGATION STYLES
+/* =============================================== */
+.main-nav {
+    background-color: #1f2937; /* gray-800 */
+    border-bottom: 1px solid #374151; /* gray-700 */
 }
-html.dark nav {
-    background-color: var(--color-bg); /* Match main background in dark mode */
+.nav-link {
+    color: #d1d5db; /* gray-300 */
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+.nav-link:hover {
+    background-color: #374151; /* gray-700 */
+    color: white;
 }
 .nav-link.active {
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-weight: 600;
+    color: white;
+    background-color: #4f46e5; /* indigo-600 */
+}
+.theme-toggle-btn {
+    background-color: #374151;
+    color: #9ca3af;
+    border-radius: 9999px;
+    padding: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+.theme-toggle-btn:hover {
+    background-color: #4b5563;
+    color: white;
 }
 
-/* 5. DASHBOARD STYLES
+/* 6. DASHBOARD STYLES
 /* =============================================== */
 .welcome-title {
     font-size: 2.5rem; /* 40px */
@@ -224,7 +244,7 @@ html.dark nav {
 }
 
 
-/* 6. TABLE STYLES
+/* 7. TABLE STYLES
 /* =============================================== */
 table {
     width: 100%;
@@ -254,7 +274,7 @@ table tbody tr:hover {
     border-left: 4px solid var(--color-primary);
 }
 
-/* 7. MODAL STYLES
+/* 8. MODAL STYLES
 /* =============================================== */
 .modal-backdrop {
     position: fixed;
@@ -290,7 +310,7 @@ table tbody tr:hover {
     color: var(--color-text);
 }
 
-/* 8. Custom Workout Plan Styles */
+/* 9. Custom Workout Plan Styles */
 .plan-card {
     background-color: var(--color-bg);
     padding: 1rem;
@@ -298,7 +318,7 @@ table tbody tr:hover {
     border-left: 4px solid var(--color-success);
 }
 
-/* 9. Notification Banner Styles */
+/* 10. Notification Banner Styles */
 .notification {
     position: fixed;
     top: -100px; /* Start off-screen */
