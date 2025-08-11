@@ -1,4 +1,3 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query, addDoc, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -250,6 +249,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Helper Functions ---
     const toDateString = (date) => date.toISOString().split('T')[0];
     const isToday = (date) => toDateString(new Date(date.seconds * 1000)) === toDateString(new Date());
+    
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
 
     // --- UI Update & Rendering Functions ---
     function updateProfileUI(profile) {
@@ -724,7 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('save-settings-btn').addEventListener('click', async () => {
         if (!userId) return;
-        const profileData = {
+        const newProfileData = {
             weight: parseFloat(document.getElementById('user-weight-input').value) || userProfileData.weight,
             profilePicUrl: document.querySelector('.avatar-selected')?.dataset.url || userProfileData.profilePicUrl,
             bio: document.getElementById('profile-bio-input').value,
@@ -734,9 +742,13 @@ document.addEventListener('DOMContentLoaded', () => {
             gender: document.getElementById('user-gender-select').value
         };
         try {
-            await setDoc(doc(db, "users", userId, "profile", "data"), profileData, { merge: true });
-            alert("Settings saved!");
-        } catch (error) { console.error("Error saving settings:", error); }
+            await setDoc(doc(db, "users", userId, "profile", "data"), newProfileData, { merge: true });
+            userProfileData = { ...userProfileData, ...newProfileData }; // Immediately update local state
+            updateNutritionGoals(); // Force refresh of nutrition goals
+            showNotification("Settings saved!");
+        } catch (error) { 
+            console.error("Error saving settings:", error);
+            showNotification("Error saving settings.");
+        }
     });
 });
-
