@@ -18,7 +18,12 @@
     <!-- Login/Signup Container -->
     <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 view-container active">
         <div class="w-full max-w-md">
-            <h1 class="text-4xl font-bold text-center mb-8 text-white">FitTrack</h1>
+            <div class="flex justify-center items-center mb-8">
+                <svg class="h-12 w-12 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.57,14.86H19.53V9.14h1.04A1.43,1.43,0,0,0,22,7.71V6.29a1.43,1.43,0,0,0-1.43-1.43H19.53V4.43a1.43,1.43,0,0,0-1.43-1.43H16.67a1.43,1.43,0,0,0-1.43,1.43V4.86H8.76V4.43A1.43,1.43,0,0,0,7.33,3H5.9A1.43,1.43,0,0,0,4.47,4.43V4.86H3.43A1.43,1.43,0,0,0,2,6.29V7.71A1.43,1.43,0,0,0,3.43,9.14h1.04v5.72H3.43A1.43,1.43,0,0,0,2,16.29v1.42a1.43,1.43,0,0,0,1.43,1.43H4.47v.43A1.43,1.43,0,0,0,5.9,21H7.33a1.43,1.43,0,0,0,1.43-1.43V19.14h6.51v.43a1.43,1.43,0,0,0,1.43,1.43h1.43a1.43,1.43,0,0,0,1.43-1.43v-.43h1.04A1.43,1.43,0,0,0,22,17.71V16.29A1.43,1.43,0,0,0,20.57,14.86Z"/>
+                </svg>
+                <h1 class="text-4xl font-bold text-center text-white ml-2">FitTrack</h1>
+            </div>
             <!-- Login Form -->
             <div id="login-form" class="bg-gray-900 p-8 rounded-lg shadow-lg">
                 <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
@@ -165,11 +170,11 @@
                     <button id="add-workout-page-btn" class="action-btn primary-btn"><i class="fas fa-plus mr-2"></i>Log New Workout</button>
                     <button id="create-plan-btn" class="action-btn secondary-btn"><i class="fas fa-stream mr-2"></i>Create Custom Plan</button>
                 </div>
-                <div class="rounded-xl border bg-gray-800 text-white shadow p-6 mb-8">
+                <div class="content-box">
                     <h3 class="text-2xl font-semibold mb-4">Workout Log</h3>
                     <div class="relative w-full overflow-auto"><table class="w-full caption-bottom text-sm"><thead class="[&_tr]:border-b"><tr class="border-b transition-colors hover:bg-gray-700/50"><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Date</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Workout</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Duration</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Calories Burned</th><th class="h-12 px-4 text-left align-middle font-medium text-gray-400">Notes</th></tr></thead><tbody id="workout-list"></tbody></table></div>
                 </div>
-                <div class="rounded-xl border bg-gray-800 text-white shadow p-6">
+                <div class="content-box mt-8">
                     <h3 class="text-2xl font-semibold mb-4">My Custom Plans</h3>
                     <div id="custom-plans-list" class="space-y-4"></div>
                 </div>
@@ -251,3 +256,4 @@
     <script src="script.js" type="module"></script>
 </body>
 </html>
+
