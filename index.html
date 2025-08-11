@@ -18,7 +18,7 @@
     <!-- Login/Signup Container -->
     <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 view-container active">
         <div class="w-full max-w-md">
-            <h1 class="text-4xl font-bold text-center mb-8 text-white">Fitness Tracker</h1>
+            <h1 class="text-4xl font-bold text-center mb-8 text-white">FitTrack</h1>
             <!-- Login Form -->
             <div id="login-form" class="bg-gray-900 p-8 rounded-lg shadow-lg">
                 <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
@@ -44,27 +44,30 @@
     <!-- Main App Container -->
     <div id="app-container" class="min-h-screen w-full view-container">
         <!-- Responsive Navigation Bar -->
-        <nav class="bg-gray-900 border-b border-gray-800">
+        <nav class="main-nav">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
+                <div class="flex h-20 items-center justify-between">
                     <div class="flex items-center">
-                        <a href="#" id="nav-logo" class="text-white font-bold text-xl">
-                            Fitness Tracker
+                        <a href="#" id="nav-logo" class="flex items-center space-x-2">
+                            <svg class="h-8 w-8 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-white font-bold text-2xl">FitTrack</span>
                         </a>
-                        <div class="hidden md:block">
-                            <div class="ml-10 flex items-baseline space-x-4">
-                                <a href="#" id="nav-dashboard" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Dashboard</a>
-                                <a href="#" id="nav-workouts" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Workouts</a>
-                                <a href="#" id="nav-progress" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Progress</a>
-                                <a href="#" id="nav-nutrition" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Nutrition</a>
-                                <a href="#" id="nav-community" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Community</a>
-                                <a href="#" id="nav-profile" class="nav-link text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Profile</a>
-                            </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#" id="nav-dashboard" class="nav-link">Dashboard</a>
+                            <a href="#" id="nav-workouts" class="nav-link">Workouts</a>
+                            <a href="#" id="nav-progress" class="nav-link">Progress</a>
+                            <a href="#" id="nav-nutrition" class="nav-link">Nutrition</a>
+                            <a href="#" id="nav-community" class="nav-link">Community</a>
+                            <a href="#" id="nav-profile" class="nav-link">Profile</a>
                         </div>
                     </div>
                     <div class="hidden md:block">
                         <div class="ml-4 flex items-center md:ml-6">
-                            <button id="theme-toggle" class="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                            <button id="theme-toggle" class="theme-toggle-btn">
                                 <svg id="theme-icon-dark" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
                                 <svg id="theme-icon-light" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
                             </button>
