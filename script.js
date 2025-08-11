@@ -457,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!goalsContainer || !goalsPrompt || !weightLossSelect) return;
 
-        const isProfileComplete = weight && height && age && gender && fitnessLevel;
+        const isProfileComplete = weight > 0 && height > 0 && age > 0 && gender && fitnessLevel;
 
         if (!isProfileComplete) {
             goalsContainer.style.display = 'none';
