@@ -470,6 +470,10 @@ table tbody tr:hover {
    12. COMMUNITY PAGE STYLES
    Author: Hashim
    =============================================== */
+#community-content .content-box {
+    padding: 0.5rem; /* Reduced padding for a more compact look */
+}
+
 .leaderboard-tab {
     padding: 1rem 1.5rem;
     font-weight: 600;
