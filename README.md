@@ -6,7 +6,7 @@
 A personal fitness dashboard built from scratch with vanilla HTML, CSS, and JavaScript, powered by a Google Firebase backend. This project was created for the **CodeSprout Hackathon (August 2025)**.
 
 **Live Demo:** 
-
+https://arans05.github.io/FitnessWebsite-Hackathon/
 ---
 
 ## 💡 About The Project
