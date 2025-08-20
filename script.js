@@ -581,10 +581,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById(modalId);
         if (!modal) return;
         const closeModal = () => modal.style.display = 'none';
-        openBtnIds.forEach(id => document.getElementById(id)?.addEventListener('click', () => modal.style.display = 'flex'));
+        openBtnIds.forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => modal.style.display = 'flex');
+        });
         document.getElementById(closeBtnId)?.addEventListener('click', closeModal);
         if (saveBtnId && saveAction) {
-            document.getElementById(saveBtnId).addEventListener('click', saveAction);
+            document.getElementById(saveBtnId)?.addEventListener('click', saveAction);
         }
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
