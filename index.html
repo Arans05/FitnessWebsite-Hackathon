@@ -1,3 +1,15 @@
+<!--
+ * FitTrack - Main HTML Structure
+ * * Description: This file contains the complete DOM structure for the FitTrack application, 
+ * including all pages, modals, and navigation components.
+ * * Hackathon: CodeSprout Hackathon - August 2025
+ * * Authors / Team:
+ * - Aran
+ * - Raheem
+ * - Hashim
+ * - Arif
+-->
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -5,6 +17,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FitTrack</title>
     
+    <!-- External Libraries & Stylesheets -->
+    <!-- Managed by: Aran -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +26,10 @@
 </head>
 <body>
 
+    <!-- ===============================================
+         AUTHENTICATION CONTAINER (LOGIN/SIGNUP)
+         Author: Aran
+         =============================================== -->
     <div id="login-container" class="min-h-screen w-full flex-col justify-center items-center p-4 view-container active">
         <div class="w-full max-w-md">
             <div class="flex justify-center items-center mb-8">
@@ -20,6 +38,7 @@
                 </svg>
                 <h1 class="text-4xl font-bold text-center text-white ml-2">FitTrack</h1>
             </div>
+            <!-- Login Form -->
             <div id="login-form" class="bg-gray-900 p-8 rounded-lg shadow-lg">
                 <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
                 <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 mb-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -28,6 +47,7 @@
                 <p class="text-center text-gray-400 mt-4">Don't have an account? <a href="#" id="show-signup" class="text-blue-400 hover:underline">Sign Up</a></p>
                 <p id="login-error" class="text-red-500 text-center mt-2"></p>
             </div>
+            <!-- Signup Form -->
             <div id="signup-form" class="bg-gray-900 p-8 rounded-lg shadow-lg" style="display: none;">
                 <h2 class="text-2xl font-bold mb-6 text-center">Sign Up</h2>
                 <input type="text" id="signup-username" placeholder="Username" class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 mb-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -40,7 +60,12 @@
         </div>
     </div>
 
+    <!-- ===============================================
+         MAIN APPLICATION CONTAINER
+         Author: Hashim (Shell & Navigation)
+         =============================================== -->
     <div id="app-container" class="min-h-screen w-full view-container">
+        <!-- Responsive Navigation Bar -->
         <nav class="main-nav">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-20 items-center justify-between">
@@ -68,6 +93,7 @@
                                 <svg id="theme-icon-dark" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
                                 <svg id="theme-icon-light" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
                             </button>
+                            <!-- Profile dropdown -->
                             <div class="relative ml-3">
                                 <div>
                                     <button type="button" class="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
@@ -83,6 +109,7 @@
                         </div>
                     </div>
                     <div class="-mr-2 flex md:hidden">
+                        <!-- Mobile menu button -->
                         <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white">
                             <svg id="mobile-menu-open-icon" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                             <svg id="mobile-menu-close-icon" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -90,6 +117,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Mobile menu -->
             <div class="md:hidden hidden" id="mobile-menu">
                 <div class="space-y-1 px-2 pt-2 pb-3 sm:px-3">
                     <a href="#" id="mobile-nav-dashboard" class="nav-link block">Dashboard</a>
@@ -115,7 +143,12 @@
             </div>
         </nav>
 
+        <!-- Main Content Area where pages will be displayed -->
         <main class="flex-grow p-8">
+            <!-- ===============================================
+                 DASHBOARD PAGE
+                 Author: Hashim
+                 =============================================== -->
             <div id="dashboard-content" class="page-content">
                 <h2 class="welcome-title" id="welcome-message"></h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
@@ -139,6 +172,10 @@
                 </div>
             </div>
 
+            <!-- ===============================================
+                 WORKOUTS PAGE
+                 Author: Arif
+                 =============================================== -->
             <div id="workouts-content" class="page-content">
                 <h2 class="welcome-title">My Workouts</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -160,6 +197,10 @@
                 </div>
             </div>
 
+            <!-- ===============================================
+                 PROGRESS PAGE
+                 Author: Raheem
+                 =============================================== -->
             <div id="progress-content" class="page-content">
                 <h2 class="welcome-title">Track Your Progress</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -176,6 +217,10 @@
                 </div>
             </div>
 
+            <!-- ===============================================
+                 NUTRITION PAGE
+                 Author: Raheem
+                 =============================================== -->
             <div id="nutrition-content" class="page-content">
                 <h2 class="welcome-title">Nutrition Hub</h2>
                 <div class="mb-8"><button id="add-meal-page-btn" class="action-btn primary-btn"><i class="fas fa-plus mr-2"></i>Log New Meal</button></div>
@@ -186,6 +231,10 @@
                 <div class="content-box"><h3 class="text-2xl font-semibold mb-4">Nutrition Goals</h3><div id="nutrition-goals-content" class="grid gap-6 md:grid-cols-2"></div></div>
             </div>
 
+            <!-- ===============================================
+                 COMMUNITY PAGE
+                 Author: Hashim
+                 =============================================== -->
             <div id="community-content" class="page-content">
                 <h2 class="welcome-title">Community Leaderboards</h2>
                 <div class="content-box">
@@ -209,6 +258,10 @@
                 </div>
             </div>
 
+            <!-- ===============================================
+                 PROFILE PAGE
+                 Author: Arif
+                 =============================================== -->
             <div id="profile-content" class="page-content">
                 <div class="flex items-center space-x-6 mb-6">
                     <img id="profile-pic-main" class="h-24 w-24 rounded-full" src="https://placehold.co/96x96/0f172a/FFF?text=U" alt="">
@@ -222,6 +275,10 @@
                  <div class="card p-6 mt-6"><h3 class="text-2xl font-semibold mb-4">Personal Bests</h3><div id="personal-bests-display" class="space-y-2"></div></div>
             </div>
 
+            <!-- ===============================================
+                 SETTINGS PAGE
+                 Author: Aran
+                 =============================================== -->
             <div id="settings-content" class="page-content">
                 <h2 class="text-3xl font-bold mb-6">Settings</h2>
                 <div class="card p-6 max-w-lg mx-auto"><h3 class="text-2xl font-semibold mb-4">Your Profile</h3><div class="space-y-4">
@@ -237,15 +294,25 @@
         </main>
     </div>
 
+    <!-- ===============================================
+         MODALS (POP-UP FORMS)
+         Author: Arif
+         =============================================== -->
     <div id="workout-modal" class="modal-backdrop"><div class="card p-6"><h3 class="text-xl font-semibold">Log New Workout</h3><button id="close-workout-modal-btn" class="modal-close-btn">&times;</button><div class="flex flex-col space-y-4"><select id="workout-type-select" class="form-input"><option>Cardio</option><option>Strength</option><option>Yoga</option></select><div id="strength-inputs" class="hidden space-y-4"><input type="text" id="exercise-name-input" p="Exercise Name" class="form-input"><input type="number" id="exercise-weight-input" p="Weight (lbs)" class="form-input"><input type="number" id="exercise-reps-input" p="Reps" class="form-input"></div><input type="number" id="workout-duration-input" p="Duration (minutes)" class="form-input"><input type="number" id="workout-calories-input" p="Calories Burned (optional)" class="form-input"><textarea id="workout-notes-input" p="Notes" class="form-input"></textarea><button id="save-workout-btn" class="btn btn-primary">Save Workout</button></div></div></div>
-    <div id="meal-modal" class="modal-backdrop"><div class="card p-6"><h3 class="text-xl font-semibold">Log New Meal</h3><button id="close-meal-modal-btn">&times;</button><div class="space-y-4"><input id="meal-name-input"/><input id="meal-calories-input"/><input id="meal-protein-input"/><input id="meal-carbs-input"/><input id="meal-fat-input"/><button id="save-meal-btn">Save</button></div></div></div>
-    <div id="water-modal" class="modal-backdrop"><div class="card p-6">...</div></div>
-    <div id="steps-modal" class="modal-backdrop"><div class="card p-6">...</div></div>
-    <div id="plan-modal" class="modal-backdrop"><div class="card p-6">...</div></div>
+    <div id="meal-modal" class="modal-backdrop"><div class="card p-6"><h3 class="text-xl font-semibold">Log New Meal</h3><button id="close-meal-modal-btn">&times;</button><div class="space-y-4"><input id="meal-name-input" placeholder="Meal Name" class="form-input"/><input id="meal-calories-input" placeholder="Calories" class="form-input"/><input id="meal-protein-input" placeholder="Protein (g)" class="form-input"/><input id="meal-carbs-input" placeholder="Carbs (g)" class="form-input"/><input id="meal-fat-input" placeholder="Fat (g)" class="form-input"/><button id="save-meal-btn" class="btn btn-primary">Save</button></div></div></div>
+    <div id="water-modal" class="modal-backdrop"><div class="card p-6"><h3 class="text-xl font-semibold">Log Water</h3><button id="close-water-modal-btn">&times;</button><div class="space-y-4"><input id="water-amount-input" placeholder="Amount (ml)" class="form-input"/><button id="save-water-btn" class="btn btn-primary">Save</button></div></div></div>
+    <div id="steps-modal" class="modal-backdrop"><div class="card p-6"><h3 class="text-xl font-semibold">Log Steps</h3><button id="close-steps-modal-btn">&times;</button><div class="space-y-4"><input id="steps-amount-input" placeholder="Number of steps" class="form-input"/><button id="save-steps-btn" class="btn btn-primary">Save</button></div></div></div>
+    <div id="plan-modal" class="modal-backdrop"><div class="card p-6"><h3 class="text-xl font-semibold">Create Custom Plan</h3><button id="close-plan-modal-btn">&times;</button><div class="space-y-4"><input id="plan-name-input" placeholder="Plan Name" class="form-input"/><div class="border p-4 rounded-md space-y-2"><h4 class="font-semibold">Add Exercise</h4><input id="plan-exercise-name-input" placeholder="Exercise Name" class="form-input"/><input id="plan-exercise-sets-input" placeholder="Sets" class="form-input"/><input id="plan-exercise-reps-input" placeholder="Reps" class="form-input"/><button id="add-exercise-to-plan-btn" class="btn btn-secondary">Add</button></div><div id="plan-exercises-list"></div><button id="save-plan-btn" class="btn btn-primary">Save Plan</button></div></div></div>
 
+    <!-- Notification Banner -->
     <div id="notification" class="notification"></div>
 
+    <!-- ===============================================
+         SCRIPTS
+         Author: Aran (Setup & Integration)
+         =============================================== -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js" type="module"></script>
 </body>
 </html>
+
