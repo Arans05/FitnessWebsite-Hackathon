@@ -1,0 +1,228 @@
+/*
+ * FitTrack - Main Stylesheet
+ * * Description: All styles for the FitTrack Fitness Dashboard. This file handles
+ * the layout, color themes (dark/light), and component styling.
+ * * Hackathon: CodeSprout Hackathon - August 2025
+ * * Authors / Team:
+ * - Aran
+ * - Raheem
+ * - Hashim
+ * - Arif
+ */
+
+/* ===============================================
+   1. FONT & ROOT VARIABLES (LIGHT MODE DEFAULT)
+   Author: Hashim
+   =============================================== */
+:root {
+    --font-sans: 'Inter', sans-serif;
+
+    /* Light Theme Colors */
+    --color-bg: #f1f5f9;
+    --color-bg-secondary: #ffffff;
+    --color-text: #0f172a;
+    --color-text-secondary: #64748b;
+    --color-border: #e2e8f0;
+    --color-primary: #3b82f6;
+    --color-primary-hover: #2563eb;
+    --color-success: #22c55e;
+    --color-danger: #ef4444;
+}
+
+/* ===============================================
+   2. DARK MODE OVERRIDES
+   Author: Hashim
+   =============================================== */
+html.dark {
+    /* Dark Theme Colors */
+    --color-bg: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-text: #f3f4f6;
+    --color-text-secondary: #9ca3af;
+    --color-border: #374151;
+}
+
+/* ===============================================
+   3. GLOBAL & UTILITY STYLES
+   Author: The Team
+   =============================================== */
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Utility classes to show/hide pages based on JS logic */
+.page-content {
+    display: none;
+}
+.page-content.active {
+    display: block;
+}
+
+/* ===============================================
+   4. COMPONENT STYLES (BUTTONS, INPUTS, CARDS)
+   Author: Arif
+   =============================================== */
+/* Standard Button Style */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+.btn-primary { 
+    background-color: var(--color-primary); 
+    color: white; 
+}
+.btn-primary:hover { 
+    background-color: var(--color-primary-hover); 
+}
+
+/* Form Input Style */
+.form-input {
+    width: 100%;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--color-text);
+}
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+/* General Card Style for content containers */
+.card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* ===============================================
+   5. NAVIGATION BAR STYLES
+   Author: Hashim
+   =============================================== */
+.main-nav {
+    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+.nav-link {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+.nav-link:hover {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+.nav-link.active {
+    color: white;
+    background-color: var(--color-primary);
+}
+
+/* ===============================================
+   6. DASHBOARD PAGE STYLES
+   Author: Hashim
+   =============================================== */
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background-color: var(--color-bg-secondary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    border: 1px solid var(--color-border);
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================================
+   7. TABLE & LEADERBOARD STYLES
+   Author: Raheem
+   =============================================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table thead th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid var(--color-border);
+}
+table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Community page tab styling */
+.leaderboard-tab {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+.leaderboard-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+/* ===============================================
+   8. MODAL (POP-UP) STYLES
+   Author: Arif
+   =============================================== */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; /* Managed by JS */
+    justify-content: center;
+    align-items: center;
+}
+.modal-backdrop .card {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* ===============================================
+   9. NOTIFICATION & ANIMATION STYLES
+   Author: Aran
+   =============================================== */
+.notification {
+    position: fixed;
+    top: -100px; /* Start off-screen */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-success);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    z-index: 1000;
+    transition: top 0.5s ease-in-out;
+}
+.notification.show {
+    top: 20px; /* Slide into view */
+}
+
+/* Keyframe animations for modals */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
