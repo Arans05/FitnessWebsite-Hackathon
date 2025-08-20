@@ -18,15 +18,19 @@
     --font-sans: 'Inter', sans-serif;
 
     /* Light Theme Colors */
-    --color-bg: #f1f5f9;
-    --color-bg-secondary: #ffffff;
-    --color-text: #0f172a;
-    --color-text-secondary: #64748b;
-    --color-border: #e2e8f0;
-    --color-primary: #3b82f6;
-    --color-primary-hover: #2563eb;
-    --color-success: #22c55e;
-    --color-danger: #ef4444;
+    --color-bg: #f1f5f9; /* slate-100 */
+    --color-bg-secondary: #ffffff; /* white */
+    --color-text: #0f172a; /* slate-900 */
+    --color-text-secondary: #64748b; /* slate-500 */
+    --color-border: #e2e8f0; /* slate-200 */
+
+    --color-primary: #3b82f6; /* blue-500 */
+    --color-primary-hover: #2563eb; /* blue-600 */
+    --color-success: #22c55e; /* green-500 */
+    --color-success-hover: #16a34a; /* green-600 */
+    --color-danger: #ef4444; /* red-500 */
+    --color-secondary: #64748b; /* slate-500 */
+    --color-secondary-hover: #475569; /* slate-600 */
 }
 
 /* ===============================================
@@ -35,15 +39,16 @@
    =============================================== */
 html.dark {
     /* Dark Theme Colors */
-    --color-bg: #111827;
-    --color-bg-secondary: #1f2937;
-    --color-text: #f3f4f6;
-    --color-text-secondary: #9ca3af;
-    --color-border: #374151;
+    --color-bg: #111827; /* gray-900 */
+    --color-bg-secondary: #1f2937; /* gray-800 */
+    --color-text: #f3f4f6; /* gray-100 */
+    --color-text-secondary: #9ca3af; /* gray-400 */
+    --color-border: #374151; /* gray-700 */
 }
 
+
 /* ===============================================
-   3. GLOBAL & UTILITY STYLES
+   3. GLOBAL STYLES
    Author: The Team
    =============================================== */
 body {
@@ -53,19 +58,26 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* Utility classes to show/hide pages based on JS logic */
-.page-content {
+.view-container, .page-content {
     display: none;
 }
-.page-content.active {
+.view-container.active, .page-content.active {
+    display: block;
+}
+#login-container.active {
+    display: flex;
+}
+#app-container.active {
     display: block;
 }
 
+
 /* ===============================================
-   4. COMPONENT STYLES (BUTTONS, INPUTS, CARDS)
+   4. COMPONENT STYLES
    Author: Arif
    =============================================== */
-/* Standard Button Style */
+
+/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -73,18 +85,40 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-weight: 600;
+    border: 1px solid transparent;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
-.btn-primary { 
-    background-color: var(--color-primary); 
-    color: white; 
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
-.btn-primary:hover { 
-    background-color: var(--color-primary-hover); 
-}
+.btn-primary { background-color: var(--color-primary); color: white; }
+.btn-primary:hover { background-color: var(--color-primary-hover); }
+.btn-success { background-color: var(--color-success); color: white; }
+.btn-success:hover { background-color: var(--color-success-hover); }
+.btn-secondary { background-color: var(--color-secondary); color: white; }
+.btn-secondary:hover { background-color: var(--color-secondary-hover); }
 
-/* Form Input Style */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    border: none;
+}
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.1), 0 3px 6px -2px rgba(0, 0, 0, 0.06);
+}
+.primary-btn { background-color: #4f46e5; color: white; } /* indigo-600 */
+.secondary-btn { background-color: #374151; color: white; } /* gray-700 */
+
+
+/* Form Inputs */
 .form-input {
     width: 100%;
     background-color: var(--color-bg);
@@ -92,14 +126,18 @@ body {
     border-radius: 0.5rem;
     padding: 0.5rem 0.75rem;
     color: var(--color-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 .form-input:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 2px var(--color-primary);
 }
+.dark .form-input {
+    background-color: var(--color-bg-secondary);
+}
 
-/* General Card Style for content containers */
+/* Cards & Containers */
 .card {
     background-color: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
@@ -107,53 +145,159 @@ body {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
+.content-box {
+    background-color: var(--color-bg-secondary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+}
+
+
 /* ===============================================
-   5. NAVIGATION BAR STYLES
+   5. NAVIGATION STYLES
    Author: Hashim
    =============================================== */
 .main-nav {
-    background-color: var(--color-bg-secondary);
-    border-bottom: 1px solid var(--color-border);
+    background-color: #1f2937; /* gray-800 */
+    border-bottom: 1px solid #374151; /* gray-700 */
 }
 .nav-link {
-    color: var(--color-text-secondary);
+    color: #d1d5db; /* gray-300 */
     font-weight: 500;
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     transition: all 0.2s ease-in-out;
+    position: relative;
 }
 .nav-link:hover {
-    background-color: var(--color-bg);
-    color: var(--color-text);
+    background-color: #374151; /* gray-700 */
+    color: white;
 }
 .nav-link.active {
     color: white;
-    background-color: var(--color-primary);
+    background-color: #4f46e5; /* indigo-600 */
+}
+.theme-toggle-btn {
+    background-color: #374151;
+    color: #9ca3af;
+    border-radius: 9999px;
+    padding: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+.theme-toggle-btn:hover {
+    background-color: #4b5563;
+    color: white;
 }
 
 /* ===============================================
-   6. DASHBOARD PAGE STYLES
+   6. DASHBOARD STYLES
    Author: Hashim
    =============================================== */
 .welcome-title {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-size: 2.5rem; /* 40px */
+    font-weight: 800; /* extrabold */
     margin-bottom: 2rem;
+    background: -webkit-linear-gradient(45deg, #a5b4fc, #f9a8d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
+
 .stat-card {
     background-color: var(--color-bg-secondary);
     border-radius: 1rem;
     padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
     transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
     border: 1px solid var(--color-border);
 }
 .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.stat-card .stat-title {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+.stat-card .stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.stat-card .stat-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 1.75rem;
+    opacity: 0.2;
 }
 
+/* Card Specific Colors */
+.calories-card { background: linear-gradient(135deg, #ef4444, #f87171); color: white; }
+.workouts-card { background: linear-gradient(135deg, #f97316, #fb923c); color: white; }
+.steps-card { background: linear-gradient(135deg, #22c55e, #4ade80); color: white; }
+.water-card { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; }
+.workout-total-card { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: white; }
+.workout-time-card { background: linear-gradient(135deg, #ec4899, #f472b6); color: white; }
+.workout-cals-card { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; }
+
+.stat-card.calories-card .stat-title, .stat-card.workouts-card .stat-title, .stat-card.steps-card .stat-title, .stat-card.water-card .stat-title,
+.stat-card.workout-total-card .stat-title, .stat-card.workout-time-card .stat-title, .stat-card.workout-cals-card .stat-title { color: rgba(255,255,255,0.8); }
+.stat-card.calories-card .stat-value, .stat-card.workouts-card .stat-value, .stat-card.steps-card .stat-value, .stat-card.water-card .stat-value,
+.stat-card.workout-total-card .stat-value, .stat-card.workout-time-card .stat-value, .stat-card.workout-cals-card .stat-value { color: white; }
+
+/* Quick Action Buttons */
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-secondary);
+}
+.quick-action-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.quick-action-btn i {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+}
+.workout-btn { color: #f97316; }
+.meal-btn { color: #ef4444; }
+.water-btn { color: #3b82f6; }
+.steps-btn { color: #22c55e; }
+
+/* Quote Card */
+.quote-card {
+    background-color: var(--color-bg-secondary);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--color-border);
+    margin-top: 2rem;
+}
+.quote-card .quote-icon {
+    font-size: 2rem;
+    color: var(--color-primary);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+}
+.quote-card p {
+    color: var(--color-text-secondary);
+    font-size: 1.125rem; /* text-lg */
+    line-height: 1.75;
+}
+
+
 /* ===============================================
-   7. TABLE & LEADERBOARD STYLES
+   7. TABLE STYLES
    Author: Raheem
    =============================================== */
 table {
@@ -163,28 +307,23 @@ table {
 table thead th {
     text-align: left;
     padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--color-text-secondary);
     border-bottom: 2px solid var(--color-border);
 }
 table tbody td {
     padding: 1rem;
     border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
 }
-
-/* Community page tab styling */
-.leaderboard-tab {
-    padding: 1rem 1.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-}
-.leaderboard-tab.active {
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
+table tbody tr:hover {
+    background-color: var(--color-bg);
 }
 
 /* ===============================================
-   8. MODAL (POP-UP) STYLES
+   8. MODAL STYLES
    Author: Arif
    =============================================== */
 .modal-backdrop {
@@ -195,14 +334,166 @@ table tbody td {
     display: none; /* Managed by JS */
     justify-content: center;
     align-items: center;
+    animation: fadeIn 0.3s ease-out;
 }
 .modal-backdrop .card {
     width: 100%;
     max-width: 500px;
+    animation: slideUp 0.4s ease-out;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.modal-close-btn:hover {
+    color: var(--color-text);
 }
 
 /* ===============================================
-   9. NOTIFICATION & ANIMATION STYLES
+   9. Custom Workout Plan Styles
+   Author: Arif
+   =============================================== */
+.plan-card {
+    background-color: var(--color-bg-secondary);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border-left: 4px solid var(--color-success);
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+}
+.plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+}
+
+/* ===============================================
+   10. PROGRESS PAGE STYLES
+   Author: Raheem
+   =============================================== */
+.progress-card-weight {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    color: white;
+}
+.progress-card-bodyfat {
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    color: white;
+}
+.progress-card-weight h3, .progress-card-bodyfat h3 {
+    color: white;
+}
+.chart-container {
+    height: 300px;
+    padding: 1rem;
+    background: rgba(0,0,0,0.1);
+    border-radius: 0.75rem;
+}
+.log-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+.log-input-group .form-input {
+    background-color: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+    color: white;
+}
+.log-input-group .form-input::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+.log-input-group .action-btn {
+    flex-shrink: 0;
+}
+
+/* ===============================================
+   11. NUTRITION PAGE STYLES
+   Author: Raheem
+   =============================================== */
+#meal-list {
+    list-style: none;
+    padding: 0;
+}
+.meal-item {
+    background-color: var(--color-bg-secondary);
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.meal-item:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.meal-item .meal-details p:first-child {
+    font-weight: 600;
+    color: var(--color-text);
+}
+.meal-item .meal-details p:last-child {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+.meal-item .meal-macros {
+    text-align: right;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+.meal-item .meal-macros span {
+    font-weight: 600;
+    color: var(--color-text);
+}
+.nutrition-goal-card {
+    background-color: var(--color-bg-secondary);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid var(--color-border);
+}
+.nutrition-goal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* ===============================================
+   12. COMMUNITY PAGE STYLES
+   Author: Hashim
+   =============================================== */
+.leaderboard-tab {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+.leaderboard-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+.timeframe-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+.timeframe-btn.active {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* ===============================================
+   13. NOTIFICATION BANNER STYLES
    Author: Aran
    =============================================== */
 .notification {
@@ -215,14 +506,25 @@ table tbody td {
     padding: 1rem 1.5rem;
     border-radius: 0.5rem;
     z-index: 1000;
+    font-weight: 500;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: top 0.5s ease-in-out;
 }
 .notification.show {
-    top: 20px; /* Slide into view */
+    top: 20px; /* Slide in */
 }
 
-/* Keyframe animations for modals */
+
+/* ===============================================
+   ANIMATIONS
+   Author: Aran
+   =============================================== */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
